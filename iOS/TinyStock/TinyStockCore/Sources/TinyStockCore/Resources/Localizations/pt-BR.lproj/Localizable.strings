@@ -1,0 +1,40 @@
+/* ⌘
+  TinyStockCore/Resources/Localizations/pt-BR.lproj/Localizable.strings
+
+  Propósito: Strings da interface em PT-BR do app TinyStock.
+
+  Created by Jonathas Motta (@jonathaxs) on 2026-08-07.
+
+ ⌘ */
+
+
+/* MARK: - Abas */
+"tab.products" = "Produtos";
+"tab.sales" = "Vendas";
+"tab.reports" = "Relatórios";
+"tab.settings" = "Ajustes";
+
+
+/* MARK: - Produtos */
+"products.empty.title" = "Nenhum produto ainda";
+"products.empty.message" = "Cadastre seu primeiro produto pra começar a controlar o estoque.";
+
+
+/* MARK: - Vendas */
+"sales.placeholder.title" = "Nenhuma venda ainda";
+"sales.placeholder.message" = "O registro de vendas chega em breve.";
+
+
+/* MARK: - Relatórios */
+"reports.placeholder.title" = "Sem dados ainda";
+"reports.placeholder.message" = "Os relatórios aparecem aqui quando você cadastrar produtos e vendas.";
+
+
+/* MARK: - Ajustes */
+"settings.placeholder.title" = "Ajustes";
+"settings.placeholder.message" = "Backup e preferências chegam em breve.";
+
+
+/* MARK: - Erro do banco de dados */
+"app.error.dataStore.title" = "Não foi possível abrir o banco de dados";
+"app.error.dataStore.message" = "Force o fechamento e reabra o app. Se continuar, reinicie o aparelho.";

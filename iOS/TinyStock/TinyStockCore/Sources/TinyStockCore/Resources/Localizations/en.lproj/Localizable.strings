@@ -1,0 +1,40 @@
+/* ⌘
+  TinyStockCore/Resources/Localizations/en.lproj/Localizable.strings
+
+  Propósito: English UI strings for the TinyStock app.
+
+  Created by Jonathas Motta (@jonathaxs) on 2026-08-07.
+
+ ⌘ */
+
+
+/* MARK: - Tabs */
+"tab.products" = "Products";
+"tab.sales" = "Sales";
+"tab.reports" = "Reports";
+"tab.settings" = "Settings";
+
+
+/* MARK: - Products */
+"products.empty.title" = "No products yet";
+"products.empty.message" = "Add your first product to start tracking your stock.";
+
+
+/* MARK: - Sales */
+"sales.placeholder.title" = "No sales yet";
+"sales.placeholder.message" = "Sales recording is coming soon.";
+
+
+/* MARK: - Reports */
+"reports.placeholder.title" = "No data yet";
+"reports.placeholder.message" = "Reports will appear here once you register products and sales.";
+
+
+/* MARK: - Settings */
+"settings.placeholder.title" = "Settings";
+"settings.placeholder.message" = "Backup and preferences are coming soon.";
+
+
+/* MARK: - Data store error */
+"app.error.dataStore.title" = "Could not open the database";
+"app.error.dataStore.message" = "Please force quit and reopen the app. If it keeps happening, restart your device.";
