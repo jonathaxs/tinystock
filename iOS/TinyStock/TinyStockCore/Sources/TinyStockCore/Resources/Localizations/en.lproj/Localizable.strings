@@ -15,9 +15,34 @@
 "tab.settings" = "Settings";
 
 
+/* MARK: - Common actions */
+"common.save" = "Save";
+"common.cancel" = "Cancel";
+
+
 /* MARK: - Products */
 "products.empty.title" = "No products yet";
 "products.empty.message" = "Add your first product to start tracking your stock.";
+"products.add" = "Add product";
+"products.row.quantity" = "%d in stock";
+
+
+/* MARK: - Product form */
+"product.form.title.new" = "New Product";
+"product.form.section.identification" = "Identification";
+"product.form.section.stock" = "Stock";
+"product.form.section.prices" = "Prices";
+"product.form.name" = "Name";
+"product.form.name.placeholder" = "Ex.: Cat Amigurumi";
+"product.form.category" = "Category";
+"product.form.category.placeholder" = "Ex.: Crochet";
+"product.form.quantity" = "Quantity";
+"product.form.minimumStock" = "Minimum stock";
+"product.form.stock.footer" = "A minimum stock of zero turns the restock alert off.";
+"product.form.costPrice" = "Cost";
+"product.form.salePrice" = "Sale price";
+"product.form.unitProfit" = "Profit per unit";
+"product.form.prices.footer" = "Cost is what you actually spent to make or buy one unit.";
 
 
 /* MARK: - Sales */

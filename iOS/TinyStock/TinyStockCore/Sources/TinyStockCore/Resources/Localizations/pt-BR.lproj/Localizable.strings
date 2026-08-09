@@ -15,9 +15,34 @@
 "tab.settings" = "Ajustes";
 
 
+/* MARK: - Ações comuns */
+"common.save" = "Salvar";
+"common.cancel" = "Cancelar";
+
+
 /* MARK: - Produtos */
 "products.empty.title" = "Nenhum produto ainda";
 "products.empty.message" = "Cadastre seu primeiro produto pra começar a controlar o estoque.";
+"products.add" = "Cadastrar produto";
+"products.row.quantity" = "%d un";
+
+
+/* MARK: - Formulário do produto */
+"product.form.title.new" = "Novo produto";
+"product.form.section.identification" = "Identificação";
+"product.form.section.stock" = "Estoque";
+"product.form.section.prices" = "Preços";
+"product.form.name" = "Nome";
+"product.form.name.placeholder" = "Ex.: Amigurumi Gato";
+"product.form.category" = "Categoria";
+"product.form.category.placeholder" = "Ex.: Crochê";
+"product.form.quantity" = "Quantidade";
+"product.form.minimumStock" = "Estoque mínimo";
+"product.form.stock.footer" = "Estoque mínimo zero desliga o alerta de reposição.";
+"product.form.costPrice" = "Custo";
+"product.form.salePrice" = "Preço de venda";
+"product.form.unitProfit" = "Lucro por unidade";
+"product.form.prices.footer" = "O custo é quanto saiu do seu bolso pra produzir ou comprar uma unidade.";
 
 
 /* MARK: - Vendas */
