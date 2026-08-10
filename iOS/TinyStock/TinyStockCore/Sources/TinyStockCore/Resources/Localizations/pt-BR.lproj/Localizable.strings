@@ -18,6 +18,8 @@
 /* MARK: - Ações comuns */
 "common.save" = "Salvar";
 "common.cancel" = "Cancelar";
+"common.edit" = "Editar";
+"common.delete" = "Excluir";
 
 
 /* MARK: - Produtos */
@@ -43,6 +45,15 @@
 "product.form.salePrice" = "Preço de venda";
 "product.form.unitProfit" = "Lucro por unidade";
 "product.form.prices.footer" = "O custo é quanto saiu do seu bolso pra produzir ou comprar uma unidade.";
+"product.form.title.edit" = "Editar produto";
+
+
+/* MARK: - Detalhe do produto */
+"product.detail.noCategory" = "Sem categoria";
+"product.detail.potentialProfit" = "Lucro do estoque parado";
+"product.detail.potentialProfit.footer" = "Quanto esse produto ainda pode render se todo o estoque atual for vendido.";
+"product.delete.confirm.title" = "Excluir este produto?";
+"product.delete.confirm.message" = "O produto sai do estoque e essa ação não pode ser desfeita.";
 
 
 /* MARK: - Vendas */

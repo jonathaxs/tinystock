@@ -12,7 +12,9 @@ import TinyStockCore
 
 struct ProductsView: View {
 
-    /// Lista ordenada por nome. Detalhe, edição e exclusão chegam na próxima etapa.
+    @Environment(\.modelContext) private var modelContext
+
+    /// Lista ordenada por nome.
     @Query(sort: \Product.name) private var products: [Product]
 
     @State private var isPresentingForm = false
@@ -23,8 +25,17 @@ struct ProductsView: View {
                 if products.isEmpty {
                     emptyState
                 } else {
-                    List(products) { product in
-                        ProductRowView(product: product)
+                    List {
+                        ForEach(products) { product in
+                            NavigationLink {
+                                ProductDetailView(product: product)
+                            } label: {
+                                ProductRowView(product: product)
+                            }
+                        }
+                        // O swipe já funciona como confirmação, então aqui não tem alerta.
+                        // A exclusão pelo detalhe é que pede confirmação.
+                        .onDelete(perform: delete)
                     }
                 }
             }
@@ -44,6 +55,15 @@ struct ProductsView: View {
             .sheet(isPresented: $isPresentingForm) {
                 ProductFormView()
             }
+        }
+    }
+
+    // MARK: - Exclusão
+
+    /// Os índices vêm do ForEach, então apontam pra lista já ordenada por nome.
+    private func delete(at offsets: IndexSet) {
+        for index in offsets {
+            modelContext.delete(products[index])
         }
     }
 

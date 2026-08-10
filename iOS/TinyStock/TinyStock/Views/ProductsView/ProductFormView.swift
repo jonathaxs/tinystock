@@ -1,7 +1,7 @@
 // ⌘
 //  TinyStock/Views/ProductsView/ProductFormView.swift
 //
-//  Propósito: Formulário de cadastro de produto, com leitura dos preços e gravação no SwiftData.
+//  Propósito: Formulário de cadastro e edição de produto, com leitura dos preços e gravação no SwiftData.
 //
 //  Created by Jonathas Motta (@jonathaxs) on 2026-08-08.
 // ⌘
@@ -15,17 +15,40 @@ struct ProductFormView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
+    /// Produto sendo editado. Nil significa cadastro novo.
+    private let editingProduct: Product?
+
     // MARK: - Campos do formulário
 
-    @State private var name = ""
-    @State private var category = ""
-    @State private var quantity = 0
-    @State private var minimumStock = 0
+    @State private var name: String
+    @State private var category: String
+    @State private var quantity: Int
+    @State private var minimumStock: Int
 
     // Dinheiro entra como texto livre e só vira Decimal na leitura abaixo.
     // Assim o usuário digita "45,90" ou "45.90" sem o campo brigar com ele.
-    @State private var costPriceText = ""
-    @State private var salePriceText = ""
+    @State private var costPriceText: String
+    @State private var salePriceText: String
+
+    // MARK: - Inicializador
+
+    /// Sem argumento abre em branco pra cadastrar; com um produto abre preenchido pra editar.
+    init(product: Product? = nil) {
+        editingProduct = product
+
+        _name = State(initialValue: product?.name ?? "")
+        _category = State(initialValue: product?.category ?? "")
+        _quantity = State(initialValue: product?.quantity ?? 0)
+        _minimumStock = State(initialValue: product?.minimumStock ?? 0)
+
+        // Preço vira texto de edição, ou seja, sem símbolo e sem separador de milhar.
+        _costPriceText = State(
+            initialValue: CurrencyFormatter.editableText(from: product?.costPrice ?? 0)
+        )
+        _salePriceText = State(
+            initialValue: CurrencyFormatter.editableText(from: product?.salePrice ?? 0)
+        )
+    }
 
     // MARK: - Valores derivados
 
@@ -47,6 +70,13 @@ struct ProductFormView: View {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    /// Chave literal nos dois lados pra ferramenta de localização conseguir enxergar ambas.
+    private var navigationTitle: String {
+        editingProduct == nil
+            ? String(localized: "product.form.title.new", bundle: .tinyStockCore)
+            : String(localized: "product.form.title.edit", bundle: .tinyStockCore)
+    }
+
     /// Placeholder dos campos de dinheiro sai do próprio formatador, então
     /// acompanha o idioma do aparelho sem string fixa espalhada na view.
     private var currencyPlaceholder: String {
@@ -62,7 +92,7 @@ struct ProductFormView: View {
                 stockSection
                 pricesSection
             }
-            .navigationTitle(String(localized: "product.form.title.new", bundle: .tinyStockCore))
+            .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -157,27 +187,50 @@ struct ProductFormView: View {
     // MARK: - Gravação
 
     private func save() {
-        let now = Date()
+        let cleanName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cleanCategory = category.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        let product = Product(
-            name: name.trimmingCharacters(in: .whitespacesAndNewlines),
-            category: category.trimmingCharacters(in: .whitespacesAndNewlines),
-            // Trava em zero pra um valor negativo digitado não virar estoque inválido.
-            quantity: max(0, quantity),
-            minimumStock: max(0, minimumStock),
-            costPrice: costPrice,
-            salePrice: salePrice,
-            createdAt: now,
-            updatedAt: now
-        )
+        // Trava em zero pra um valor negativo digitado não virar estoque inválido.
+        let safeQuantity = max(0, quantity)
+        let safeMinimumStock = max(0, minimumStock)
 
-        // O contexto do ambiente tem autosave ligado, então basta inserir.
-        modelContext.insert(product)
+        if let product = editingProduct {
+            // Edição altera o objeto que já está no banco, mantendo o createdAt original.
+            product.name = cleanName
+            product.category = cleanCategory
+            product.quantity = safeQuantity
+            product.minimumStock = safeMinimumStock
+            product.costPrice = costPrice
+            product.salePrice = salePrice
+            product.updatedAt = Date()
+        } else {
+            let now = Date()
+            let product = Product(
+                name: cleanName,
+                category: cleanCategory,
+                quantity: safeQuantity,
+                minimumStock: safeMinimumStock,
+                costPrice: costPrice,
+                salePrice: salePrice,
+                createdAt: now,
+                updatedAt: now
+            )
+            // O contexto do ambiente tem autosave ligado, então basta inserir.
+            modelContext.insert(product)
+        }
+
         dismiss()
     }
 }
 
-#Preview {
+#Preview("Cadastro") {
     ProductFormView()
         .modelContainer(for: Product.self, inMemory: true)
+}
+
+#Preview("Edição") {
+    ProductFormView(
+        product: Product(name: "Amigurumi Gato", category: "Crochê", quantity: 12, costPrice: 20, salePrice: 45)
+    )
+    .modelContainer(for: Product.self, inMemory: true)
 }

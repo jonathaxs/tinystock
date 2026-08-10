@@ -18,6 +18,8 @@
 /* MARK: - Common actions */
 "common.save" = "Save";
 "common.cancel" = "Cancel";
+"common.edit" = "Edit";
+"common.delete" = "Delete";
 
 
 /* MARK: - Products */
@@ -43,6 +45,15 @@
 "product.form.salePrice" = "Sale price";
 "product.form.unitProfit" = "Profit per unit";
 "product.form.prices.footer" = "Cost is what you actually spent to make or buy one unit.";
+"product.form.title.edit" = "Edit Product";
+
+
+/* MARK: - Product detail */
+"product.detail.noCategory" = "No category";
+"product.detail.potentialProfit" = "Profit sitting in stock";
+"product.detail.potentialProfit.footer" = "What this product can still earn if the whole current stock is sold.";
+"product.delete.confirm.title" = "Delete this product?";
+"product.delete.confirm.message" = "The product leaves your stock and this cannot be undone.";
 
 
 /* MARK: - Sales */
