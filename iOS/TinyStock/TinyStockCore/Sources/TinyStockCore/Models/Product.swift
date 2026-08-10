@@ -85,4 +85,9 @@ public final class Product {
     public var unitProfit: Decimal {
         salePrice - costPrice
     }
+
+    /// Quanto o estoque parado ainda pode render, se tudo que existe hoje for vendido.
+    public var potentialProfit: Decimal {
+        unitProfit * Decimal(quantity)
+    }
 }

@@ -29,6 +29,22 @@ public enum CurrencyFormatter {
         value.formatted(.currency(code: currencyCode).locale(locale))
     }
 
+    /// Devolve o valor pronto pra preencher um campo de formulário, por exemplo "45,90".
+    ///
+    /// Diferente do `string(from:)`, aqui não entra símbolo de moeda nem separador de
+    /// milhar, porque o campo precisa continuar legível e fácil de corrigir no teclado.
+    /// Zero volta como texto vazio, assim o campo mostra o placeholder em vez de "0,00".
+    public static func editableText(from value: Decimal, locale: Locale = .autoupdatingCurrent) -> String {
+        guard value != 0 else { return "" }
+
+        return value.formatted(
+            .number
+                .precision(.fractionLength(2))
+                .grouping(.never)
+                .locale(locale)
+        )
+    }
+
     // MARK: - Leitura do que o usuário digitou
 
     /// Converte o texto digitado em `Decimal`, aceitando vírgula ou ponto como separador decimal.

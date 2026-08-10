@@ -46,6 +46,30 @@ private func money(cents: Int) -> Decimal {
     #expect(valor.currencyText == CurrencyFormatter.string(from: valor))
 }
 
+// MARK: - Texto de edição
+
+@Test func textoDeEdicaoNaoTemSimboloNemMilhar() {
+    // O campo do formulário precisa ficar fácil de corrigir no teclado.
+    let texto = CurrencyFormatter.editableText(from: money(cents: 123456), locale: localeBR)
+    #expect(texto == "1234,56")
+}
+
+@Test func textoDeEdicaoCompletaAsCasasDecimais() {
+    #expect(CurrencyFormatter.editableText(from: 45, locale: localeBR) == "45,00")
+}
+
+@Test func textoDeEdicaoDeZeroVemVazio() {
+    // Vazio deixa o placeholder aparecer em vez de um "0,00" que a pessoa teria que apagar.
+    #expect(CurrencyFormatter.editableText(from: 0, locale: localeBR) == "")
+}
+
+@Test func textoDeEdicaoVoltaNoParser() {
+    // Abrir o produto pra editar e salvar sem mexer não pode alterar o valor.
+    let original = money(cents: 4590)
+    let texto = CurrencyFormatter.editableText(from: original, locale: localeBR)
+    #expect(CurrencyFormatter.decimal(from: texto) == original)
+}
+
 // MARK: - Leitura do texto digitado
 
 @Test func leVirgulaComoSeparadorDecimal() {
