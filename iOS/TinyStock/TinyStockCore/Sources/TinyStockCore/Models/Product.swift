@@ -90,4 +90,19 @@ public final class Product {
     public var potentialProfit: Decimal {
         unitProfit * Decimal(quantity)
     }
+
+    // MARK: - Busca
+
+    /// Diz se o produto casa com o texto digitado na busca, olhando nome e categoria.
+    ///
+    /// Usa `localizedStandardContains`, que é a comparação que o próprio iOS faz nas buscas
+    /// do sistema: ignora maiúscula e acento, então "croche" encontra "Crochê".
+    /// Texto vazio devolve true, ou seja, sem busca a lista aparece inteira.
+    public func matches(searchText: String) -> Bool {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return true }
+
+        return name.localizedStandardContains(query)
+            || category.localizedStandardContains(query)
+    }
 }

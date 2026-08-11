@@ -30,6 +30,48 @@ import SwiftData
     #expect(produto.unitProfit == 17)
 }
 
+@Test func lowStockDesligaQuandoEstoqueEstaAcimaDoMinimo() {
+    let produto = Product(name: "Tapete Redondo", quantity: 10, minimumStock: 3)
+    #expect(produto.isLowStock == false)
+}
+
+@Test func lowStockLigaComEstoqueZeradoEMinimoDefinido() {
+    // Estoque acabou de vez, que é justamente quando o alerta mais importa.
+    let produto = Product(name: "Vaso 3D", quantity: 0, minimumStock: 2)
+    #expect(produto.isLowStock == true)
+}
+
+// MARK: - Busca
+
+@Test func buscaVaziaDevolveTodosOsProdutos() {
+    let produto = Product(name: "Amigurumi Gato", category: "Crochê")
+    #expect(produto.matches(searchText: "") == true)
+    #expect(produto.matches(searchText: "   ") == true)
+}
+
+@Test func buscaEncontraPorPedacoDoNome() {
+    let produto = Product(name: "Amigurumi Gato", category: "Crochê")
+    #expect(produto.matches(searchText: "gato") == true)
+}
+
+@Test func buscaIgnoraAcentoEMaiuscula() {
+    // O comerciante digita rápido e sem acento, e a busca tem que achar do mesmo jeito.
+    let produto = Product(name: "Amigurumi Gato", category: "Crochê")
+    #expect(produto.matches(searchText: "CROCHE") == true)
+}
+
+@Test func buscaEncontraPelaCategoria() {
+    let produto = Product(name: "Suporte de Fone", category: "Impressão 3D")
+    #expect(produto.matches(searchText: "impressao") == true)
+}
+
+@Test func buscaNaoEncontraOQueNaoExiste() {
+    let produto = Product(name: "Amigurumi Gato", category: "Crochê")
+    #expect(produto.matches(searchText: "caneca") == false)
+}
+
+// MARK: - Lucro
+
 @Test func lucroPotencialMultiplicaOLucroPelaQuantidade() {
     let produto = Product(name: "Suporte de Fone", quantity: 4, costPrice: 10, salePrice: 25)
     #expect(produto.potentialProfit == 60)
