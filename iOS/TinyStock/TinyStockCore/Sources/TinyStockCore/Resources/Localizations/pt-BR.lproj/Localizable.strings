@@ -27,6 +27,8 @@
 "products.empty.message" = "Cadastre seu primeiro produto pra começar a controlar o estoque.";
 "products.add" = "Cadastrar produto";
 "products.row.quantity" = "%d un";
+"products.lowStock" = "Estoque baixo";
+"products.search.prompt" = "Buscar por nome ou categoria";
 
 
 /* MARK: - Formulário do produto */

@@ -27,6 +27,8 @@
 "products.empty.message" = "Add your first product to start tracking your stock.";
 "products.add" = "Add product";
 "products.row.quantity" = "%d in stock";
+"products.lowStock" = "Low stock";
+"products.search.prompt" = "Search by name or category";
 
 
 /* MARK: - Product form */

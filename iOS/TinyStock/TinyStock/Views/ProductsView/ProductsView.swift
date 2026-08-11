@@ -18,15 +18,25 @@ struct ProductsView: View {
     @Query(sort: \Product.name) private var products: [Product]
 
     @State private var isPresentingForm = false
+    @State private var searchText = ""
+
+    /// Filtra em memória de propósito: o estoque de um pequeno negócio tem dezenas de itens,
+    /// então o custo é irrelevante e o código fica bem mais simples do que remontar o @Query.
+    private var filteredProducts: [Product] {
+        products.filter { $0.matches(searchText: searchText) }
+    }
 
     var body: some View {
         NavigationStack {
             Group {
                 if products.isEmpty {
                     emptyState
+                } else if filteredProducts.isEmpty {
+                    // Estado nativo de "nada encontrado", já localizado pelo sistema.
+                    ContentUnavailableView.search(text: searchText)
                 } else {
                     List {
-                        ForEach(products) { product in
+                        ForEach(filteredProducts) { product in
                             NavigationLink {
                                 ProductDetailView(product: product)
                             } label: {
@@ -52,6 +62,10 @@ struct ProductsView: View {
                     }
                 }
             }
+            .searchable(
+                text: $searchText,
+                prompt: Text(String(localized: "products.search.prompt", bundle: .tinyStockCore))
+            )
             .sheet(isPresented: $isPresentingForm) {
                 ProductFormView()
             }
@@ -60,10 +74,11 @@ struct ProductsView: View {
 
     // MARK: - Exclusão
 
-    /// Os índices vêm do ForEach, então apontam pra lista já ordenada por nome.
+    /// Os índices vêm do ForEach, que itera a lista JÁ FILTRADA pela busca.
+    /// Usar `products` aqui apagaria o produto errado sempre que houvesse busca ativa.
     private func delete(at offsets: IndexSet) {
         for index in offsets {
-            modelContext.delete(products[index])
+            modelContext.delete(filteredProducts[index])
         }
     }
 

@@ -85,6 +85,15 @@ struct ProductDetailView: View {
             } label: {
                 Text(String(localized: "product.form.minimumStock", bundle: .tinyStockCore))
             }
+
+            // Mesmo alerta da lista, repetido aqui pra quem abriu direto o produto.
+            if product.isLowStock {
+                Label(
+                    String(localized: "products.lowStock", bundle: .tinyStockCore),
+                    systemImage: "exclamationmark.triangle.fill"
+                )
+                .foregroundStyle(.orange)
+            }
         }
     }
 
