@@ -65,7 +65,37 @@
 
 /* MARK: - Vendas */
 "sales.placeholder.title" = "Nenhuma venda ainda";
-"sales.placeholder.message" = "O registro de vendas chega em breve.";
+"sales.placeholder.message" = "Registre sua primeira venda pra acompanhar o que está saindo.";
+"sales.add" = "Registrar venda";
+"sales.row.quantity" = "%d un";
+
+
+/* MARK: - Nova venda */
+"sale.new.title" = "Nova venda";
+"sale.new.section.product" = "Produto";
+"sale.new.chooseProduct" = "Escolher produto";
+"sale.new.section.quantity" = "Quantidade";
+"sale.new.available" = "%d em estoque";
+"sale.new.inStock" = "Em estoque";
+"sale.new.quantity.footer" = "A quantidade para no que existe em estoque hoje.";
+"sale.new.section.payment" = "Pagamento";
+"sale.new.section.summary" = "Resumo";
+"sale.new.total" = "Total";
+"sale.new.profit" = "Lucro da venda";
+"sale.new.confirm" = "Confirmar venda";
+
+
+/* MARK: - Escolha do produto */
+"sale.picker.title" = "Escolher produto";
+"sale.picker.empty.title" = "Nada disponível pra vender";
+"sale.picker.empty.message" = "Cadastre um produto ou reponha o estoque pra registrar uma venda.";
+
+
+/* MARK: - Erros da venda */
+"sale.error.title" = "Não foi possível registrar";
+"sale.error.emptySale" = "Escolha um produto antes de confirmar.";
+"sale.error.invalidQuantity" = "A quantidade precisa ser de pelo menos uma unidade.";
+"sale.error.insufficientStock" = "Restam só %1$d unidades de %2$@ em estoque.";
 
 
 /* MARK: - Formas de pagamento */

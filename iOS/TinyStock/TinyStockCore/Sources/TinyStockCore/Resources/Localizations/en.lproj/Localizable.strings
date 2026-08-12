@@ -65,7 +65,37 @@
 
 /* MARK: - Sales */
 "sales.placeholder.title" = "No sales yet";
-"sales.placeholder.message" = "Sales recording is coming soon.";
+"sales.placeholder.message" = "Register your first sale to keep track of what is going out.";
+"sales.add" = "New sale";
+"sales.row.quantity" = "%d units";
+
+
+/* MARK: - New sale */
+"sale.new.title" = "New Sale";
+"sale.new.section.product" = "Product";
+"sale.new.chooseProduct" = "Choose product";
+"sale.new.section.quantity" = "Quantity";
+"sale.new.available" = "%d in stock";
+"sale.new.inStock" = "In stock";
+"sale.new.quantity.footer" = "The quantity stops at what you have in stock today.";
+"sale.new.section.payment" = "Payment";
+"sale.new.section.summary" = "Summary";
+"sale.new.total" = "Total";
+"sale.new.profit" = "Sale profit";
+"sale.new.confirm" = "Confirm sale";
+
+
+/* MARK: - Product picker */
+"sale.picker.title" = "Choose Product";
+"sale.picker.empty.title" = "Nothing available to sell";
+"sale.picker.empty.message" = "Add a product or restock to register a sale.";
+
+
+/* MARK: - Sale errors */
+"sale.error.title" = "Could not register the sale";
+"sale.error.emptySale" = "Choose a product before confirming.";
+"sale.error.invalidQuantity" = "The quantity must be at least one unit.";
+"sale.error.insufficientStock" = "Only %1$d units of %2$@ left in stock.";
 
 
 /* MARK: - Payment methods */
