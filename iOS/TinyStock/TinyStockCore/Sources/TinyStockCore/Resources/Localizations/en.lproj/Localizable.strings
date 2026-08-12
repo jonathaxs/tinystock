@@ -48,6 +48,11 @@
 "product.form.unitProfit" = "Profit per unit";
 "product.form.prices.footer" = "Cost is what you actually spent to make or buy one unit.";
 "product.form.title.edit" = "Edit Product";
+"product.form.section.photo" = "Photo";
+"product.form.photo.choose" = "Choose photo";
+"product.form.photo.change" = "Change photo";
+"product.form.photo.remove" = "Remove photo";
+"product.form.photo.footer" = "A photo helps you spot the product quickly when making a sale.";
 
 
 /* MARK: - Product detail */

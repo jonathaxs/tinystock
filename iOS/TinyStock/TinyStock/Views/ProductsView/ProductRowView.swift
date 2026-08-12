@@ -23,6 +23,15 @@ struct ProductRowView: View {
     }
 
     var body: some View {
+        HStack(spacing: 12) {
+            ProductImageView(imageData: product.imageData)
+
+            details
+        }
+        .padding(.vertical, 2)
+    }
+
+    private var details: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(product.name)
                 .font(.headline)
@@ -49,7 +58,6 @@ struct ProductRowView: View {
                 .foregroundStyle(.orange)
             }
         }
-        .padding(.vertical, 2)
     }
 }
 

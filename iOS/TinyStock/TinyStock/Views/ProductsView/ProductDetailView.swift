@@ -24,6 +24,7 @@ struct ProductDetailView: View {
 
     var body: some View {
         List {
+            photoSection
             identificationSection
             stockSection
             pricesSection
@@ -55,6 +56,21 @@ struct ProductDetailView: View {
     }
 
     // MARK: - Seções
+
+    /// Só aparece quando o produto tem foto, pra não abrir um espaço vazio no topo.
+    @ViewBuilder
+    private var photoSection: some View {
+        if product.imageData != nil {
+            Section {
+                HStack {
+                    Spacer()
+                    ProductImageView(imageData: product.imageData, side: 160)
+                    Spacer()
+                }
+                .listRowBackground(Color.clear)
+            }
+        }
+    }
 
     private var identificationSection: some View {
         Section(String(localized: "product.form.section.identification", bundle: .tinyStockCore)) {

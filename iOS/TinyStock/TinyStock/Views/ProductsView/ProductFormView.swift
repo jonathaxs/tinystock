@@ -8,6 +8,7 @@
 
 import SwiftUI
 import SwiftData
+import PhotosUI
 import TinyStockCore
 
 struct ProductFormView: View {
@@ -30,6 +31,15 @@ struct ProductFormView: View {
     @State private var costPriceText: String
     @State private var salePriceText: String
 
+    /// Foto já reduzida, pronta pra ir pro banco.
+    @State private var imageData: Data?
+
+    /// Item devolvido pelo seletor de fotos, usado só como gatilho do carregamento.
+    @State private var pickerItem: PhotosPickerItem?
+
+    /// Segura a interface enquanto a foto é carregada e reduzida.
+    @State private var isLoadingPhoto = false
+
     // MARK: - Inicializador
 
     /// Sem argumento abre em branco pra cadastrar; com um produto abre preenchido pra editar.
@@ -48,6 +58,8 @@ struct ProductFormView: View {
         _salePriceText = State(
             initialValue: CurrencyFormatter.editableText(from: product?.salePrice ?? 0)
         )
+
+        _imageData = State(initialValue: product?.imageData)
     }
 
     // MARK: - Valores derivados
@@ -71,6 +83,13 @@ struct ProductFormView: View {
     }
 
     /// Chave literal nos dois lados pra ferramenta de localização conseguir enxergar ambas.
+    private var photoButtonTitle: String {
+        imageData == nil
+            ? String(localized: "product.form.photo.choose", bundle: .tinyStockCore)
+            : String(localized: "product.form.photo.change", bundle: .tinyStockCore)
+    }
+
+    /// Chave literal nos dois lados pra ferramenta de localização conseguir enxergar ambas.
     private var navigationTitle: String {
         editingProduct == nil
             ? String(localized: "product.form.title.new", bundle: .tinyStockCore)
@@ -88,6 +107,7 @@ struct ProductFormView: View {
     var body: some View {
         NavigationStack {
             Form {
+                photoSection
                 identificationSection
                 stockSection
                 pricesSection
@@ -111,6 +131,46 @@ struct ProductFormView: View {
     }
 
     // MARK: - Seções
+
+    private var photoSection: some View {
+        Section {
+            // Foto centralizada pra ficar claro que ela representa o produto inteiro.
+            HStack {
+                Spacer()
+                ProductImageView(imageData: imageData, side: 120)
+                    .overlay {
+                        if isLoadingPhoto {
+                            ProgressView()
+                        }
+                    }
+                Spacer()
+            }
+            .listRowBackground(Color.clear)
+
+            PhotosPicker(selection: $pickerItem, matching: .images, photoLibrary: .shared()) {
+                Label(photoButtonTitle, systemImage: "photo")
+            }
+
+            if imageData != nil {
+                Button(role: .destructive) {
+                    imageData = nil
+                    pickerItem = nil
+                } label: {
+                    Label(
+                        String(localized: "product.form.photo.remove", bundle: .tinyStockCore),
+                        systemImage: "trash"
+                    )
+                }
+            }
+        } header: {
+            Text(String(localized: "product.form.section.photo", bundle: .tinyStockCore))
+        } footer: {
+            Text(String(localized: "product.form.photo.footer", bundle: .tinyStockCore))
+        }
+        .onChange(of: pickerItem) { _, newItem in
+            Task { await loadPhoto(newItem) }
+        }
+    }
 
     private var identificationSection: some View {
         Section(String(localized: "product.form.section.identification", bundle: .tinyStockCore)) {
@@ -184,6 +244,28 @@ struct ProductFormView: View {
         }
     }
 
+    // MARK: - Carregamento da foto
+
+    /// Traz a foto escolhida e já reduz antes de guardar no estado.
+    /// A redução roda fora da main thread pra não travar a interface com foto grande.
+    private func loadPhoto(_ item: PhotosPickerItem?) async {
+        guard let item else { return }
+
+        isLoadingPhoto = true
+        defer { isLoadingPhoto = false }
+
+        guard let rawData = try? await item.loadTransferable(type: Data.self) else { return }
+
+        let prepared = await Task.detached(priority: .userInitiated) {
+            ProductImageProcessor.prepared(from: rawData)
+        }.value
+
+        // Se o arquivo não for uma imagem legível, mantém a foto anterior em vez de apagar.
+        guard let prepared else { return }
+
+        imageData = prepared
+    }
+
     // MARK: - Gravação
 
     private func save() {
@@ -202,6 +284,7 @@ struct ProductFormView: View {
             product.minimumStock = safeMinimumStock
             product.costPrice = costPrice
             product.salePrice = salePrice
+            product.imageData = imageData
             product.updatedAt = Date()
         } else {
             let now = Date()
@@ -212,6 +295,7 @@ struct ProductFormView: View {
                 minimumStock: safeMinimumStock,
                 costPrice: costPrice,
                 salePrice: salePrice,
+                imageData: imageData,
                 createdAt: now,
                 updatedAt: now
             )

@@ -48,6 +48,11 @@
 "product.form.unitProfit" = "Lucro por unidade";
 "product.form.prices.footer" = "O custo é quanto saiu do seu bolso pra produzir ou comprar uma unidade.";
 "product.form.title.edit" = "Editar produto";
+"product.form.section.photo" = "Foto";
+"product.form.photo.choose" = "Escolher foto";
+"product.form.photo.change" = "Trocar foto";
+"product.form.photo.remove" = "Remover foto";
+"product.form.photo.footer" = "A foto ajuda a achar o produto rápido na hora da venda.";
 
 
 /* MARK: - Detalhe do produto */
