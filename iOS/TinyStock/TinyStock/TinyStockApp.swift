@@ -19,7 +19,7 @@ struct TinyStockApp: App {
     private let sharedModelContainer: ModelContainer
 
     init() {
-        let schema = Schema([Product.self])
+        let schema = Schema([Product.self, Sale.self, SaleItem.self])
         // URL explícita + cloudKitDatabase: .none evita que o iOS ligue o mirror do CloudKit
         // só por causa de um entitlement de iCloud Documents (usado no futuro pro backup).
         let storeURL = URL.applicationSupportDirectory.appending(path: "TinyStock.store")
@@ -35,7 +35,7 @@ struct TinyStockApp: App {
             // Cai pra um container em memória pra o app conseguir mostrar a tela de erro.
             // Nesse estado os dados não são salvos, mas o app não trava.
             sharedModelContainer = try! ModelContainer(
-                for: Schema([Product.self]),
+                for: Schema([Product.self, Sale.self, SaleItem.self]),
                 configurations: [ModelConfiguration(isStoredInMemoryOnly: true)]
             )
             containerInitFailed = true
