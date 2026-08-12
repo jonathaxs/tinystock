@@ -68,6 +68,13 @@
 "sales.placeholder.message" = "Sales recording is coming soon.";
 
 
+/* MARK: - Payment methods */
+"payment.pix" = "Pix";
+"payment.cash" = "Cash";
+"payment.card" = "Card";
+"payment.shopee" = "Shopee";
+
+
 /* MARK: - Reports */
 "reports.placeholder.title" = "No data yet";
 "reports.placeholder.message" = "Reports will appear here once you register products and sales.";

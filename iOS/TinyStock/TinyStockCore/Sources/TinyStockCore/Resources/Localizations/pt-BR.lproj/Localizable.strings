@@ -68,6 +68,13 @@
 "sales.placeholder.message" = "O registro de vendas chega em breve.";
 
 
+/* MARK: - Formas de pagamento */
+"payment.pix" = "Pix";
+"payment.cash" = "Dinheiro";
+"payment.card" = "Cartão";
+"payment.shopee" = "Shopee";
+
+
 /* MARK: - Relatórios */
 "reports.placeholder.title" = "Sem dados ainda";
 "reports.placeholder.message" = "Os relatórios aparecem aqui quando você cadastrar produtos e vendas.";
