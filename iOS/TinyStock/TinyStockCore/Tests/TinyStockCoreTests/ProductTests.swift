@@ -84,70 +84,64 @@ import SwiftData
 
 // MARK: - Persistência
 
-@Test @MainActor func produtoSalvoPodeSerLidoDeVolta() throws {
-    // Container em memória imita o que o formulário faz de verdade,
-    // sem depender do banco no disco do aparelho.
-    let container = try ModelContainer(
-        for: Product.self,
-        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-    )
-    let context = container.mainContext
+/// Serializada e com banco compartilhado: ver [TestDatabase] para o porquê.
+@Suite(.serialized)
+@MainActor
+struct ProductPersistenceTests {
 
-    context.insert(
-        Product(name: "Amigurumi Gato", category: "Crochê", quantity: 12, costPrice: 20, salePrice: 45)
-    )
+    @Test func produtoSalvoPodeSerLidoDeVolta() throws {
+        // Banco em memória imita o que o formulário faz de verdade,
+        // sem depender do banco no disco do aparelho.
+        let context = try TestDatabase.makeCleanContext()
 
-    let salvos = try context.fetch(FetchDescriptor<Product>())
+        context.insert(
+            Product(name: "Amigurumi Gato", category: "Crochê", quantity: 12, costPrice: 20, salePrice: 45)
+        )
 
-    #expect(salvos.count == 1)
-    #expect(salvos.first?.name == "Amigurumi Gato")
-    #expect(salvos.first?.category == "Crochê")
-    #expect(salvos.first?.quantity == 12)
-    #expect(salvos.first?.unitProfit == 25)
-}
+        let salvos = try context.fetch(FetchDescriptor<Product>())
 
-@Test @MainActor func edicaoAlteraOsCamposEPreservaACriacao() throws {
-    let container = try ModelContainer(
-        for: Product.self,
-        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-    )
-    let context = container.mainContext
+        #expect(salvos.count == 1)
+        #expect(salvos.first?.name == "Amigurumi Gato")
+        #expect(salvos.first?.category == "Crochê")
+        #expect(salvos.first?.quantity == 12)
+        #expect(salvos.first?.unitProfit == 25)
+    }
 
-    let criadoEm = Date(timeIntervalSince1970: 1_700_000_000)
-    let produto = Product(name: "Suporte de Fone", quantity: 2, salePrice: 25, createdAt: criadoEm, updatedAt: criadoEm)
-    context.insert(produto)
+    @Test func edicaoAlteraOsCamposEPreservaACriacao() throws {
+        let context = try TestDatabase.makeCleanContext()
 
-    // Mesma operação que o formulário faz ao salvar uma edição.
-    produto.name = "Suporte de Fone V2"
-    produto.quantity = 10
-    produto.salePrice = 30
-    produto.updatedAt = Date()
+        let criadoEm = Date(timeIntervalSince1970: 1_700_000_000)
+        let produto = Product(name: "Suporte de Fone", quantity: 2, salePrice: 25, createdAt: criadoEm, updatedAt: criadoEm)
+        context.insert(produto)
 
-    let salvos = try context.fetch(FetchDescriptor<Product>())
+        // Mesma operação que o formulário faz ao salvar uma edição.
+        produto.name = "Suporte de Fone V2"
+        produto.quantity = 10
+        produto.salePrice = 30
+        produto.updatedAt = Date()
 
-    #expect(salvos.count == 1, "editar não pode criar um segundo registro")
-    #expect(salvos.first?.name == "Suporte de Fone V2")
-    #expect(salvos.first?.quantity == 10)
-    #expect(salvos.first?.createdAt == criadoEm, "a data de cadastro original tem que sobreviver")
-    #expect(salvos.first?.updatedAt != criadoEm)
-}
+        let salvos = try context.fetch(FetchDescriptor<Product>())
 
-@Test @MainActor func exclusaoTiraOProdutoDoEstoque() throws {
-    let container = try ModelContainer(
-        for: Product.self,
-        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-    )
-    let context = container.mainContext
+        #expect(salvos.count == 1, "editar não pode criar um segundo registro")
+        #expect(salvos.first?.name == "Suporte de Fone V2")
+        #expect(salvos.first?.quantity == 10)
+        #expect(salvos.first?.createdAt == criadoEm, "a data de cadastro original tem que sobreviver")
+        #expect(salvos.first?.updatedAt != criadoEm)
+    }
 
-    let amigurumi = Product(name: "Amigurumi Gato", quantity: 12)
-    let tapete = Product(name: "Tapete Redondo", quantity: 8)
-    context.insert(amigurumi)
-    context.insert(tapete)
+    @Test func exclusaoTiraOProdutoDoEstoque() throws {
+        let context = try TestDatabase.makeCleanContext()
 
-    context.delete(amigurumi)
+        let amigurumi = Product(name: "Amigurumi Gato", quantity: 12)
+        let tapete = Product(name: "Tapete Redondo", quantity: 8)
+        context.insert(amigurumi)
+        context.insert(tapete)
 
-    let restantes = try context.fetch(FetchDescriptor<Product>())
+        context.delete(amigurumi)
 
-    #expect(restantes.count == 1)
-    #expect(restantes.first?.name == "Tapete Redondo")
+        let restantes = try context.fetch(FetchDescriptor<Product>())
+
+        #expect(restantes.count == 1)
+        #expect(restantes.first?.name == "Tapete Redondo")
+    }
 }
