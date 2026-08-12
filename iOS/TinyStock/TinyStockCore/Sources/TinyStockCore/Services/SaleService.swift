@@ -24,6 +24,28 @@ public enum SaleError: Error, Equatable, Sendable {
     case insufficientStock(productName: String, available: Int, requested: Int)
 }
 
+public extension SaleError {
+
+    /// Explicação pronta pra mostrar num alerta, já traduzida.
+    /// Fica no Core pra tela não precisar montar texto nem conhecer os casos do erro.
+    var localizedMessage: String {
+        switch self {
+        case .emptySale:
+            String(localized: "sale.error.emptySale", bundle: .tinyStockCore)
+
+        case .invalidQuantity:
+            String(localized: "sale.error.invalidQuantity", bundle: .tinyStockCore)
+
+        case let .insufficientStock(productName, available, _):
+            String(
+                format: String(localized: "sale.error.insufficientStock", bundle: .tinyStockCore),
+                available,
+                productName
+            )
+        }
+    }
+}
+
 // MARK: - Linha da venda em montagem
 
 /// O que a tela monta antes de fechar a venda: um produto e quantas unidades.

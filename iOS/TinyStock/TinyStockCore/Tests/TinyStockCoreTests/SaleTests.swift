@@ -283,6 +283,29 @@ struct SaleTests {
         #expect(venda.paymentMethod == .pix, "texto estranho não pode quebrar a tela")
     }
 
+    // MARK: - Mensagens de erro
+
+    @Test func todoErroDeVendaTemMensagem() {
+        let erros: [SaleError] = [
+            .emptySale,
+            .invalidQuantity(productName: "Amigurumi Gato"),
+            .insufficientStock(productName: "Amigurumi Gato", available: 2, requested: 5)
+        ]
+
+        for erro in erros {
+            #expect(!erro.localizedMessage.isEmpty)
+        }
+    }
+
+    @Test func mensagemDeEstoqueMostraOQueRestaEONome() {
+        let erro = SaleError.insufficientStock(productName: "Tapete Redondo", available: 3, requested: 7)
+        let mensagem = erro.localizedMessage
+
+        #expect(mensagem.contains("3"), "a pessoa precisa saber quanto ainda tem")
+        #expect(mensagem.contains("Tapete Redondo"))
+        #expect(!mensagem.contains("%"), "sobrou marcador de formatação sem substituir")
+    }
+
     @Test func todaFormaDePagamentoTemNomeEIcone() {
         for method in PaymentMethod.allCases {
             #expect(!method.localizedName.isEmpty)
