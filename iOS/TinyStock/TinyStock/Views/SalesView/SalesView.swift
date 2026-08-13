@@ -14,10 +14,15 @@ struct SalesView: View {
 
     @Environment(\.modelContext) private var modelContext
 
-    /// Mais recente primeiro. O agrupamento por dia chega na próxima etapa.
+    /// Mais recente primeiro. O agrupamento por dia acontece logo abaixo, na memória:
+    /// o `#Predicate` do SwiftData não sabe agrupar, e o histórico é pequeno.
     @Query(sort: \Sale.date, order: .reverse) private var sales: [Sale]
 
     @State private var isPresentingNewSale = false
+
+    private var dayGroups: [SaleDayGroup] {
+        SaleDayGroup.groups(from: sales)
+    }
 
     var body: some View {
         NavigationStack {
@@ -26,10 +31,18 @@ struct SalesView: View {
                     emptyState
                 } else {
                     List {
-                        ForEach(sales) { sale in
-                            SaleRowView(sale: sale)
+                        ForEach(dayGroups) { group in
+                            Section {
+                                ForEach(group.sales) { sale in
+                                    SaleRowView(sale: sale)
+                                }
+                                .onDelete { offsets in
+                                    delete(offsets, from: group)
+                                }
+                            } header: {
+                                SaleDayHeaderView(group: group)
+                            }
                         }
-                        .onDelete(perform: delete)
                     }
                 }
             }
@@ -56,9 +69,12 @@ struct SalesView: View {
 
     /// Apaga só o registro da venda. O estoque não volta de propósito: desfazer
     /// venda é outro assunto, e devolver silenciosamente confundiria a contagem.
-    private func delete(at offsets: IndexSet) {
+    ///
+    /// O índice vem do `ForEach` do grupo, então tem que voltar no grupo. Indexar
+    /// a lista inteira aqui apagaria a venda errada.
+    private func delete(_ offsets: IndexSet, from group: SaleDayGroup) {
         for index in offsets {
-            modelContext.delete(sales[index])
+            modelContext.delete(group.sales[index])
         }
     }
 
