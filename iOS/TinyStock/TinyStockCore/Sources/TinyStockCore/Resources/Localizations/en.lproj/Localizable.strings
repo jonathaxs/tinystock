@@ -68,6 +68,8 @@
 "sales.placeholder.message" = "Register your first sale to keep track of what is going out.";
 "sales.add" = "New sale";
 "sales.row.quantity" = "%d units";
+"sales.day.today" = "Today";
+"sales.day.yesterday" = "Yesterday";
 
 
 /* MARK: - New sale */

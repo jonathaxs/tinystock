@@ -68,6 +68,8 @@
 "sales.placeholder.message" = "Registre sua primeira venda pra acompanhar o que está saindo.";
 "sales.add" = "Registrar venda";
 "sales.row.quantity" = "%d un";
+"sales.day.today" = "Hoje";
+"sales.day.yesterday" = "Ontem";
 
 
 /* MARK: - Nova venda */
