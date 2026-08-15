@@ -1,7 +1,7 @@
 // ⌘
 //  TinyStock/Views/SalesView/NewSaleView.swift
 //
-//  Propósito: Registrar uma venda, escolhendo produto, quantidade e forma de pagamento.
+//  Propósito: Registrar uma venda com um ou vários produtos, quantidade e forma de pagamento.
 //
 //  Created by Jonathas Motta (@jonathaxs) on 2026-08-11.
 // ⌘
@@ -15,38 +15,24 @@ struct NewSaleView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
-    @State private var selectedProduct: Product?
-    @State private var quantity = 1
+    /// Itens escolhidos até agora. Somar produto repetido e parar no estoque
+    /// é regra, então mora no carrinho, no Core, e não aqui.
+    @State private var cart = SaleCart()
+
     @State private var paymentMethod: PaymentMethod = .pix
 
     /// Mensagem do erro devolvido pelo Core. Não nil significa alerta na tela.
     @State private var errorMessage: String?
-
-    // MARK: - Valores derivados
-
-    private var total: Decimal {
-        guard let selectedProduct else { return 0 }
-        return selectedProduct.salePrice * Decimal(quantity)
-    }
-
-    private var profit: Decimal {
-        guard let selectedProduct else { return 0 }
-        return selectedProduct.unitProfit * Decimal(quantity)
-    }
-
-    private var canConfirm: Bool {
-        selectedProduct != nil && quantity > 0
-    }
 
     // MARK: - Corpo
 
     var body: some View {
         NavigationStack {
             Form {
-                productSection
+                itemsSection
 
-                if let product = selectedProduct {
-                    quantitySection(for: product)
+                // Sem item escolhido não há o que pagar nem o que somar.
+                if !cart.isEmpty {
                     paymentSection
                     summarySection
                 }
@@ -63,7 +49,7 @@ struct NewSaleView: View {
                     Button(String(localized: "common.save", bundle: .tinyStockCore)) {
                         confirm()
                     }
-                    .disabled(!canConfirm)
+                    .disabled(cart.isEmpty)
                 }
             }
             .alert(
@@ -80,66 +66,72 @@ struct NewSaleView: View {
         }
     }
 
-    // MARK: - Seções
+    // MARK: - Itens
 
-    private var productSection: some View {
-        Section(String(localized: "sale.new.section.product", bundle: .tinyStockCore)) {
-            NavigationLink {
-                ProductPickerView(selection: $selectedProduct)
-            } label: {
-                if let selectedProduct {
-                    chosenProductLabel(selectedProduct)
-                } else {
-                    Text(String(localized: "sale.new.chooseProduct", bundle: .tinyStockCore))
-                        .foregroundStyle(.secondary)
-                }
-            }
-        }
-        .onChange(of: selectedProduct) { _, newProduct in
-            // Trocar de produto zera a quantidade, senão sobra um número
-            // que talvez nem caiba no estoque do produto novo.
-            quantity = newProduct == nil ? 1 : min(quantity, newProduct?.quantity ?? 1)
-        }
-    }
-
-    private func chosenProductLabel(_ product: Product) -> some View {
-        HStack(spacing: 12) {
-            ProductImageView(imageData: product.imageData, side: 44)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(product.name)
-                    .font(.headline)
-
-                Text(product.salePrice.currencyText)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-        }
-    }
-
-    private func quantitySection(for product: Product) -> some View {
+    private var itemsSection: some View {
         Section {
-            // O Stepper para no estoque disponível, então não dá nem pra tentar
-            // vender mais do que existe. O alerta continua como rede de segurança.
-            Stepper(value: $quantity, in: 1...max(1, product.quantity)) {
-                LabeledContent {
-                    Text(quantity, format: .number)
-                        .font(.body.monospacedDigit())
-                } label: {
-                    Text(String(localized: "sale.new.section.quantity", bundle: .tinyStockCore))
-                }
+            ForEach(cart.lines, id: \.product.id) { line in
+                lineRow(for: line)
+            }
+            .onDelete { offsets in
+                cart.remove(atOffsets: offsets)
             }
 
-            LabeledContent {
-                Text(product.quantity, format: .number)
-                    .foregroundStyle(product.isLowStock ? Color.orange : Color.secondary)
+            NavigationLink {
+                // O picker devolve o produto e volta. A quantidade se ajusta
+                // na própria linha, que é onde a pessoa está olhando.
+                ProductPickerView(
+                    remainingStock: { cart.remainingStock(of: $0) },
+                    onSelect: { cart.add($0) }
+                )
             } label: {
-                Text(String(localized: "sale.new.inStock", bundle: .tinyStockCore))
+                Label(
+                    String(localized: "sale.new.addProduct", bundle: .tinyStockCore),
+                    systemImage: "plus.circle.fill"
+                )
             }
+        } header: {
+            Text(String(localized: "sale.new.section.items", bundle: .tinyStockCore))
         } footer: {
             Text(String(localized: "sale.new.quantity.footer", bundle: .tinyStockCore))
         }
     }
+
+    private func lineRow(for line: SaleLine) -> some View {
+        VStack(spacing: 6) {
+            HStack {
+                Text(line.product.name)
+                    .font(.headline)
+                    .lineLimit(1)
+
+                Spacer()
+
+                Text(subtotal(of: line).currencyText)
+                    .font(.headline)
+            }
+
+            HStack {
+                Text(unitText(for: line))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                Spacer()
+
+                // Trava no estoque do produto, então não dá pra montar
+                // um carrinho que a confirmação vai recusar.
+                Stepper(
+                    String(localized: "sale.new.section.quantity", bundle: .tinyStockCore),
+                    value: quantityBinding(for: line.product),
+                    in: 1...max(1, line.product.quantity)
+                )
+                .labelsHidden()
+                .fixedSize()
+            }
+        }
+        .padding(.vertical, 2)
+    }
+
+    // MARK: - Pagamento e resumo
 
     private var paymentSection: some View {
         Section(String(localized: "sale.new.section.payment", bundle: .tinyStockCore)) {
@@ -160,35 +152,64 @@ struct NewSaleView: View {
     private var summarySection: some View {
         Section(String(localized: "sale.new.section.summary", bundle: .tinyStockCore)) {
             LabeledContent {
-                Text(total.currencyText)
+                Text(cart.unitCount, format: .number)
+                    .font(.body.monospacedDigit())
+            } label: {
+                Text(String(localized: "sale.new.section.quantity", bundle: .tinyStockCore))
+            }
+
+            LabeledContent {
+                Text(cart.total.currencyText)
                     .font(.headline)
             } label: {
                 Text(String(localized: "sale.new.total", bundle: .tinyStockCore))
             }
 
             LabeledContent {
-                Text(profit.currencyText)
-                    .foregroundStyle(profit < 0 ? Color.red : Color.primary)
+                Text(cart.profit.currencyText)
+                    .foregroundStyle(cart.profit < 0 ? Color.red : Color.primary)
             } label: {
                 Text(String(localized: "sale.new.profit", bundle: .tinyStockCore))
             }
         }
     }
 
+    // MARK: - Apoio
+
+    private func subtotal(of line: SaleLine) -> Decimal {
+        line.product.salePrice * Decimal(line.quantity)
+    }
+
+    /// Texto do tipo "2 × R$ 45,00", que explica de onde saiu o subtotal.
+    private func unitText(for line: SaleLine) -> String {
+        String(
+            format: String(localized: "sale.new.line.unit", bundle: .tinyStockCore),
+            line.quantity,
+            line.product.salePrice.currencyText
+        )
+    }
+
+    private func quantityBinding(for product: Product) -> Binding<Int> {
+        Binding(
+            get: { cart.quantity(of: product) },
+            set: { cart.setQuantity($0, for: product) }
+        )
+    }
+
     // MARK: - Confirmação
 
     private func confirm() {
-        guard let selectedProduct else { return }
+        guard !cart.isEmpty else { return }
 
         do {
             try SaleService.register(
-                lines: [SaleLine(product: selectedProduct, quantity: quantity)],
+                lines: cart.lines,
                 paymentMethod: paymentMethod,
                 in: modelContext
             )
             dismiss()
         } catch let error as SaleError {
-            // Chega aqui se o estoque mudou entre escolher e confirmar.
+            // Chega aqui se o estoque mudou entre montar o carrinho e confirmar.
             errorMessage = error.localizedMessage
         } catch {
             errorMessage = error.localizedDescription

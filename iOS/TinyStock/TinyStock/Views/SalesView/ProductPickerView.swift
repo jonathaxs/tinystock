@@ -14,8 +14,12 @@ struct ProductPickerView: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    /// Produto escolhido, devolvido pra tela de nova venda.
-    @Binding var selection: Product?
+    /// Quanto ainda dá pra vender de cada produto, já descontando o carrinho.
+    /// Quem chama sabe o que já foi escolhido, esta tela não precisa saber.
+    let remainingStock: (Product) -> Int
+
+    /// Entrega o produto escolhido e sai da tela.
+    let onSelect: (Product) -> Void
 
     /// Só entra na lista quem tem o que vender. Filtrar aqui já evita
     /// metade dos erros de estoque antes de a pessoa tentar confirmar.
@@ -24,20 +28,25 @@ struct ProductPickerView: View {
 
     @State private var searchText = ""
 
+    /// Some da lista quem já foi todo pro carrinho: não dá pra escolher o que não sobrou.
+    private var sellableProducts: [Product] {
+        availableProducts.filter { remainingStock($0) > 0 }
+    }
+
     private var filteredProducts: [Product] {
-        availableProducts.filter { $0.matches(searchText: searchText) }
+        sellableProducts.filter { $0.matches(searchText: searchText) }
     }
 
     var body: some View {
         Group {
-            if availableProducts.isEmpty {
+            if sellableProducts.isEmpty {
                 emptyState
             } else if filteredProducts.isEmpty {
                 ContentUnavailableView.search(text: searchText)
             } else {
                 List(filteredProducts) { product in
                     Button {
-                        selection = product
+                        onSelect(product)
                         dismiss()
                     } label: {
                         row(for: product)
@@ -64,10 +73,12 @@ struct ProductPickerView: View {
                 Text(product.name)
                     .font(.headline)
 
+                // O número que importa aqui é o que ainda dá pra escolher,
+                // não o estoque cheio: parte dele já pode estar no carrinho.
                 Text(
                     String(
                         format: String(localized: "sale.new.available", bundle: .tinyStockCore),
-                        product.quantity
+                        remainingStock(product)
                     )
                 )
                 .font(.subheadline)
@@ -99,7 +110,7 @@ struct ProductPickerView: View {
 
 #Preview {
     NavigationStack {
-        ProductPickerView(selection: .constant(nil))
+        ProductPickerView(remainingStock: \.quantity, onSelect: { _ in })
     }
     .modelContainer(for: Product.self, inMemory: true)
 }
