@@ -68,18 +68,19 @@
 "sales.placeholder.message" = "Register your first sale to keep track of what is going out.";
 "sales.add" = "New sale";
 "sales.row.quantity" = "%d units";
+"sales.row.moreItems" = "%1$@ and %2$d more";
 "sales.day.today" = "Today";
 "sales.day.yesterday" = "Yesterday";
 
 
 /* MARK: - New sale */
 "sale.new.title" = "New Sale";
-"sale.new.section.product" = "Product";
-"sale.new.chooseProduct" = "Choose product";
+"sale.new.section.items" = "Items";
+"sale.new.addProduct" = "Add product";
+"sale.new.line.unit" = "%1$d × %2$@";
 "sale.new.section.quantity" = "Quantity";
 "sale.new.available" = "%d in stock";
-"sale.new.inStock" = "In stock";
-"sale.new.quantity.footer" = "The quantity stops at what you have in stock today.";
+"sale.new.quantity.footer" = "You can sell several products in the same sale. The quantity stops at what you have in stock today.";
 "sale.new.section.payment" = "Payment";
 "sale.new.section.summary" = "Summary";
 "sale.new.total" = "Total";

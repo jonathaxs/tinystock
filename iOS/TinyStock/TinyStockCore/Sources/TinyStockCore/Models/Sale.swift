@@ -66,8 +66,14 @@ public final class Sale {
     // MARK: - Derivados (não persistidos)
 
     /// Itens numa lista comum, já que a propriedade persistida é opcional.
+    ///
+    /// Ordenado por nome de propósito: relação to-many do SwiftData não guarda ordem,
+    /// então sem isso a mesma venda apareceria com os itens embaralhados a cada abertura.
+    /// Ordenar aqui custa pouco, porque venda de artesanato tem poucos itens.
     public var itemList: [SaleItem] {
-        items ?? []
+        (items ?? []).sorted {
+            $0.productName.localizedStandardCompare($1.productName) == .orderedAscending
+        }
     }
 
     /// Quantas unidades saíram no total, somando todos os itens.

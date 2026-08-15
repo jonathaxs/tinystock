@@ -68,18 +68,19 @@
 "sales.placeholder.message" = "Registre sua primeira venda pra acompanhar o que está saindo.";
 "sales.add" = "Registrar venda";
 "sales.row.quantity" = "%d un";
+"sales.row.moreItems" = "%1$@ e mais %2$d";
 "sales.day.today" = "Hoje";
 "sales.day.yesterday" = "Ontem";
 
 
 /* MARK: - Nova venda */
 "sale.new.title" = "Nova venda";
-"sale.new.section.product" = "Produto";
-"sale.new.chooseProduct" = "Escolher produto";
+"sale.new.section.items" = "Itens";
+"sale.new.addProduct" = "Adicionar produto";
+"sale.new.line.unit" = "%1$d × %2$@";
 "sale.new.section.quantity" = "Quantidade";
 "sale.new.available" = "%d em estoque";
-"sale.new.inStock" = "Em estoque";
-"sale.new.quantity.footer" = "A quantidade para no que existe em estoque hoje.";
+"sale.new.quantity.footer" = "Dá pra vender vários produtos na mesma venda. A quantidade para no que existe em estoque hoje.";
 "sale.new.section.payment" = "Pagamento";
 "sale.new.section.summary" = "Resumo";
 "sale.new.total" = "Total";
