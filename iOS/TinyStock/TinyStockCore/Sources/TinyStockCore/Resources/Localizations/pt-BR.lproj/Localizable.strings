@@ -125,6 +125,11 @@
 "reports.daily.profit" = "Lucro: %@";
 "reports.empty.period.title" = "Nenhuma venda no período";
 "reports.empty.period.message" = "Escolha outro período ou registre uma nova venda.";
+"reports.bestSellers.title" = "Mais vendidos";
+"reports.bestSellers.units.one" = "%d unidade vendida";
+"reports.bestSellers.units.other" = "%d unidades vendidas";
+"reports.restock.title" = "Precisa repor";
+"reports.restock.stock" = "%1$d un · mínimo %2$d";
 
 
 /* MARK: - Ajustes */

@@ -108,6 +108,112 @@ struct SalesReportTests {
         #expect(summary.dayGroups.isEmpty)
     }
 
+    // MARK: - Produtos mais vendidos
+
+    @Test func rankingSomaOMesmoProdutoEmVendasDiferentes() throws {
+        let context = try makeContext()
+        let product = Product(name: "Amigurumi Gato", quantity: 20, costPrice: 20, salePrice: 45)
+        context.insert(product)
+
+        try sell(product, quantity: 2, daysFromReference: 0, in: context)
+        try sell(product, quantity: 3, daysFromReference: -1, in: context)
+
+        let summary = SalesReportSummary(
+            sales: try context.fetch(FetchDescriptor<Sale>()),
+            period: .allTime,
+            reference: reference,
+            calendar: calendar
+        )
+        let ranking = try #require(summary.bestSellingProducts().first)
+
+        #expect(ranking.productID == product.id)
+        #expect(ranking.productName == "Amigurumi Gato")
+        #expect(ranking.quantity == 5)
+        #expect(ranking.revenue == 225)
+    }
+
+    @Test func rankingUsaApenasAsVendasDoPeriodo() throws {
+        let context = try makeContext()
+        let recent = Product(name: "Suporte de Fone", quantity: 10, salePrice: 25)
+        let old = Product(name: "Tapete Redondo", quantity: 20, salePrice: 90)
+        context.insert(recent)
+        context.insert(old)
+
+        try sell(recent, quantity: 2, daysFromReference: 0, in: context)
+        try sell(old, quantity: 10, daysFromReference: -8, in: context)
+
+        let summary = SalesReportSummary(
+            sales: try context.fetch(FetchDescriptor<Sale>()),
+            period: .lastSevenDays,
+            reference: reference,
+            calendar: calendar
+        )
+
+        #expect(summary.bestSellingProducts().map(\.productName) == ["Suporte de Fone"])
+    }
+
+    @Test func rankingPrefereQuantidadeEDesempataPorReceita() throws {
+        let context = try makeContext()
+        let first = Product(name: "Vaso 3D", quantity: 20, salePrice: 20)
+        let second = Product(name: "Chaveiro", quantity: 20, salePrice: 10)
+        let third = Product(name: "Porta Copo", quantity: 20, salePrice: 50)
+        context.insert(first)
+        context.insert(second)
+        context.insert(third)
+
+        try sell(first, quantity: 4, daysFromReference: 0, in: context)
+        try sell(second, quantity: 5, daysFromReference: 0, in: context)
+        try sell(third, quantity: 4, daysFromReference: 0, in: context)
+
+        let summary = SalesReportSummary(
+            sales: try context.fetch(FetchDescriptor<Sale>()),
+            period: .allTime,
+            reference: reference,
+            calendar: calendar
+        )
+
+        #expect(summary.bestSellingProducts().map(\.productName) == ["Chaveiro", "Porta Copo", "Vaso 3D"])
+    }
+
+    @Test func rankingRespeitaOLimiteSolicitado() throws {
+        let context = try makeContext()
+
+        for index in 1...5 {
+            let product = Product(name: "Produto \(index)", quantity: 10, salePrice: 10)
+            context.insert(product)
+            try sell(product, quantity: index, daysFromReference: 0, in: context)
+        }
+
+        let summary = SalesReportSummary(
+            sales: try context.fetch(FetchDescriptor<Sale>()),
+            period: .allTime,
+            reference: reference,
+            calendar: calendar
+        )
+
+        #expect(summary.bestSellingProducts(limit: 3).map(\.quantity) == [5, 4, 3])
+        #expect(summary.bestSellingProducts(limit: 0).isEmpty)
+    }
+
+    @Test func rankingMantemONomeMaisRecenteDaVenda() throws {
+        let context = try makeContext()
+        let product = Product(name: "Suporte", quantity: 10, salePrice: 25)
+        context.insert(product)
+
+        try sell(product, quantity: 1, daysFromReference: -1, in: context)
+        product.name = "Suporte de Fone"
+        try sell(product, quantity: 1, daysFromReference: 0, in: context)
+
+        let summary = SalesReportSummary(
+            sales: try context.fetch(FetchDescriptor<Sale>()),
+            period: .allTime,
+            reference: reference,
+            calendar: calendar
+        )
+
+        #expect(summary.bestSellingProducts().first?.productName == "Suporte de Fone")
+    }
+
     @Test func diasDoResumoVemDoMaisRecenteProMaisAntigo() throws {
         let context = try makeContext()
         let product = Product(name: "Tapete Redondo", quantity: 10, costPrice: 30, salePrice: 90)

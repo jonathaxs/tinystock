@@ -125,6 +125,11 @@
 "reports.daily.profit" = "Profit: %@";
 "reports.empty.period.title" = "No sales in this period";
 "reports.empty.period.message" = "Choose another period or register a new sale.";
+"reports.bestSellers.title" = "Best sellers";
+"reports.bestSellers.units.one" = "%d unit sold";
+"reports.bestSellers.units.other" = "%d units sold";
+"reports.restock.title" = "Needs restocking";
+"reports.restock.stock" = "%1$d in stock · minimum %2$d";
 
 
 /* MARK: - Settings */

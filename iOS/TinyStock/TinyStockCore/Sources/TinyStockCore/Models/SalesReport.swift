@@ -114,4 +114,65 @@ public struct SalesReportSummary {
     public var unitCount: Int {
         sales.reduce(0) { $0 + $1.totalQuantity }
     }
+
+    /// Produtos com mais unidades vendidas dentro do periodo selecionado.
+    ///
+    /// O agrupamento usa o identificador salvo no item da venda. O nome vem do retrato mais
+    /// recente, entao editar ou excluir o produto atual nao apaga a historia do relatorio.
+    public func bestSellingProducts(limit: Int = 3) -> [ProductSalesRanking] {
+        guard limit > 0 else { return [] }
+
+        var rankings: [UUID: ProductSalesRanking] = [:]
+
+        for sale in sales {
+            for item in sale.itemList {
+                let current = rankings[item.productID]
+                rankings[item.productID] = ProductSalesRanking(
+                    productID: item.productID,
+                    productName: current?.productName ?? item.productName,
+                    quantity: (current?.quantity ?? 0) + item.quantity,
+                    revenue: (current?.revenue ?? 0) + item.subtotal
+                )
+            }
+        }
+
+        return rankings.values
+            .sorted {
+                if $0.quantity != $1.quantity {
+                    return $0.quantity > $1.quantity
+                }
+
+                if $0.revenue != $1.revenue {
+                    return $0.revenue > $1.revenue
+                }
+
+                return $0.productName.localizedStandardCompare($1.productName) == .orderedAscending
+            }
+            .prefix(limit)
+            .map { $0 }
+    }
+}
+
+// MARK: - Produtos mais vendidos
+
+/// Retrato agregado de um produto no ranking do periodo.
+public struct ProductSalesRanking: Identifiable, Equatable, Sendable {
+    public let productID: UUID
+    public let productName: String
+    public let quantity: Int
+    public let revenue: Decimal
+
+    public var id: UUID { productID }
+
+    public init(
+        productID: UUID,
+        productName: String,
+        quantity: Int,
+        revenue: Decimal
+    ) {
+        self.productID = productID
+        self.productName = productName
+        self.quantity = quantity
+        self.revenue = revenue
+    }
 }
