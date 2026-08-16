@@ -111,6 +111,20 @@
 /* MARK: - Reports */
 "reports.placeholder.title" = "No data yet";
 "reports.placeholder.message" = "Reports will appear here once you register products and sales.";
+"reports.period.today" = "Today";
+"reports.period.sevenDays" = "7 days";
+"reports.period.month" = "Month";
+"reports.period.all" = "All";
+"reports.metric.revenue" = "Total sold";
+"reports.metric.profit" = "Gross profit";
+"reports.metric.sales" = "Sales";
+"reports.metric.units" = "Units";
+"reports.daily.title" = "By day";
+"reports.daily.sales.one" = "%d sale";
+"reports.daily.sales.other" = "%d sales";
+"reports.daily.profit" = "Profit: %@";
+"reports.empty.period.title" = "No sales in this period";
+"reports.empty.period.message" = "Choose another period or register a new sale.";
 
 
 /* MARK: - Settings */

@@ -111,6 +111,20 @@
 /* MARK: - Relatórios */
 "reports.placeholder.title" = "Sem dados ainda";
 "reports.placeholder.message" = "Os relatórios aparecem aqui quando você cadastrar produtos e vendas.";
+"reports.period.today" = "Hoje";
+"reports.period.sevenDays" = "7 dias";
+"reports.period.month" = "Mês";
+"reports.period.all" = "Tudo";
+"reports.metric.revenue" = "Total vendido";
+"reports.metric.profit" = "Lucro bruto";
+"reports.metric.sales" = "Vendas";
+"reports.metric.units" = "Unidades";
+"reports.daily.title" = "Por dia";
+"reports.daily.sales.one" = "%d venda";
+"reports.daily.sales.other" = "%d vendas";
+"reports.daily.profit" = "Lucro: %@";
+"reports.empty.period.title" = "Nenhuma venda no período";
+"reports.empty.period.message" = "Escolha outro período ou registre uma nova venda.";
 
 
 /* MARK: - Ajustes */
