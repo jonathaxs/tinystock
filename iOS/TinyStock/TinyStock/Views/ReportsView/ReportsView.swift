@@ -14,6 +14,7 @@ struct ReportsView: View {
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Query(sort: \Sale.date, order: .reverse) private var sales: [Sale]
+    @Query(sort: \Product.name) private var products: [Product]
 
     @State private var selectedPeriod: SalesReportPeriod = .currentMonth
 
@@ -21,20 +22,34 @@ struct ReportsView: View {
         SalesReportSummary(sales: sales, period: selectedPeriod)
     }
 
+    private var bestSellingProducts: [ProductSalesRanking] {
+        summary.bestSellingProducts()
+    }
+
+    private var productsToRestock: [Product] {
+        products
+            .filter(\.isLowStock)
+            .sorted {
+                if $0.quantity != $1.quantity {
+                    return $0.quantity < $1.quantity
+                }
+
+                return $0.name.localizedStandardCompare($1.name) == .orderedAscending
+            }
+    }
+
     var body: some View {
         NavigationStack {
             Group {
-                if sales.isEmpty {
+                if sales.isEmpty && productsToRestock.isEmpty {
                     noDataState
                 } else {
                     VStack(spacing: 0) {
-                        periodPicker
-
-                        if summary.isEmpty {
-                            emptyPeriodState
-                        } else {
-                            reportContent
+                        if !sales.isEmpty {
+                            periodPicker
                         }
+
+                        reportContent
                     }
                 }
             }
@@ -64,28 +79,47 @@ struct ReportsView: View {
     private var reportContent: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                metricsGrid
+                if sales.isEmpty {
+                    noDataState
+                        .frame(maxWidth: .infinity, minHeight: 260)
+                } else if summary.isEmpty {
+                    emptyPeriodState
+                } else {
+                    metricsGrid
 
-                VStack(alignment: .leading, spacing: 10) {
-                    Text(String(localized: "reports.daily.title", bundle: .tinyStockCore))
-                        .font(.headline)
+                    bestSellersSection
+                }
 
-                    VStack(spacing: 0) {
-                        ForEach(Array(summary.dayGroups.enumerated()), id: \.element.id) { index, group in
-                            ReportDayRowView(group: group)
+                if !productsToRestock.isEmpty {
+                    restockSection
+                }
 
-                            if index < summary.dayGroups.count - 1 {
-                                Divider()
-                                    .padding(.leading, 16)
-                            }
-                        }
-                    }
-                    .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 8))
+                if !summary.isEmpty {
+                    dailySection
                 }
             }
             .padding()
         }
         .background(Color(.systemGroupedBackground))
+    }
+
+    private var dailySection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(String(localized: "reports.daily.title", bundle: .tinyStockCore))
+                .font(.headline)
+
+            VStack(spacing: 0) {
+                ForEach(Array(summary.dayGroups.enumerated()), id: \.element.id) { index, group in
+                    ReportDayRowView(group: group)
+
+                    if index < summary.dayGroups.count - 1 {
+                        Divider()
+                            .padding(.leading, 16)
+                    }
+                }
+            }
+            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 8))
+        }
     }
 
     private var metricsGrid: some View {
@@ -123,6 +157,49 @@ struct ReportsView: View {
         }
     }
 
+    private var bestSellersSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(String(localized: "reports.bestSellers.title", bundle: .tinyStockCore))
+                .font(.headline)
+
+            VStack(spacing: 0) {
+                ForEach(Array(bestSellingProducts.enumerated()), id: \.element.id) { index, ranking in
+                    BestSellingRowView(position: index + 1, ranking: ranking)
+
+                    if index < bestSellingProducts.count - 1 {
+                        Divider()
+                            .padding(.leading, 16)
+                    }
+                }
+            }
+            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 8))
+        }
+    }
+
+    private var restockSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(String(localized: "reports.restock.title", bundle: .tinyStockCore))
+                .font(.headline)
+
+            VStack(spacing: 0) {
+                ForEach(Array(productsToRestock.enumerated()), id: \.element.id) { index, product in
+                    NavigationLink {
+                        ProductDetailView(product: product)
+                    } label: {
+                        RestockProductRowView(product: product)
+                    }
+                    .buttonStyle(.plain)
+
+                    if index < productsToRestock.count - 1 {
+                        Divider()
+                            .padding(.leading, 84)
+                    }
+                }
+            }
+            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 8))
+        }
+    }
+
     private var metricColumns: [GridItem] {
         if dynamicTypeSize.isAccessibilitySize {
             return [GridItem(.flexible())]
@@ -156,7 +233,7 @@ struct ReportsView: View {
         } description: {
             Text(String(localized: "reports.empty.period.message", bundle: .tinyStockCore))
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity, minHeight: 260)
     }
 }
 
