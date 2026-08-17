@@ -137,6 +137,22 @@
 "settings.placeholder.message" = "Backup e preferências chegam em breve.";
 
 
+/* MARK: - Backup */
+"backup.error.invalidFile" = "Este arquivo não é um backup válido do TinyStock.";
+"backup.error.unsupportedVersion" = "Este backup foi criado por uma versão incompatível do TinyStock.";
+"settings.backup.section.local" = "Backup local";
+"settings.backup.export" = "Exportar dados";
+"settings.backup.import" = "Importar dados";
+"settings.backup.section.footer" = "O arquivo JSON inclui produtos, fotos, estoque e todo o histórico de vendas.";
+"settings.backup.import.confirm.title" = "Substituir os dados atuais?";
+"settings.backup.import.confirm.message" = "Este backup contém %1$d produtos e %2$d vendas. Os dados atuais serão substituídos.";
+"settings.backup.import.confirm.action" = "Restaurar backup";
+"settings.backup.success.title" = "Backup concluído";
+"settings.backup.export.success" = "O backup do TinyStock foi exportado.";
+"settings.backup.import.success" = "O backup do TinyStock foi restaurado.";
+"settings.backup.error.title" = "Falha no backup";
+
+
 /* MARK: - Erro do banco de dados */
 "app.error.dataStore.title" = "Não foi possível abrir o banco de dados";
 "app.error.dataStore.message" = "Force o fechamento e reabra o app. Se continuar, reinicie o aparelho.";

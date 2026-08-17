@@ -137,6 +137,22 @@
 "settings.placeholder.message" = "Backup and preferences are coming soon.";
 
 
+/* MARK: - Backup */
+"backup.error.invalidFile" = "This file is not a valid TinyStock backup.";
+"backup.error.unsupportedVersion" = "This backup was created by an incompatible TinyStock version.";
+"settings.backup.section.local" = "Local backup";
+"settings.backup.export" = "Export data";
+"settings.backup.import" = "Import data";
+"settings.backup.section.footer" = "The JSON file includes your products, photos, stock and complete sales history.";
+"settings.backup.import.confirm.title" = "Replace current data?";
+"settings.backup.import.confirm.message" = "This backup contains %1$d products and %2$d sales. Your current data will be replaced.";
+"settings.backup.import.confirm.action" = "Restore backup";
+"settings.backup.success.title" = "Backup complete";
+"settings.backup.export.success" = "The TinyStock backup was exported.";
+"settings.backup.import.success" = "The TinyStock backup was restored.";
+"settings.backup.error.title" = "Backup failed";
+
+
 /* MARK: - Data store error */
 "app.error.dataStore.title" = "Could not open the database";
 "app.error.dataStore.message" = "Please force quit and reopen the app. If it keeps happening, restart your device.";
