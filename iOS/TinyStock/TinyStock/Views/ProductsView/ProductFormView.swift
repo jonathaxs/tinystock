@@ -40,6 +40,9 @@ struct ProductFormView: View {
     /// Segura a interface enquanto a foto é carregada e reduzida.
     @State private var isLoadingPhoto = false
 
+    /// Controla a calculadora sem persistir os campos auxiliares no produto.
+    @State private var isPresentingCostCalculator = false
+
     // MARK: - Inicializador
 
     /// Sem argumento abre em branco pra cadastrar; com um produto abre preenchido pra editar.
@@ -126,6 +129,12 @@ struct ProductFormView: View {
                     }
                     .disabled(!canSave)
                 }
+            }
+        }
+        .sheet(isPresented: $isPresentingCostCalculator) {
+            ProductionCostCalculatorView { result in
+                costPriceText = CurrencyFormatter.editableText(from: result.totalCost)
+                salePriceText = CurrencyFormatter.editableText(from: result.suggestedPrice)
             }
         }
     }
@@ -236,6 +245,15 @@ struct ProductFormView: View {
                     .foregroundStyle(unitProfit < 0 ? Color.red : Color.primary)
             } label: {
                 Text(String(localized: "product.form.unitProfit", bundle: .tinyStockCore))
+            }
+
+            Button {
+                isPresentingCostCalculator = true
+            } label: {
+                Label(
+                    String(localized: "product.form.costCalculator", bundle: .tinyStockCore),
+                    systemImage: "calculator"
+                )
             }
         } header: {
             Text(String(localized: "product.form.section.prices", bundle: .tinyStockCore))
