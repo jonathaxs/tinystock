@@ -24,12 +24,22 @@ struct SettingsView: View {
     @State private var isConfirmingImport = false
     @State private var presentedMessage: PresentedMessage?
 
+    @State private var isICloudAvailable = ICloudBackupManager.isSignedIn
+    @State private var iCloudLastBackup: Date?
+    @State private var isSavingToICloud = false
+    @State private var isRestoringFromICloud = false
+    @State private var isConfirmingICloudRestore = false
+
     var body: some View {
         NavigationStack {
             List {
+                iCloudBackupSection
                 localBackupSection
             }
             .navigationTitle(String(localized: "tab.settings", bundle: .tinyStockCore))
+        }
+        .task {
+            await refreshICloudStatus()
         }
         .fileExporter(
             isPresented: $isExporting,
@@ -75,12 +85,146 @@ struct SettingsView: View {
                 Text(importConfirmationMessage(for: payload))
             }
         }
+        .alert(
+            String(localized: "settings.backup.icloud.restore.confirm.title", bundle: .tinyStockCore),
+            isPresented: $isConfirmingICloudRestore
+        ) {
+            Button(
+                String(localized: "settings.backup.icloud.restore", bundle: .tinyStockCore),
+                role: .destructive
+            ) {
+                Task { await restoreFromICloud() }
+            }
+            Button(String(localized: "common.cancel", bundle: .tinyStockCore), role: .cancel) { }
+        } message: {
+            Text(String(localized: "settings.backup.icloud.restore.confirm.message", bundle: .tinyStockCore))
+        }
         .alert(item: $presentedMessage) { message in
             Alert(
                 title: Text(message.title),
                 message: Text(message.message),
                 dismissButton: .default(Text("OK"))
             )
+        }
+    }
+
+    // MARK: - Backup no iCloud Drive
+
+    private var iCloudBackupSection: some View {
+        Section {
+            if isICloudAvailable {
+                Button {
+                    Task { await saveToICloud() }
+                } label: {
+                    HStack {
+                        Label(
+                            String(localized: "settings.backup.icloud.save", bundle: .tinyStockCore),
+                            systemImage: "icloud.and.arrow.up"
+                        )
+
+                        if isSavingToICloud {
+                            Spacer()
+                            ProgressView()
+                        }
+                    }
+                }
+                .disabled(isSavingToICloud || isRestoringFromICloud)
+
+                Button {
+                    isConfirmingICloudRestore = true
+                } label: {
+                    HStack {
+                        Label(
+                            String(localized: "settings.backup.icloud.restore", bundle: .tinyStockCore),
+                            systemImage: "icloud.and.arrow.down"
+                        )
+
+                        if isRestoringFromICloud {
+                            Spacer()
+                            ProgressView()
+                        }
+                    }
+                }
+                .disabled(isSavingToICloud || isRestoringFromICloud)
+            } else {
+                Label(
+                    String(localized: "settings.backup.icloud.unavailable", bundle: .tinyStockCore),
+                    systemImage: "icloud.slash"
+                )
+                .foregroundStyle(.secondary)
+            }
+        } header: {
+            Text("iCloud Drive")
+        } footer: {
+            iCloudFooter
+        }
+    }
+
+    @ViewBuilder
+    private var iCloudFooter: some View {
+        if let iCloudLastBackup {
+            Text(
+                String(
+                    format: String(localized: "settings.backup.icloud.lastBackup", bundle: .tinyStockCore),
+                    iCloudLastBackup.formatted(date: .abbreviated, time: .shortened)
+                )
+            )
+        } else if isICloudAvailable {
+            Text(String(localized: "settings.backup.icloud.noBackup", bundle: .tinyStockCore))
+        } else {
+            Text(String(localized: "settings.backup.icloud.unavailable.footer", bundle: .tinyStockCore))
+        }
+    }
+
+    private func refreshICloudStatus() async {
+        isICloudAvailable = ICloudBackupManager.isSignedIn
+        iCloudLastBackup = isICloudAvailable
+            ? await ICloudBackupManager.lastBackupDate()
+            : nil
+    }
+
+    private func saveToICloud() async {
+        isSavingToICloud = true
+
+        do {
+            let data = try BackupManager.export(products: products, sales: sales)
+            try await ICloudBackupManager.save(data)
+            await refreshICloudStatus()
+            isSavingToICloud = false
+            showMessage(
+                titleKey: "settings.backup.success.title",
+                messageKey: "settings.backup.icloud.save.success"
+            )
+        } catch {
+            isSavingToICloud = false
+            show(error)
+        }
+    }
+
+    private func restoreFromICloud() async {
+        isRestoringFromICloud = true
+
+        do {
+            guard let data = try await ICloudBackupManager.load() else {
+                isRestoringFromICloud = false
+                showMessage(
+                    titleKey: "settings.backup.error.title",
+                    messageKey: "settings.backup.icloud.noBackup"
+                )
+                return
+            }
+
+            let payload = try BackupManager.decode(data)
+            try BackupManager.apply(payload, into: modelContext)
+            await refreshICloudStatus()
+            isRestoringFromICloud = false
+            showMessage(
+                titleKey: "settings.backup.success.title",
+                messageKey: "settings.backup.icloud.restore.success"
+            )
+        } catch {
+            isRestoringFromICloud = false
+            show(error)
         }
     }
 
