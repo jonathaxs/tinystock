@@ -151,6 +151,18 @@
 "settings.backup.export.success" = "The TinyStock backup was exported.";
 "settings.backup.import.success" = "The TinyStock backup was restored.";
 "settings.backup.error.title" = "Backup failed";
+"icloud.error.unavailable" = "iCloud Drive is unavailable. Check your Apple Account and iCloud Drive settings.";
+"icloud.error.downloadTimeout" = "The iCloud backup could not be downloaded in time. Please try again.";
+"settings.backup.icloud.save" = "Save to iCloud";
+"settings.backup.icloud.restore" = "Restore from iCloud";
+"settings.backup.icloud.unavailable" = "iCloud Drive unavailable";
+"settings.backup.icloud.unavailable.footer" = "Sign in to your Apple Account and turn on iCloud Drive to use cloud backup.";
+"settings.backup.icloud.noBackup" = "No TinyStock backup was found in iCloud Drive.";
+"settings.backup.icloud.lastBackup" = "Last backup: %@";
+"settings.backup.icloud.restore.confirm.title" = "Restore iCloud backup?";
+"settings.backup.icloud.restore.confirm.message" = "Your current products and sales will be replaced by the iCloud backup.";
+"settings.backup.icloud.save.success" = "The TinyStock backup was saved to iCloud Drive.";
+"settings.backup.icloud.restore.success" = "The iCloud backup was restored.";
 
 
 /* MARK: - Data store error */
