@@ -165,6 +165,39 @@
 "settings.backup.icloud.restore.success" = "The iCloud backup was restored.";
 
 
+/* MARK: - Production cost calculator */
+"product.form.costCalculator" = "Calculate production cost";
+"costCalculator.title" = "Production Cost";
+"costCalculator.apply" = "Apply";
+"costCalculator.section.method" = "Production method";
+"costCalculator.method.printing3D" = "3D Printing";
+"costCalculator.method.crochet" = "Crochet";
+"costCalculator.section.material" = "Material";
+"costCalculator.material.grams" = "Filament used (g)";
+"costCalculator.material.skeins" = "Skeins used";
+"costCalculator.material.pricePerKilogram" = "Filament price per kg";
+"costCalculator.material.pricePerSkein" = "Price per skein";
+"costCalculator.section.time" = "Production time";
+"costCalculator.time.printingHours" = "Printing time (hours)";
+"costCalculator.time.workHours" = "Work time (hours)";
+"costCalculator.time.energyPerHour" = "Energy cost per hour";
+"costCalculator.time.laborPerHour" = "Hourly rate";
+"costCalculator.section.additional" = "Additional costs";
+"costCalculator.additional" = "Other costs";
+"costCalculator.additional.footer" = "Include packaging, labels and other costs for one unit.";
+"costCalculator.section.margin" = "Sale margin";
+"costCalculator.margin" = "Desired margin";
+"costCalculator.margin.footer" = "The margin is calculated as a percentage of the sale price.";
+"costCalculator.section.result" = "Estimate";
+"costCalculator.result.material" = "Material";
+"costCalculator.result.energy" = "Energy";
+"costCalculator.result.labor" = "Labor";
+"costCalculator.result.additional" = "Other costs";
+"costCalculator.result.totalCost" = "Total cost";
+"costCalculator.result.suggestedPrice" = "Suggested price";
+"costCalculator.result.expectedProfit" = "Expected profit";
+
+
 /* MARK: - Data store error */
 "app.error.dataStore.title" = "Could not open the database";
 "app.error.dataStore.message" = "Please force quit and reopen the app. If it keeps happening, restart your device.";
