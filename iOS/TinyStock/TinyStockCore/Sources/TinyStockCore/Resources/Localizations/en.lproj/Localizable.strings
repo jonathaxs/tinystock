@@ -69,6 +69,7 @@
 "sales.add" = "New sale";
 "sales.row.quantity" = "%d units";
 "sales.row.moreItems" = "%1$@ and %2$d more";
+"sales.row.netProfit" = "Net %@";
 "sales.day.today" = "Today";
 "sales.day.yesterday" = "Yesterday";
 
@@ -84,7 +85,10 @@
 "sale.new.section.payment" = "Payment";
 "sale.new.section.summary" = "Summary";
 "sale.new.total" = "Total";
-"sale.new.profit" = "Sale profit";
+"sale.new.grossProfit" = "Gross profit";
+"sale.new.channelFeePercentage" = "Shopee fee";
+"sale.new.channelFee" = "Channel fee";
+"sale.new.netProfit" = "Net profit";
 "sale.new.confirm" = "Confirm sale";
 
 
@@ -99,6 +103,7 @@
 "sale.error.emptySale" = "Choose a product before confirming.";
 "sale.error.invalidQuantity" = "The quantity must be at least one unit.";
 "sale.error.insufficientStock" = "Only %1$d units of %2$@ left in stock.";
+"sale.error.invalidChannelFeePercentage" = "The channel fee must be between 0% and 100%.";
 
 
 /* MARK: - Payment methods */
@@ -116,13 +121,13 @@
 "reports.period.month" = "Month";
 "reports.period.all" = "All";
 "reports.metric.revenue" = "Total sold";
-"reports.metric.profit" = "Gross profit";
+"reports.metric.profit" = "Net profit";
 "reports.metric.sales" = "Sales";
 "reports.metric.units" = "Units";
 "reports.daily.title" = "By day";
 "reports.daily.sales.one" = "%d sale";
 "reports.daily.sales.other" = "%d sales";
-"reports.daily.profit" = "Profit: %@";
+"reports.daily.profit" = "Net profit: %@";
 "reports.empty.period.title" = "No sales in this period";
 "reports.empty.period.message" = "Choose another period or register a new sale.";
 "reports.bestSellers.title" = "Best sellers";

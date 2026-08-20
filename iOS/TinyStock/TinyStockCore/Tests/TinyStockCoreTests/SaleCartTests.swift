@@ -152,6 +152,15 @@ struct SaleCartTests {
         #expect(carrinho.unitCount == 3)
     }
 
+    @Test func taxaDoCanalMostraOLucroLiquidoAntesDeFechar() {
+        let produto = Product(name: "Peça 3D", quantity: 5, costPrice: 40, salePrice: 100)
+        var carrinho = SaleCart()
+        carrinho.add(produto)
+
+        #expect(carrinho.channelFee(percentage: 14) == 14)
+        #expect(carrinho.netProfit(channelFeePercentage: 14) == 46)
+    }
+
     // MARK: - Fechamento da venda
 
     @Test func carrinhoFechaVendaComVariosProdutos() throws {

@@ -69,6 +69,7 @@
 "sales.add" = "Registrar venda";
 "sales.row.quantity" = "%d un";
 "sales.row.moreItems" = "%1$@ e mais %2$d";
+"sales.row.netProfit" = "Líq. %@";
 "sales.day.today" = "Hoje";
 "sales.day.yesterday" = "Ontem";
 
@@ -84,7 +85,10 @@
 "sale.new.section.payment" = "Pagamento";
 "sale.new.section.summary" = "Resumo";
 "sale.new.total" = "Total";
-"sale.new.profit" = "Lucro da venda";
+"sale.new.grossProfit" = "Lucro bruto";
+"sale.new.channelFeePercentage" = "Taxa da Shopee";
+"sale.new.channelFee" = "Taxa do canal";
+"sale.new.netProfit" = "Lucro líquido";
 "sale.new.confirm" = "Confirmar venda";
 
 
@@ -99,6 +103,7 @@
 "sale.error.emptySale" = "Escolha um produto antes de confirmar.";
 "sale.error.invalidQuantity" = "A quantidade precisa ser de pelo menos uma unidade.";
 "sale.error.insufficientStock" = "Restam só %1$d unidades de %2$@ em estoque.";
+"sale.error.invalidChannelFeePercentage" = "A taxa do canal precisa ficar entre 0% e 100%.";
 
 
 /* MARK: - Formas de pagamento */
@@ -116,13 +121,13 @@
 "reports.period.month" = "Mês";
 "reports.period.all" = "Tudo";
 "reports.metric.revenue" = "Total vendido";
-"reports.metric.profit" = "Lucro bruto";
+"reports.metric.profit" = "Lucro líquido";
 "reports.metric.sales" = "Vendas";
 "reports.metric.units" = "Unidades";
 "reports.daily.title" = "Por dia";
 "reports.daily.sales.one" = "%d venda";
 "reports.daily.sales.other" = "%d vendas";
-"reports.daily.profit" = "Lucro: %@";
+"reports.daily.profit" = "Lucro líquido: %@";
 "reports.empty.period.title" = "Nenhuma venda no período";
 "reports.empty.period.message" = "Escolha outro período ou registre uma nova venda.";
 "reports.bestSellers.title" = "Mais vendidos";

@@ -70,6 +70,8 @@ public struct BackupPayload: Codable, Equatable, Sendable {
         public let date: Date
         public let paymentMethod: String
         public let note: String
+        public let channelFeePercentage: Decimal
+        public let channelFeeAmount: Decimal
         public let items: [SaleItemSnapshot]
 
         public init(
@@ -77,13 +79,45 @@ public struct BackupPayload: Codable, Equatable, Sendable {
             date: Date,
             paymentMethod: String,
             note: String,
+            channelFeePercentage: Decimal = 0,
+            channelFeeAmount: Decimal = 0,
             items: [SaleItemSnapshot]
         ) {
             self.id = id
             self.date = date
             self.paymentMethod = paymentMethod
             self.note = note
+            self.channelFeePercentage = channelFeePercentage
+            self.channelFeeAmount = channelFeeAmount
             self.items = items
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case id
+            case date
+            case paymentMethod
+            case note
+            case channelFeePercentage
+            case channelFeeAmount
+            case items
+        }
+
+        /// Campos ausentes em backups anteriores entram como zero.
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            id = try container.decode(UUID.self, forKey: .id)
+            date = try container.decode(Date.self, forKey: .date)
+            paymentMethod = try container.decode(String.self, forKey: .paymentMethod)
+            note = try container.decode(String.self, forKey: .note)
+            channelFeePercentage = try container.decodeIfPresent(
+                Decimal.self,
+                forKey: .channelFeePercentage
+            ) ?? 0
+            channelFeeAmount = try container.decodeIfPresent(
+                Decimal.self,
+                forKey: .channelFeeAmount
+            ) ?? 0
+            items = try container.decode([SaleItemSnapshot].self, forKey: .items)
         }
     }
 

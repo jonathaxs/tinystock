@@ -35,7 +35,7 @@ public struct SaleDayGroup: Identifiable {
         sales.reduce(0) { $0 + $1.total }
     }
 
-    /// Lucro bruto do dia. Serve de base pros relatórios da fase 3.
+    /// Lucro líquido do dia, já descontando as taxas registradas nas vendas.
     public var profit: Decimal {
         sales.reduce(0) { $0 + $1.profit }
     }

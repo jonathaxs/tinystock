@@ -31,6 +31,12 @@ public final class Sale {
     /// Anotação livre, por exemplo o nome do cliente.
     public var note: String = ""
 
+    /// Percentual cobrado pelo canal no momento em que a venda foi registrada.
+    public var channelFeePercentage: Decimal = 0
+
+    /// Valor efetivamente descontado. Fica persistido porque regras do canal podem mudar.
+    public var channelFeeAmount: Decimal = 0
+
     /// Itens da venda. Apagar a venda apaga os itens junto.
     /// Opcional porque relação to-many precisa ser opcional pro CloudKit.
     @Relationship(deleteRule: .cascade, inverse: \SaleItem.sale)
@@ -42,12 +48,16 @@ public final class Sale {
         id: UUID = UUID(),
         date: Date = Date(),
         paymentMethod: PaymentMethod = .pix,
-        note: String = ""
+        note: String = "",
+        channelFeePercentage: Decimal = 0,
+        channelFeeAmount: Decimal = 0
     ) {
         self.id = id
         self.date = date
         self.paymentMethodRawValue = paymentMethod.rawValue
         self.note = note
+        self.channelFeePercentage = channelFeePercentage
+        self.channelFeeAmount = channelFeeAmount
     }
 
     // MARK: - Forma de pagamento
@@ -91,8 +101,18 @@ public final class Sale {
         itemList.reduce(0) { $0 + $1.subtotalCost }
     }
 
-    /// Lucro bruto da venda. A taxa de canal, tipo a da Shopee, entra depois.
-    public var profit: Decimal {
+    /// Lucro antes de descontar a taxa do canal.
+    public var grossProfit: Decimal {
         total - totalCost
+    }
+
+    /// Lucro que realmente sobra depois do custo e da taxa do canal.
+    public var netProfit: Decimal {
+        grossProfit - channelFeeAmount
+    }
+
+    /// Atalho mantido para relatórios e agrupamentos, agora com semântica de lucro líquido.
+    public var profit: Decimal {
+        netProfit
     }
 }

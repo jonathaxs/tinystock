@@ -259,6 +259,43 @@ struct SaleTests {
         #expect(venda.profit == money(cents: 7020))
     }
 
+    @Test func taxaDoCanalFicaNoRetratoEDescontaDoLucroLiquido() throws {
+        let context = try makeContext()
+        let produto = Product(name: "Peça 3D", quantity: 5, costPrice: 40, salePrice: 100)
+        context.insert(produto)
+
+        let venda = try SaleService.register(
+            lines: [SaleLine(product: produto, quantity: 1)],
+            paymentMethod: .shopee,
+            channelFeePercentage: 14,
+            in: context
+        )
+
+        #expect(venda.channelFeePercentage == 14)
+        #expect(venda.channelFeeAmount == 14)
+        #expect(venda.grossProfit == 60)
+        #expect(venda.netProfit == 46)
+        #expect(venda.profit == 46)
+    }
+
+    @Test func taxaInvalidaNaoRegistraVendaNemBaixaEstoque() throws {
+        let context = try makeContext()
+        let produto = Product(name: "Peça 3D", quantity: 5, salePrice: 100)
+        context.insert(produto)
+
+        #expect(throws: SaleError.invalidChannelFeePercentage) {
+            try SaleService.register(
+                lines: [SaleLine(product: produto, quantity: 1)],
+                paymentMethod: .shopee,
+                channelFeePercentage: 101,
+                in: context
+            )
+        }
+
+        #expect(produto.quantity == 5)
+        #expect(try context.fetch(FetchDescriptor<Sale>()).isEmpty)
+    }
+
     // MARK: - Forma de pagamento
 
     @Test func formaDePagamentoVaiEVoltaComoEnum() throws {
@@ -289,7 +326,8 @@ struct SaleTests {
         let erros: [SaleError] = [
             .emptySale,
             .invalidQuantity(productName: "Amigurumi Gato"),
-            .insufficientStock(productName: "Amigurumi Gato", available: 2, requested: 5)
+            .insufficientStock(productName: "Amigurumi Gato", available: 2, requested: 5),
+            .invalidChannelFeePercentage
         ]
 
         for erro in erros {

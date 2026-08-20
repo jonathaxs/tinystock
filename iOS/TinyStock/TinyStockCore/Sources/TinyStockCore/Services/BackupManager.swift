@@ -109,7 +109,9 @@ public enum BackupManager {
                     id: snapshot.id,
                     date: snapshot.date,
                     paymentMethod: PaymentMethod(rawValue: snapshot.paymentMethod) ?? .pix,
-                    note: snapshot.note
+                    note: snapshot.note,
+                    channelFeePercentage: snapshot.channelFeePercentage,
+                    channelFeeAmount: snapshot.channelFeeAmount
                 )
                 // Preserva o texto original mesmo se uma versão antiga tiver gravado outro valor.
                 sale.paymentMethodRawValue = snapshot.paymentMethod
@@ -165,6 +167,8 @@ public enum BackupManager {
             date: sale.date,
             paymentMethod: sale.paymentMethodRawValue,
             note: sale.note,
+            channelFeePercentage: sale.channelFeePercentage,
+            channelFeeAmount: sale.channelFeeAmount,
             items: sale.itemList.map {
                 BackupPayload.SaleItemSnapshot(
                     id: $0.id,

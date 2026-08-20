@@ -45,6 +45,15 @@ public struct SaleCart {
         lines.reduce(0) { $0 + $1.product.unitProfit * Decimal($1.quantity) }
     }
 
+    /// Taxa estimada para o resumo antes de a venda ser persistida.
+    public func channelFee(percentage: Decimal) -> Decimal {
+        (try? ChannelFeeCalculator.fee(on: total, percentage: percentage)) ?? 0
+    }
+
+    public func netProfit(channelFeePercentage: Decimal) -> Decimal {
+        profit - channelFee(percentage: channelFeePercentage)
+    }
+
     /// Quantas unidades desse produto já estão no carrinho.
     public func quantity(of product: Product) -> Int {
         lines.first { $0.product.id == product.id }?.quantity ?? 0

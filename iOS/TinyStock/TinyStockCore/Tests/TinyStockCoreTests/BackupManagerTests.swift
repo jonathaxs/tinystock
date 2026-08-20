@@ -40,6 +40,7 @@ struct BackupManagerTests {
             paymentMethod: .shopee,
             date: reference,
             note: "Pedido 123",
+            channelFeePercentage: 14,
             in: context
         )
 
@@ -57,6 +58,8 @@ struct BackupManagerTests {
         #expect(saleSnapshot.id == sale.id)
         #expect(saleSnapshot.paymentMethod == PaymentMethod.shopee.rawValue)
         #expect(saleSnapshot.note == "Pedido 123")
+        #expect(saleSnapshot.channelFeePercentage == 14)
+        #expect(saleSnapshot.channelFeeAmount == Decimal(string: "12.60"))
         #expect(itemSnapshot.productID == product.id)
         #expect(itemSnapshot.quantity == 2)
         #expect(itemSnapshot.unitPrice == 45)
@@ -70,6 +73,9 @@ struct BackupManagerTests {
         #expect(restoredProduct.quantity == 6)
         #expect(restoredSale.paymentMethod == .shopee)
         #expect(restoredSale.total == 90)
+        #expect(restoredSale.channelFeePercentage == 14)
+        #expect(restoredSale.channelFeeAmount == Decimal(string: "12.60"))
+        #expect(restoredSale.netProfit == Decimal(string: "37.40"))
     }
 
     @Test func restauracaoSubstituiOBancoERefazRelacionamentos() throws {
@@ -203,6 +209,32 @@ struct BackupManagerTests {
 
         #expect(try context.fetch(FetchDescriptor<Product>()).first?.quantity == -1)
         #expect(try context.fetch(FetchDescriptor<Sale>()).first?.paymentMethodRawValue == "legacy")
+    }
+
+    @Test func backupAnteriorSemTaxaContinuaCompativel() throws {
+        let saleID = UUID()
+        let json = """
+        {
+          "version": 1,
+          "exportedAt": "2026-08-16T00:00:00Z",
+          "products": [],
+          "sales": [
+            {
+              "id": "\(saleID.uuidString)",
+              "date": "2026-08-16T00:00:00Z",
+              "paymentMethod": "shopee",
+              "note": "",
+              "items": []
+            }
+          ]
+        }
+        """
+
+        let payload = try BackupManager.decode(Data(json.utf8))
+        let sale = try #require(payload.sales.first)
+
+        #expect(sale.channelFeePercentage == 0)
+        #expect(sale.channelFeeAmount == 0)
     }
 
     @Test func nomeSugeridoUsaDataEstavel() {

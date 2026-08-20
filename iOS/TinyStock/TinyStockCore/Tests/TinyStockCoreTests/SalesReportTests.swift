@@ -108,6 +108,30 @@ struct SalesReportTests {
         #expect(summary.dayGroups.isEmpty)
     }
 
+    @Test func resumoFinanceiroDescontaTaxasDoLucro() throws {
+        let context = try makeContext()
+        let product = Product(name: "Peça 3D", quantity: 5, costPrice: 40, salePrice: 100)
+        context.insert(product)
+
+        try SaleService.register(
+            lines: [SaleLine(product: product, quantity: 1)],
+            paymentMethod: .shopee,
+            date: reference,
+            channelFeePercentage: 14,
+            in: context
+        )
+
+        let summary = SalesReportSummary(
+            sales: try context.fetch(FetchDescriptor<Sale>()),
+            period: .allTime,
+            reference: reference,
+            calendar: calendar
+        )
+
+        #expect(summary.revenue == 100)
+        #expect(summary.profit == 46)
+    }
+
     // MARK: - Produtos mais vendidos
 
     @Test func rankingSomaOMesmoProdutoEmVendasDiferentes() throws {

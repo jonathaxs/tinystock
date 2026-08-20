@@ -104,7 +104,7 @@ public struct SalesReportSummary {
         sales.reduce(0) { $0 + $1.total }
     }
 
-    /// Lucro bruto, usando o custo guardado no retrato de cada item vendido.
+    /// Lucro líquido, usando custos e taxas guardados no retrato de cada venda.
     public var profit: Decimal {
         sales.reduce(0) { $0 + $1.profit }
     }

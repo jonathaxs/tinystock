@@ -22,6 +22,9 @@ public enum SaleError: Error, Equatable, Sendable {
 
     /// Não há estoque suficiente. Carrega os números pra tela poder explicar direito.
     case insufficientStock(productName: String, available: Int, requested: Int)
+
+    /// Percentual da taxa precisa ficar entre zero e cem.
+    case invalidChannelFeePercentage
 }
 
 public extension SaleError {
@@ -42,6 +45,9 @@ public extension SaleError {
                 available,
                 productName
             )
+
+        case .invalidChannelFeePercentage:
+            String(localized: "sale.error.invalidChannelFeePercentage", bundle: .tinyStockCore)
         }
     }
 }
@@ -81,6 +87,7 @@ public enum SaleService {
         paymentMethod: PaymentMethod,
         date: Date = Date(),
         note: String = "",
+        channelFeePercentage: Decimal = 0,
         in context: ModelContext
     ) throws -> Sale {
 
@@ -103,8 +110,31 @@ public enum SaleService {
             )
         }
 
+        guard channelFeePercentage >= 0, channelFeePercentage <= 100 else {
+            throw SaleError.invalidChannelFeePercentage
+        }
+
+        let revenue = mergedLines.reduce(Decimal.zero) {
+            $0 + $1.product.salePrice * Decimal($1.quantity)
+        }
+        let channelFeeAmount: Decimal
+        do {
+            channelFeeAmount = try ChannelFeeCalculator.fee(
+                on: revenue,
+                percentage: channelFeePercentage
+            )
+        } catch {
+            throw SaleError.invalidChannelFeePercentage
+        }
+
         // Daqui pra baixo nada mais pode falhar, então já pode escrever.
-        let sale = Sale(date: date, paymentMethod: paymentMethod, note: note)
+        let sale = Sale(
+            date: date,
+            paymentMethod: paymentMethod,
+            note: note,
+            channelFeePercentage: channelFeePercentage,
+            channelFeeAmount: channelFeeAmount
+        )
         context.insert(sale)
 
         let now = Date()
