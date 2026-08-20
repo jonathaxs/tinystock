@@ -21,8 +21,32 @@ struct NewSaleView: View {
 
     @State private var paymentMethod: PaymentMethod = .pix
 
+    /// Guarda a última taxa informada pra próxima venda feita pela Shopee.
+    @AppStorage("sale.shopeeFeePercentage") private var shopeeFeePercentageText = ""
+
     /// Mensagem do erro devolvido pelo Core. Não nil significa alerta na tela.
     @State private var errorMessage: String?
+
+    private var channelFeePercentage: Decimal {
+        guard paymentMethod == .shopee else { return 0 }
+        return CurrencyFormatter.decimal(from: shopeeFeePercentageText) ?? 0
+    }
+
+    private var isChannelFeeValid: Bool {
+        channelFeePercentage >= 0 && channelFeePercentage <= 100
+    }
+
+    private var channelFeeAmount: Decimal {
+        cart.channelFee(percentage: channelFeePercentage)
+    }
+
+    private var netProfit: Decimal {
+        cart.netProfit(channelFeePercentage: channelFeePercentage)
+    }
+
+    private var canSave: Bool {
+        !cart.isEmpty && isChannelFeeValid
+    }
 
     // MARK: - Corpo
 
@@ -49,7 +73,7 @@ struct NewSaleView: View {
                     Button(String(localized: "common.save", bundle: .tinyStockCore)) {
                         confirm()
                     }
-                    .disabled(cart.isEmpty)
+                    .disabled(!canSave)
                 }
             }
             .alert(
@@ -146,6 +170,25 @@ struct NewSaleView: View {
             }
             .pickerStyle(.inline)
             .labelsHidden()
+
+            if paymentMethod == .shopee {
+                LabeledContent {
+                    HStack(spacing: 4) {
+                        TextField("0", text: $shopeeFeePercentageText)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 72)
+
+                        Text(verbatim: "%")
+                            .foregroundStyle(.secondary)
+                    }
+                } label: {
+                    Label(
+                        String(localized: "sale.new.channelFeePercentage", bundle: .tinyStockCore),
+                        systemImage: "percent"
+                    )
+                }
+            }
         }
     }
 
@@ -167,9 +210,24 @@ struct NewSaleView: View {
 
             LabeledContent {
                 Text(cart.profit.currencyText)
-                    .foregroundStyle(cart.profit < 0 ? Color.red : Color.primary)
             } label: {
-                Text(String(localized: "sale.new.profit", bundle: .tinyStockCore))
+                Text(String(localized: "sale.new.grossProfit", bundle: .tinyStockCore))
+            }
+
+            if paymentMethod == .shopee {
+                LabeledContent {
+                    Text(channelFeeText)
+                } label: {
+                    Text(String(localized: "sale.new.channelFee", bundle: .tinyStockCore))
+                }
+            }
+
+            LabeledContent {
+                Text(netProfit.currencyText)
+                    .font(.headline)
+                    .foregroundStyle(netProfit < 0 ? Color.red : Color.primary)
+            } label: {
+                Text(String(localized: "sale.new.netProfit", bundle: .tinyStockCore))
             }
         }
     }
@@ -196,6 +254,11 @@ struct NewSaleView: View {
         )
     }
 
+    private var channelFeeText: String {
+        guard channelFeeAmount > 0 else { return Decimal.zero.currencyText }
+        return "- \(channelFeeAmount.currencyText)"
+    }
+
     // MARK: - Confirmação
 
     private func confirm() {
@@ -205,6 +268,7 @@ struct NewSaleView: View {
             try SaleService.register(
                 lines: cart.lines,
                 paymentMethod: paymentMethod,
+                channelFeePercentage: channelFeePercentage,
                 in: modelContext
             )
             dismiss()

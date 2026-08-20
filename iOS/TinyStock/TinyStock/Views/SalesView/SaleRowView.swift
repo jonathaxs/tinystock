@@ -60,10 +60,25 @@ struct SaleRowView: View {
 
             Spacer()
 
-            Text(sale.total.currencyText)
-                .font(.headline)
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(sale.total.currencyText)
+                    .font(.headline)
+
+                if sale.channelFeeAmount > 0 {
+                    Text(netProfitText)
+                        .font(.caption)
+                        .foregroundStyle(sale.netProfit < 0 ? Color.red : Color.secondary)
+                }
+            }
         }
         .padding(.vertical, 2)
+    }
+
+    private var netProfitText: String {
+        String(
+            format: String(localized: "sales.row.netProfit", bundle: .tinyStockCore),
+            sale.netProfit.currencyText
+        )
     }
 }
 
