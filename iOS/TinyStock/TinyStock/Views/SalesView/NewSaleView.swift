@@ -14,6 +14,7 @@ struct NewSaleView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     /// Itens escolhidos até agora. Somar produto repetido e parar no estoque
     /// é regra, então mora no carrinho, no Core, e não aqui.
@@ -122,16 +123,25 @@ struct NewSaleView: View {
     }
 
     private func lineRow(for line: SaleLine) -> some View {
-        VStack(spacing: 6) {
-            HStack {
-                Text(line.product.name)
-                    .font(.headline)
-                    .lineLimit(1)
+        VStack(alignment: .leading, spacing: 8) {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(line.product.name)
+                        .font(.headline)
 
-                Spacer()
+                    Text(subtotal(of: line).currencyText)
+                        .font(.headline)
+                }
+            } else {
+                HStack {
+                    Text(line.product.name)
+                        .font(.headline)
 
-                Text(subtotal(of: line).currencyText)
-                    .font(.headline)
+                    Spacer(minLength: 12)
+
+                    Text(subtotal(of: line).currencyText)
+                        .font(.headline)
+                }
             }
 
             HStack {
@@ -150,6 +160,8 @@ struct NewSaleView: View {
                 )
                 .labelsHidden()
                 .fixedSize()
+                .accessibilityLabel(stepperAccessibilityLabel(for: line.product))
+                .accessibilityValue(Text(line.quantity, format: .number))
             }
         }
         .padding(.vertical, 2)
@@ -244,6 +256,13 @@ struct NewSaleView: View {
             format: String(localized: "sale.new.line.unit", bundle: .tinyStockCore),
             line.quantity,
             line.product.salePrice.currencyText
+        )
+    }
+
+    private func stepperAccessibilityLabel(for product: Product) -> String {
+        String(
+            format: String(localized: "sale.new.quantity.accessibility", bundle: .tinyStockCore),
+            product.name
         )
     }
 

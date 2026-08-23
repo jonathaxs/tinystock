@@ -80,6 +80,7 @@
 "sale.new.addProduct" = "Add product";
 "sale.new.line.unit" = "%1$d × %2$@";
 "sale.new.section.quantity" = "Quantity";
+"sale.new.quantity.accessibility" = "Quantity of %@";
 "sale.new.available" = "%d in stock";
 "sale.new.quantity.footer" = "You can sell several products in the same sale. The quantity stops at what you have in stock today.";
 "sale.new.section.payment" = "Payment";

@@ -12,6 +12,8 @@ import TinyStockCore
 
 struct SaleRowView: View {
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     let sale: Sale
 
     private var quantityText: String {
@@ -37,41 +39,56 @@ struct SaleRowView: View {
     }
 
     var body: some View {
-        HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(titleText)
-                    .font(.headline)
-                    .lineLimit(1)
-
-                HStack(spacing: 6) {
-                    Label(sale.paymentMethod.localizedName, systemImage: sale.paymentMethod.symbolName)
-
-                    Text(verbatim: "·")
-
-                    Text(quantityText)
-
-                    Text(verbatim: "·")
-
-                    Text(sale.date, format: .dateTime.hour().minute())
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 8) {
+                    saleInformation
+                    financialInformation
                 }
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-            }
+            } else {
+                HStack(spacing: 12) {
+                    saleInformation
 
-            Spacer()
+                    Spacer(minLength: 12)
 
-            VStack(alignment: .trailing, spacing: 2) {
-                Text(sale.total.currencyText)
-                    .font(.headline)
-
-                if sale.channelFeeAmount > 0 {
-                    Text(netProfitText)
-                        .font(.caption)
-                        .foregroundStyle(sale.netProfit < 0 ? Color.red : Color.secondary)
+                    financialInformation
                 }
             }
         }
         .padding(.vertical, 2)
+        .accessibilityElement(children: .combine)
+    }
+
+    private var saleInformation: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(titleText)
+                .font(.headline)
+
+            Label(metadataText, systemImage: sale.paymentMethod.symbolName)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var financialInformation: some View {
+        VStack(
+            alignment: dynamicTypeSize.isAccessibilitySize ? .leading : .trailing,
+            spacing: 2
+        ) {
+            Text(sale.total.currencyText)
+                .font(.headline)
+
+            if sale.channelFeeAmount > 0 {
+                Text(netProfitText)
+                    .font(.caption)
+                    .foregroundStyle(sale.netProfit < 0 ? Color.red : Color.secondary)
+            }
+        }
+    }
+
+    private var metadataText: String {
+        let time = sale.date.formatted(.dateTime.hour().minute())
+        return "\(sale.paymentMethod.localizedName) · \(quantityText) · \(time)"
     }
 
     private var netProfitText: String {

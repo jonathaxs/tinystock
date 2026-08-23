@@ -80,6 +80,7 @@
 "sale.new.addProduct" = "Adicionar produto";
 "sale.new.line.unit" = "%1$d × %2$@";
 "sale.new.section.quantity" = "Quantidade";
+"sale.new.quantity.accessibility" = "Quantidade de %@";
 "sale.new.available" = "%d em estoque";
 "sale.new.quantity.footer" = "Dá pra vender vários produtos na mesma venda. A quantidade para no que existe em estoque hoje.";
 "sale.new.section.payment" = "Pagamento";

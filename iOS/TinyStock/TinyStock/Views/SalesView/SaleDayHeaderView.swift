@@ -11,18 +11,31 @@ import TinyStockCore
 
 struct SaleDayHeaderView: View {
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     let group: SaleDayGroup
 
     var body: some View {
-        HStack {
-            // O título é calculado na hora de desenhar. Se o app ficar aberto virando
-            // a meia-noite, o "Hoje" só se acerta no próximo redesenho, e tudo bem.
-            Text(group.title())
-
-            Spacer()
-
-            Text(group.total.currencyText)
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 4) {
+                    title
+                    Text(group.total.currencyText)
+                }
+            } else {
+                HStack {
+                    title
+                    Spacer()
+                    Text(group.total.currencyText)
+                }
+            }
         }
+    }
+
+    /// O título é calculado ao desenhar. Se virar meia-noite com o app aberto,
+    /// ele se acerta no próximo redesenho.
+    private var title: some View {
+        Text(group.title())
     }
 }
 

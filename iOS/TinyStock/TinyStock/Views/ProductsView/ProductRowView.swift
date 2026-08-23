@@ -12,6 +12,8 @@ import TinyStockCore
 
 struct ProductRowView: View {
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     let product: Product
 
     /// A chave carrega um %d, então a contagem entra por String(format:).
@@ -23,18 +25,32 @@ struct ProductRowView: View {
     }
 
     var body: some View {
-        HStack(spacing: 12) {
-            ProductImageView(imageData: product.imageData)
-
-            details
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 12) {
+                    ProductImageView(imageData: product.imageData)
+                    productName
+                    Text(quantityText)
+                        .foregroundStyle(product.isLowStock ? Color.orange : Color.secondary)
+                    Text(product.salePrice.currencyText)
+                        .foregroundStyle(.secondary)
+                    lowStockLabel
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                HStack(spacing: 12) {
+                    ProductImageView(imageData: product.imageData)
+                    details
+                }
+            }
         }
         .padding(.vertical, 2)
+        .accessibilityElement(children: .combine)
     }
 
     private var details: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(product.name)
-                .font(.headline)
+            productName
 
             HStack(spacing: 6) {
                 // Quantidade em laranja já entrega o alerta antes mesmo de ler o selo.
@@ -48,15 +64,26 @@ struct ProductRowView: View {
                     .foregroundStyle(.secondary)
             }
             .font(.subheadline)
+            .accessibilityElement(children: .combine)
 
-            if product.isLowStock {
-                Label(
-                    String(localized: "products.lowStock", bundle: .tinyStockCore),
-                    systemImage: "exclamationmark.triangle.fill"
-                )
-                .font(.caption)
-                .foregroundStyle(.orange)
-            }
+            lowStockLabel
+        }
+    }
+
+    private var productName: some View {
+        Text(product.name)
+            .font(.headline)
+    }
+
+    @ViewBuilder
+    private var lowStockLabel: some View {
+        if product.isLowStock {
+            Label(
+                String(localized: "products.lowStock", bundle: .tinyStockCore),
+                systemImage: "exclamationmark.triangle.fill"
+            )
+            .font(.caption)
+            .foregroundStyle(.orange)
         }
     }
 }

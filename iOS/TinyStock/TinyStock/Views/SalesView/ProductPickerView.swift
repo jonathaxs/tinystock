@@ -13,6 +13,7 @@ import TinyStockCore
 struct ProductPickerView: View {
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     /// Quanto ainda dá pra vender de cada produto, já descontando o carrinho.
     /// Quem chama sabe o que já foi escolhido, esta tela não precisa saber.
@@ -66,32 +67,51 @@ struct ProductPickerView: View {
     // MARK: - Linha
 
     private func row(for product: Product) -> some View {
-        HStack(spacing: 12) {
-            ProductImageView(imageData: product.imageData, side: 44)
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 8) {
+                    ProductImageView(imageData: product.imageData, side: 44)
+                    productInformation(product)
+                    productPrice(product)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                HStack(spacing: 12) {
+                    ProductImageView(imageData: product.imageData, side: 44)
+                    productInformation(product)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(product.name)
-                    .font(.headline)
+                    Spacer(minLength: 8)
 
-                // O número que importa aqui é o que ainda dá pra escolher,
-                // não o estoque cheio: parte dele já pode estar no carrinho.
-                Text(
-                    String(
-                        format: String(localized: "sale.new.available", bundle: .tinyStockCore),
-                        remainingStock(product)
-                    )
-                )
-                .font(.subheadline)
-                .foregroundStyle(product.isLowStock ? Color.orange : Color.secondary)
+                    productPrice(product)
+                }
             }
-
-            Spacer()
-
-            Text(product.salePrice.currencyText)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
         }
         .contentShape(.rect)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func productInformation(_ product: Product) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(product.name)
+                .font(.headline)
+
+            // O número que importa aqui é o que ainda dá pra escolher,
+            // não o estoque cheio: parte dele já pode estar no carrinho.
+            Text(
+                String(
+                    format: String(localized: "sale.new.available", bundle: .tinyStockCore),
+                    remainingStock(product)
+                )
+            )
+            .font(.subheadline)
+            .foregroundStyle(product.isLowStock ? Color.orange : Color.secondary)
+        }
+    }
+
+    private func productPrice(_ product: Product) -> some View {
+        Text(product.salePrice.currencyText)
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
     }
 
     // MARK: - Estado vazio
