@@ -15,9 +15,7 @@ struct ProductionCostCalculatorView: View {
 
     let onApply: (ProductionCostResult) -> Void
 
-    @State private var method: ProductionMethod = .printing3D
-    @State private var materialQuantityText = ""
-    @State private var materialUnitPriceText = ""
+    @State private var materials = [MaterialDraft()]
     @State private var productionHoursText = ""
     @State private var hourlyCostText = ""
     @State private var additionalCostText = ""
@@ -29,9 +27,12 @@ struct ProductionCostCalculatorView: View {
 
     private var input: ProductionCostInput {
         ProductionCostInput(
-            method: method,
-            materialQuantity: decimal(from: materialQuantityText),
-            materialUnitPrice: decimal(from: materialUnitPriceText),
+            components: materials.map {
+                ProductionCostComponent(
+                    quantity: decimal(from: $0.quantityText),
+                    unitCost: decimal(from: $0.unitCostText)
+                )
+            },
             productionHours: decimal(from: productionHoursText),
             hourlyCost: decimal(from: hourlyCostText),
             additionalCost: decimal(from: additionalCostText),
@@ -48,56 +49,10 @@ struct ProductionCostCalculatorView: View {
         return result.totalCost > 0
     }
 
-    private var materialQuantityLabel: String {
-        switch method {
-        case .printing3D:
-            String(localized: "costCalculator.material.grams", bundle: .tinyStockCore)
-        case .crochet:
-            String(localized: "costCalculator.material.skeins", bundle: .tinyStockCore)
-        }
-    }
-
-    private var materialUnitPriceLabel: String {
-        switch method {
-        case .printing3D:
-            String(localized: "costCalculator.material.pricePerKilogram", bundle: .tinyStockCore)
-        case .crochet:
-            String(localized: "costCalculator.material.pricePerSkein", bundle: .tinyStockCore)
-        }
-    }
-
-    private var productionHoursLabel: String {
-        switch method {
-        case .printing3D:
-            String(localized: "costCalculator.time.printingHours", bundle: .tinyStockCore)
-        case .crochet:
-            String(localized: "costCalculator.time.workHours", bundle: .tinyStockCore)
-        }
-    }
-
-    private var hourlyCostLabel: String {
-        switch method {
-        case .printing3D:
-            String(localized: "costCalculator.time.energyPerHour", bundle: .tinyStockCore)
-        case .crochet:
-            String(localized: "costCalculator.time.laborPerHour", bundle: .tinyStockCore)
-        }
-    }
-
-    private var timeCostLabel: String {
-        switch method {
-        case .printing3D:
-            String(localized: "costCalculator.result.energy", bundle: .tinyStockCore)
-        case .crochet:
-            String(localized: "costCalculator.result.labor", bundle: .tinyStockCore)
-        }
-    }
-
     var body: some View {
         NavigationStack {
             Form {
-                methodSection
-                materialSection
+                materialsSection
                 timeSection
                 additionalCostsSection
                 marginSection
@@ -122,32 +77,73 @@ struct ProductionCostCalculatorView: View {
         }
     }
 
-    private var methodSection: some View {
-        Section(String(localized: "costCalculator.section.method", bundle: .tinyStockCore)) {
-            Picker(
-                String(localized: "costCalculator.section.method", bundle: .tinyStockCore),
-                selection: $method
-            ) {
-                ForEach(ProductionMethod.allCases) { option in
-                    Text(option.localizedName).tag(option)
+    private var materialsSection: some View {
+        Section {
+            ForEach($materials) { $material in
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        TextField(
+                            String(localized: "costCalculator.material.name", bundle: .tinyStockCore),
+                            text: $material.name,
+                            prompt: Text(
+                                String(
+                                    localized: "costCalculator.material.name.placeholder",
+                                    bundle: .tinyStockCore
+                                )
+                            )
+                        )
+
+                        if materials.count > 1 {
+                            Button(role: .destructive) {
+                                removeMaterial(id: material.id)
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                            .buttonStyle(.borderless)
+                            .accessibilityLabel(
+                                String(localized: "costCalculator.material.remove", bundle: .tinyStockCore)
+                            )
+                        }
+                    }
+
+                    decimalField(
+                        String(localized: "costCalculator.material.quantity", bundle: .tinyStockCore),
+                        text: $material.quantityText,
+                        placeholder: "0"
+                    )
+                    decimalField(
+                        String(localized: "costCalculator.material.unitCost", bundle: .tinyStockCore),
+                        text: $material.unitCostText
+                    )
                 }
             }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-        }
-    }
 
-    private var materialSection: some View {
-        Section(String(localized: "costCalculator.section.material", bundle: .tinyStockCore)) {
-            decimalField(materialQuantityLabel, text: $materialQuantityText, placeholder: "0")
-            decimalField(materialUnitPriceLabel, text: $materialUnitPriceText)
+            Button {
+                materials.append(MaterialDraft())
+            } label: {
+                Label(
+                    String(localized: "costCalculator.material.add", bundle: .tinyStockCore),
+                    systemImage: "plus.circle"
+                )
+            }
+        } header: {
+            Text(String(localized: "costCalculator.section.materials", bundle: .tinyStockCore))
+        } footer: {
+            Text(String(localized: "costCalculator.materials.footer", bundle: .tinyStockCore))
         }
     }
 
     private var timeSection: some View {
         Section(String(localized: "costCalculator.section.time", bundle: .tinyStockCore)) {
-            decimalField(productionHoursLabel, text: $productionHoursText, placeholder: "0")
-            decimalField(hourlyCostLabel, text: $hourlyCostText)
+            decimalField(
+                String(localized: "costCalculator.time.hours", bundle: .tinyStockCore),
+                text: $productionHoursText,
+                placeholder: "0"
+            )
+            decimalField(
+                String(localized: "costCalculator.time.hourlyCost", bundle: .tinyStockCore),
+                text: $hourlyCostText
+            )
         }
     }
 
@@ -182,11 +178,11 @@ struct ProductionCostCalculatorView: View {
     private var resultSection: some View {
         Section(String(localized: "costCalculator.section.result", bundle: .tinyStockCore)) {
             LabeledContent(
-                String(localized: "costCalculator.result.material", bundle: .tinyStockCore),
-                value: (result?.materialCost ?? 0).currencyText
+                String(localized: "costCalculator.result.materials", bundle: .tinyStockCore),
+                value: (result?.materialsCost ?? 0).currencyText
             )
             LabeledContent(
-                timeCostLabel,
+                String(localized: "costCalculator.result.time", bundle: .tinyStockCore),
                 value: (result?.timeCost ?? 0).currencyText
             )
             LabeledContent(
@@ -232,9 +228,20 @@ struct ProductionCostCalculatorView: View {
         CurrencyFormatter.decimal(from: text) ?? 0
     }
 
+    private func removeMaterial(id: UUID) {
+        materials.removeAll { $0.id == id }
+    }
+
     private func applyResult() {
         guard let result, canApply else { return }
         onApply(result)
         dismiss()
     }
+}
+
+private struct MaterialDraft: Identifiable {
+    let id = UUID()
+    var name = ""
+    var quantityText = ""
+    var unitCostText = ""
 }
