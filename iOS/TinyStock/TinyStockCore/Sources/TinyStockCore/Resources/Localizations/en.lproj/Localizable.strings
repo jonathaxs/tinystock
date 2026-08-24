@@ -201,6 +201,13 @@
 "costCalculator.result.expectedProfit" = "Expected profit";
 
 
+/* MARK: - Stores */
+"store.default.name" = "My store";
+"store.error.emptyName" = "Enter a name for the store.";
+"store.error.duplicateName" = "A store with this name already exists.";
+"store.error.lastActiveStore" = "Keep at least one active store.";
+
+
 /* MARK: - Data store error */
 "app.error.dataStore.title" = "Could not open the database";
 "app.error.dataStore.message" = "Please force quit and reopen the app. If it keeps happening, restart your device.";

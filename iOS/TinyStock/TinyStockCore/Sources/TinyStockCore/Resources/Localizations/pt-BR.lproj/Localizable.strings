@@ -201,6 +201,13 @@
 "costCalculator.result.expectedProfit" = "Lucro esperado";
 
 
+/* MARK: - Lojas */
+"store.default.name" = "Minha loja";
+"store.error.emptyName" = "Informe um nome para a loja.";
+"store.error.duplicateName" = "Já existe uma loja com esse nome.";
+"store.error.lastActiveStore" = "Mantenha pelo menos uma loja ativa.";
+
+
 /* MARK: - Erro do banco de dados */
 "app.error.dataStore.title" = "Não foi possível abrir o banco de dados";
 "app.error.dataStore.message" = "Force o fechamento e reabra o app. Se continuar, reinicie o aparelho.";
