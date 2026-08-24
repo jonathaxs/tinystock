@@ -8,43 +8,32 @@
 
 import Foundation
 
-public enum ProductionMethod: String, CaseIterable, Identifiable, Sendable {
-    case printing3D
-    case crochet
+/// Um componente livre do custo, como tecido, filamento, embalagem ou tinta.
+public struct ProductionCostComponent: Equatable, Sendable {
+    public let quantity: Decimal
+    public let unitCost: Decimal
 
-    public var id: String { rawValue }
-
-    public var localizedName: String {
-        switch self {
-        case .printing3D:
-            String(localized: "costCalculator.method.printing3D", bundle: .tinyStockCore)
-        case .crochet:
-            String(localized: "costCalculator.method.crochet", bundle: .tinyStockCore)
-        }
+    public init(quantity: Decimal, unitCost: Decimal) {
+        self.quantity = quantity
+        self.unitCost = unitCost
     }
 }
 
 public struct ProductionCostInput: Equatable, Sendable {
-    public let method: ProductionMethod
-    public let materialQuantity: Decimal
-    public let materialUnitPrice: Decimal
+    public let components: [ProductionCostComponent]
     public let productionHours: Decimal
     public let hourlyCost: Decimal
     public let additionalCost: Decimal
     public let desiredMarginPercentage: Decimal
 
     public init(
-        method: ProductionMethod,
-        materialQuantity: Decimal,
-        materialUnitPrice: Decimal,
+        components: [ProductionCostComponent],
         productionHours: Decimal,
         hourlyCost: Decimal,
         additionalCost: Decimal,
         desiredMarginPercentage: Decimal
     ) {
-        self.method = method
-        self.materialQuantity = materialQuantity
-        self.materialUnitPrice = materialUnitPrice
+        self.components = components
         self.productionHours = productionHours
         self.hourlyCost = hourlyCost
         self.additionalCost = additionalCost
@@ -53,7 +42,7 @@ public struct ProductionCostInput: Equatable, Sendable {
 }
 
 public struct ProductionCostResult: Equatable, Sendable {
-    public let materialCost: Decimal
+    public let materialsCost: Decimal
     public let timeCost: Decimal
     public let additionalCost: Decimal
     public let totalCost: Decimal
@@ -61,14 +50,14 @@ public struct ProductionCostResult: Equatable, Sendable {
     public let expectedProfit: Decimal
 
     public init(
-        materialCost: Decimal,
+        materialsCost: Decimal,
         timeCost: Decimal,
         additionalCost: Decimal,
         totalCost: Decimal,
         suggestedPrice: Decimal,
         expectedProfit: Decimal
     ) {
-        self.materialCost = materialCost
+        self.materialsCost = materialsCost
         self.timeCost = timeCost
         self.additionalCost = additionalCost
         self.totalCost = totalCost
@@ -84,9 +73,8 @@ public enum ProductionCostError: Error, Equatable, Sendable {
 
 public enum ProductionCostCalculator {
     public static func calculate(_ input: ProductionCostInput) throws -> ProductionCostResult {
-        let numericValues = [
-            input.materialQuantity,
-            input.materialUnitPrice,
+        let componentValues = input.components.flatMap { [$0.quantity, $0.unitCost] }
+        let numericValues = componentValues + [
             input.productionHours,
             input.hourlyCost,
             input.additionalCost
@@ -98,26 +86,19 @@ public enum ProductionCostCalculator {
             throw ProductionCostError.invalidMargin
         }
 
-        let rawMaterialCost: Decimal
-        switch input.method {
-        case .printing3D:
-            // Na impressão 3D a quantidade entra em gramas e o filamento em preço por quilo.
-            rawMaterialCost = (input.materialQuantity / 1_000) * input.materialUnitPrice
-        case .crochet:
-            // No crochê a quantidade representa novelos, inclusive frações de novelo.
-            rawMaterialCost = input.materialQuantity * input.materialUnitPrice
+        let rawMaterialsCost = input.components.reduce(Decimal.zero) { partialResult, component in
+            partialResult + (component.quantity * component.unitCost)
         }
-
         let rawTimeCost = input.productionHours * input.hourlyCost
-        let materialCost = rounded(rawMaterialCost)
+        let materialsCost = rounded(rawMaterialsCost)
         let timeCost = rounded(rawTimeCost)
         let additionalCost = rounded(input.additionalCost)
-        let totalCost = rounded(rawMaterialCost + rawTimeCost + input.additionalCost)
+        let totalCost = rounded(rawMaterialsCost + rawTimeCost + input.additionalCost)
         let marginFactor = 1 - (input.desiredMarginPercentage / 100)
         let suggestedPrice = roundedUp(totalCost / marginFactor)
 
         return ProductionCostResult(
-            materialCost: materialCost,
+            materialsCost: materialsCost,
             timeCost: timeCost,
             additionalCost: additionalCost,
             totalCost: totalCost,
