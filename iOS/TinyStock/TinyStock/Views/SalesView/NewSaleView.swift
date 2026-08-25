@@ -16,6 +16,8 @@ struct NewSaleView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
+    private let storeID: UUID
+
     /// Itens escolhidos até agora. Somar produto repetido e parar no estoque
     /// é regra, então mora no carrinho, no Core, e não aqui.
     @State private var cart = SaleCart()
@@ -27,6 +29,10 @@ struct NewSaleView: View {
 
     /// Mensagem do erro devolvido pelo Core. Não nil significa alerta na tela.
     @State private var errorMessage: String?
+
+    init(storeID: UUID) {
+        self.storeID = storeID
+    }
 
     private var channelFeePercentage: Decimal {
         guard paymentMethod == .shopee else { return 0 }
@@ -106,6 +112,7 @@ struct NewSaleView: View {
                 // O picker devolve o produto e volta. A quantidade se ajusta
                 // na própria linha, que é onde a pessoa está olhando.
                 ProductPickerView(
+                    storeID: storeID,
                     remainingStock: { cart.remainingStock(of: $0) },
                     onSelect: { cart.add($0) }
                 )
@@ -301,6 +308,6 @@ struct NewSaleView: View {
 }
 
 #Preview {
-    NewSaleView()
-        .modelContainer(for: Product.self, inMemory: true)
+    NewSaleView(storeID: UUID())
+        .modelContainer(for: [StoreProfile.self, Product.self, Sale.self, SaleItem.self], inMemory: true)
 }

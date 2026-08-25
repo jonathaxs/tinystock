@@ -13,8 +13,10 @@ import TinyStockCore
 
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Product.name) private var products: [Product]
-    @Query(sort: \Sale.date, order: .forward) private var sales: [Sale]
+    @Query private var products: [Product]
+    @Query private var sales: [Sale]
+
+    private let storeID: UUID
 
     @State private var exportDocument: BackupDocument?
     @State private var exportFilename = ""
@@ -29,6 +31,19 @@ struct SettingsView: View {
     @State private var isSavingToICloud = false
     @State private var isRestoringFromICloud = false
     @State private var isConfirmingICloudRestore = false
+
+    init(storeID: UUID) {
+        self.storeID = storeID
+        _products = Query(
+            filter: #Predicate<Product> { $0.storeID == storeID },
+            sort: \Product.name
+        )
+        _sales = Query(
+            filter: #Predicate<Sale> { $0.storeID == storeID },
+            sort: \Sale.date,
+            order: .forward
+        )
+    }
 
     var body: some View {
         NavigationStack {
@@ -215,7 +230,7 @@ struct SettingsView: View {
             }
 
             let payload = try BackupManager.decode(data)
-            try BackupManager.apply(payload, into: modelContext)
+            try BackupManager.apply(payload, into: modelContext, storeID: storeID)
             await refreshICloudStatus()
             isRestoringFromICloud = false
             showMessage(
@@ -286,7 +301,7 @@ struct SettingsView: View {
         guard let pendingPayload else { return }
 
         do {
-            try BackupManager.apply(pendingPayload, into: modelContext)
+            try BackupManager.apply(pendingPayload, into: modelContext, storeID: storeID)
             self.pendingPayload = nil
             showMessage(
                 titleKey: "settings.backup.success.title",
@@ -334,6 +349,6 @@ private struct PresentedMessage: Identifiable {
 }
 
 #Preview {
-    SettingsView()
-        .modelContainer(for: [Product.self, Sale.self, SaleItem.self], inMemory: true)
+    SettingsView(storeID: UUID())
+        .modelContainer(for: [StoreProfile.self, Product.self, Sale.self, SaleItem.self], inMemory: true)
 }

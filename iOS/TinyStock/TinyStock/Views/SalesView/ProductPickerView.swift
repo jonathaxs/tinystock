@@ -24,10 +24,24 @@ struct ProductPickerView: View {
 
     /// Só entra na lista quem tem o que vender. Filtrar aqui já evita
     /// metade dos erros de estoque antes de a pessoa tentar confirmar.
-    @Query(filter: #Predicate<Product> { $0.quantity > 0 }, sort: \Product.name)
-    private var availableProducts: [Product]
+    @Query private var availableProducts: [Product]
 
     @State private var searchText = ""
+
+    init(
+        storeID: UUID,
+        remainingStock: @escaping (Product) -> Int,
+        onSelect: @escaping (Product) -> Void
+    ) {
+        self.remainingStock = remainingStock
+        self.onSelect = onSelect
+        _availableProducts = Query(
+            filter: #Predicate<Product> {
+                $0.storeID == storeID && $0.quantity > 0
+            },
+            sort: \Product.name
+        )
+    }
 
     /// Some da lista quem já foi todo pro carrinho: não dá pra escolher o que não sobrou.
     private var sellableProducts: [Product] {
@@ -130,7 +144,11 @@ struct ProductPickerView: View {
 
 #Preview {
     NavigationStack {
-        ProductPickerView(remainingStock: \.quantity, onSelect: { _ in })
+        ProductPickerView(
+            storeID: UUID(),
+            remainingStock: \.quantity,
+            onSelect: { _ in }
+        )
     }
-    .modelContainer(for: Product.self, inMemory: true)
+    .modelContainer(for: [StoreProfile.self, Product.self], inMemory: true)
 }

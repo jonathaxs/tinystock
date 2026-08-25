@@ -40,7 +40,7 @@ struct ProductDetailView: View {
             }
         }
         .sheet(isPresented: $isPresentingForm) {
-            ProductFormView(product: product)
+            ProductFormView(storeID: product.storeID, product: product)
         }
         .alert(
             String(localized: "product.delete.confirm.title", bundle: .tinyStockCore),

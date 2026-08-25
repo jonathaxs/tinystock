@@ -14,11 +14,21 @@ struct ProductsView: View {
 
     @Environment(\.modelContext) private var modelContext
 
+    private let storeID: UUID
+
     /// Lista ordenada por nome.
-    @Query(sort: \Product.name) private var products: [Product]
+    @Query private var products: [Product]
 
     @State private var isPresentingForm = false
     @State private var searchText = ""
+
+    init(storeID: UUID) {
+        self.storeID = storeID
+        _products = Query(
+            filter: #Predicate<Product> { $0.storeID == storeID },
+            sort: \Product.name
+        )
+    }
 
     /// Filtra em memória de propósito: o estoque de um pequeno negócio tem dezenas de itens,
     /// então o custo é irrelevante e o código fica bem mais simples do que remontar o @Query.
@@ -67,7 +77,7 @@ struct ProductsView: View {
                 prompt: Text(String(localized: "products.search.prompt", bundle: .tinyStockCore))
             )
             .sheet(isPresented: $isPresentingForm) {
-                ProductFormView()
+                ProductFormView(storeID: storeID)
             }
         }
     }
@@ -102,6 +112,6 @@ struct ProductsView: View {
 }
 
 #Preview {
-    ProductsView()
-        .modelContainer(for: Product.self, inMemory: true)
+    ProductsView(storeID: UUID())
+        .modelContainer(for: [StoreProfile.self, Product.self], inMemory: true)
 }

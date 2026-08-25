@@ -18,6 +18,7 @@ struct ProductFormView: View {
 
     /// Produto sendo editado. Nil significa cadastro novo.
     private let editingProduct: Product?
+    private let storeID: UUID
 
     // MARK: - Campos do formulário
 
@@ -46,7 +47,8 @@ struct ProductFormView: View {
     // MARK: - Inicializador
 
     /// Sem argumento abre em branco pra cadastrar; com um produto abre preenchido pra editar.
-    init(product: Product? = nil) {
+    init(storeID: UUID, product: Product? = nil) {
+        self.storeID = storeID
         editingProduct = product
 
         _name = State(initialValue: product?.name ?? "")
@@ -307,6 +309,7 @@ struct ProductFormView: View {
         } else {
             let now = Date()
             let product = Product(
+                storeID: storeID,
                 name: cleanName,
                 category: cleanCategory,
                 quantity: safeQuantity,
@@ -326,13 +329,14 @@ struct ProductFormView: View {
 }
 
 #Preview("Cadastro") {
-    ProductFormView()
-        .modelContainer(for: Product.self, inMemory: true)
+    ProductFormView(storeID: UUID())
+        .modelContainer(for: [StoreProfile.self, Product.self], inMemory: true)
 }
 
 #Preview("Edição") {
     ProductFormView(
+        storeID: StoreScope.unassignedStoreID,
         product: Product(name: "Amigurumi Gato", category: "Crochê", quantity: 12, costPrice: 20, salePrice: 45)
     )
-    .modelContainer(for: Product.self, inMemory: true)
+    .modelContainer(for: [StoreProfile.self, Product.self], inMemory: true)
 }

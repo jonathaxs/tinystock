@@ -13,12 +13,22 @@ import TinyStockCore
 struct SalesView: View {
 
     @Environment(\.modelContext) private var modelContext
+    private let storeID: UUID
 
     /// Mais recente primeiro. O agrupamento por dia acontece logo abaixo, na memória:
     /// o `#Predicate` do SwiftData não sabe agrupar, e o histórico é pequeno.
-    @Query(sort: \Sale.date, order: .reverse) private var sales: [Sale]
+    @Query private var sales: [Sale]
 
     @State private var isPresentingNewSale = false
+
+    init(storeID: UUID) {
+        self.storeID = storeID
+        _sales = Query(
+            filter: #Predicate<Sale> { $0.storeID == storeID },
+            sort: \Sale.date,
+            order: .reverse
+        )
+    }
 
     private var dayGroups: [SaleDayGroup] {
         SaleDayGroup.groups(from: sales)
@@ -60,7 +70,7 @@ struct SalesView: View {
                 }
             }
             .sheet(isPresented: $isPresentingNewSale) {
-                NewSaleView()
+                NewSaleView(storeID: storeID)
             }
         }
     }
@@ -98,6 +108,6 @@ struct SalesView: View {
 }
 
 #Preview {
-    SalesView()
-        .modelContainer(for: Sale.self, inMemory: true)
+    SalesView(storeID: UUID())
+        .modelContainer(for: [StoreProfile.self, Product.self, Sale.self, SaleItem.self], inMemory: true)
 }

@@ -13,10 +13,22 @@ import TinyStockCore
 struct ReportsView: View {
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @Query(sort: \Sale.date, order: .reverse) private var sales: [Sale]
-    @Query(sort: \Product.name) private var products: [Product]
+    @Query private var sales: [Sale]
+    @Query private var products: [Product]
 
     @State private var selectedPeriod: SalesReportPeriod = .currentMonth
+
+    init(storeID: UUID) {
+        _sales = Query(
+            filter: #Predicate<Sale> { $0.storeID == storeID },
+            sort: \Sale.date,
+            order: .reverse
+        )
+        _products = Query(
+            filter: #Predicate<Product> { $0.storeID == storeID },
+            sort: \Product.name
+        )
+    }
 
     private var summary: SalesReportSummary {
         SalesReportSummary(sales: sales, period: selectedPeriod)
@@ -238,6 +250,6 @@ struct ReportsView: View {
 }
 
 #Preview {
-    ReportsView()
-        .modelContainer(for: [Product.self, Sale.self, SaleItem.self], inMemory: true)
+    ReportsView(storeID: UUID())
+        .modelContainer(for: [StoreProfile.self, Product.self, Sale.self, SaleItem.self], inMemory: true)
 }

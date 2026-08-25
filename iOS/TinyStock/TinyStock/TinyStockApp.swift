@@ -17,27 +17,39 @@ struct TinyStockApp: App {
     // Quando true, o app mostra uma tela de erro em vez de travar.
     private let containerInitFailed: Bool
     private let sharedModelContainer: ModelContainer
+    private let storeSession: StoreSession
 
     init() {
-        let schema = Schema([Product.self, Sale.self, SaleItem.self])
+        let schema = Schema([StoreProfile.self, Product.self, Sale.self, SaleItem.self])
         // URL explícita + cloudKitDatabase: .none evita que o iOS ligue o mirror do CloudKit
         // só por causa de um entitlement de iCloud Documents (usado no futuro pro backup).
-        let storeURL = URL.applicationSupportDirectory.appending(path: "TinyStock.store")
+        // O arquivo v2 preserva o banco antigo enquanto o novo domínio é construído.
+        let storeURL = URL.applicationSupportDirectory.appending(path: "TinyStock-v2.store")
         let config = ModelConfiguration(
             schema: schema,
             url: storeURL,
             cloudKitDatabase: .none
         )
         do {
-            sharedModelContainer = try ModelContainer(for: schema, configurations: [config])
+            let container = try ModelContainer(for: schema, configurations: [config])
+            let context = ModelContext(container)
+            let session = try StoreSession.bootstrap(in: context)
+            try context.save()
+
+            sharedModelContainer = container
+            storeSession = session
             containerInitFailed = false
         } catch {
             // Cai pra um container em memória pra o app conseguir mostrar a tela de erro.
             // Nesse estado os dados não são salvos, mas o app não trava.
-            sharedModelContainer = try! ModelContainer(
-                for: Schema([Product.self, Sale.self, SaleItem.self]),
+            let container = try! ModelContainer(
+                for: schema,
                 configurations: [ModelConfiguration(isStoredInMemoryOnly: true)]
             )
+            let context = ModelContext(container)
+
+            sharedModelContainer = container
+            storeSession = try! StoreSession.bootstrap(in: context)
             containerInitFailed = true
         }
     }
@@ -51,6 +63,7 @@ struct TinyStockApp: App {
                     MainView()
                 }
             }
+            .environment(storeSession)
         }
         .modelContainer(sharedModelContainer)
     }

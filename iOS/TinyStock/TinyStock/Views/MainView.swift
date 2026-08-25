@@ -24,31 +24,33 @@ extension MainView {
 // MARK: - Tela principal
 struct MainView: View {
 
+    @Environment(StoreSession.self) private var storeSession
+
     // Aba selecionada, persistida pra permitir navegação entre abas no futuro.
     @AppStorage("app.selectedTab") private var selectedTab: Int = 0
 
     var body: some View {
         TabView(selection: $selectedTab) {
 
-            ProductsView()
+            ProductsView(storeID: storeSession.selectedStoreID)
                 .tabItem {
                     Label(String(localized: "tab.products", bundle: .tinyStockCore), systemImage: "shippingbox.fill")
                 }
                 .tag(Tab.products)
 
-            SalesView()
+            SalesView(storeID: storeSession.selectedStoreID)
                 .tabItem {
                     Label(String(localized: "tab.sales", bundle: .tinyStockCore), systemImage: "cart.fill")
                 }
                 .tag(Tab.sales)
 
-            ReportsView()
+            ReportsView(storeID: storeSession.selectedStoreID)
                 .tabItem {
                     Label(String(localized: "tab.reports", bundle: .tinyStockCore), systemImage: "chart.bar.fill")
                 }
                 .tag(Tab.reports)
 
-            SettingsView()
+            SettingsView(storeID: storeSession.selectedStoreID)
                 .tabItem {
                     Label(String(localized: "tab.settings", bundle: .tinyStockCore), systemImage: "gearshape.fill")
                 }
@@ -58,6 +60,9 @@ struct MainView: View {
 }
 
 #Preview {
+    let storeID = UUID()
+
     MainView()
-        .modelContainer(for: Product.self, inMemory: true)
+        .environment(StoreSession(selectedStoreID: storeID))
+        .modelContainer(for: [StoreProfile.self, Product.self, Sale.self, SaleItem.self], inMemory: true)
 }
