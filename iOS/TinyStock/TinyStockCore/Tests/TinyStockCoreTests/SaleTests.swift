@@ -169,6 +169,42 @@ struct SaleTests {
         #expect(produto.quantity == 5)
     }
 
+    @Test func vendaHerdaALojaDoProduto() throws {
+        let context = try makeContext()
+        let storeID = UUID()
+        let produto = Product(storeID: storeID, name: "Máquina Beast", quantity: 2, salePrice: 100)
+        context.insert(produto)
+
+        let venda = try SaleService.register(
+            lines: [SaleLine(product: produto, quantity: 1)],
+            paymentMethod: .shopee,
+            in: context
+        )
+
+        #expect(venda.storeID == storeID)
+    }
+
+    @Test func vendaNaoMisturaProdutosDeLojasDiferentes() throws {
+        let context = try makeContext()
+        let beast = Product(storeID: UUID(), name: "Máquina Beast", quantity: 2, salePrice: 100)
+        let caneca = Product(storeID: UUID(), name: "Caneca", quantity: 2, salePrice: 30)
+        context.insert(beast)
+        context.insert(caneca)
+
+        #expect(throws: SaleError.mixedStores) {
+            try SaleService.register(
+                lines: [
+                    SaleLine(product: beast, quantity: 1),
+                    SaleLine(product: caneca, quantity: 1)
+                ],
+                paymentMethod: .shopee,
+                in: context
+            )
+        }
+        #expect(beast.quantity == 2)
+        #expect(caneca.quantity == 2)
+    }
+
     // MARK: - Retrato do produto
 
     @Test func itemGuardaRetratoDoProdutoNaDataDaVenda() throws {
@@ -327,7 +363,8 @@ struct SaleTests {
             .emptySale,
             .invalidQuantity(productName: "Amigurumi Gato"),
             .insufficientStock(productName: "Amigurumi Gato", available: 2, requested: 5),
-            .invalidChannelFeePercentage
+            .invalidChannelFeePercentage,
+            .mixedStores
         ]
 
         for erro in erros {

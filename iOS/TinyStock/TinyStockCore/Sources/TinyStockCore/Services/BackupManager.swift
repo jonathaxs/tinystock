@@ -73,8 +73,13 @@ public enum BackupManager {
 
     // MARK: - Restaurar
 
-    /// Substitui o banco dentro de uma transação. Qualquer falha desfaz todas as alterações.
-    public static func apply(_ payload: BackupPayload, into context: ModelContext) throws {
+    /// Substitui os dados de uma loja dentro de uma transação.
+    /// Qualquer falha desfaz todas as alterações.
+    public static func apply(
+        _ payload: BackupPayload,
+        into context: ModelContext,
+        storeID: UUID = StoreScope.unassignedStoreID
+    ) throws {
         guard payload.version == currentVersion else {
             throw BackupError.unsupportedVersion(payload.version)
         }
@@ -83,14 +88,27 @@ public enum BackupManager {
         }
 
         try context.transaction {
-            try context.delete(model: SaleItem.self)
-            try context.delete(model: Sale.self)
-            try context.delete(model: Product.self)
+            // O backup v1 representa uma loja. Restaurar não pode apagar os dados
+            // pertencentes às demais lojas que já existem no mesmo aparelho.
+            let scopedSales = try context.fetch(
+                FetchDescriptor<Sale>(predicate: #Predicate { $0.storeID == storeID })
+            )
+            let scopedProducts = try context.fetch(
+                FetchDescriptor<Product>(predicate: #Predicate { $0.storeID == storeID })
+            )
+
+            for sale in scopedSales {
+                context.delete(sale)
+            }
+            for product in scopedProducts {
+                context.delete(product)
+            }
 
             for snapshot in payload.products {
                 context.insert(
                     Product(
                         id: snapshot.id,
+                        storeID: storeID,
                         name: snapshot.name,
                         category: snapshot.category,
                         quantity: snapshot.quantity,
@@ -107,6 +125,7 @@ public enum BackupManager {
             for snapshot in payload.sales {
                 let sale = Sale(
                     id: snapshot.id,
+                    storeID: storeID,
                     date: snapshot.date,
                     paymentMethod: PaymentMethod(rawValue: snapshot.paymentMethod) ?? .pix,
                     note: snapshot.note,

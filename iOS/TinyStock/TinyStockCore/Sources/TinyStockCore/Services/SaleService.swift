@@ -25,6 +25,9 @@ public enum SaleError: Error, Equatable, Sendable {
 
     /// Percentual da taxa precisa ficar entre zero e cem.
     case invalidChannelFeePercentage
+
+    /// Uma venda não pode misturar produtos de lojas diferentes.
+    case mixedStores
 }
 
 public extension SaleError {
@@ -48,6 +51,9 @@ public extension SaleError {
 
         case .invalidChannelFeePercentage:
             String(localized: "sale.error.invalidChannelFeePercentage", bundle: .tinyStockCore)
+
+        case .mixedStores:
+            String(localized: "sale.error.mixedStores", bundle: .tinyStockCore)
         }
     }
 }
@@ -101,6 +107,11 @@ public enum SaleService {
         // O mesmo produto pode ter sido adicionado duas vezes na tela. Somar antes de
         // validar evita liberar uma venda de 3 + 3 unidades quando só existem 5 em estoque.
         let mergedLines = merge(lines)
+        let storeID = mergedLines[0].product.storeID
+
+        guard mergedLines.allSatisfy({ $0.product.storeID == storeID }) else {
+            throw SaleError.mixedStores
+        }
 
         for line in mergedLines where line.quantity > line.product.quantity {
             throw SaleError.insufficientStock(
@@ -129,6 +140,7 @@ public enum SaleService {
 
         // Daqui pra baixo nada mais pode falhar, então já pode escrever.
         let sale = Sale(
+            storeID: storeID,
             date: date,
             paymentMethod: paymentMethod,
             note: note,

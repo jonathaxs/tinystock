@@ -134,6 +134,43 @@ struct BackupManagerTests {
         #expect(restoredSale.itemList.first?.sale?.id == restoredSale.id)
     }
 
+    @Test func restauracaoDeUmaLojaPreservaAsDemais() throws {
+        let context = try makeContext()
+        let firstStoreID = UUID()
+        let secondStoreID = UUID()
+        context.insert(Product(storeID: firstStoreID, name: "Produto antigo", quantity: 1))
+        context.insert(Product(storeID: secondStoreID, name: "Produto da outra loja", quantity: 3))
+
+        let payload = BackupPayload(
+            version: 1,
+            exportedAt: reference,
+            products: [
+                .init(
+                    id: UUID(),
+                    name: "Produto restaurado",
+                    category: "",
+                    quantity: 4,
+                    minimumStock: 0,
+                    costPrice: 10,
+                    salePrice: 20,
+                    imageData: nil,
+                    createdAt: reference,
+                    updatedAt: reference
+                )
+            ],
+            sales: []
+        )
+
+        try BackupManager.apply(payload, into: context, storeID: firstStoreID)
+
+        let products = try context.fetch(FetchDescriptor<Product>())
+        let firstStoreProducts = products.filter { $0.storeID == firstStoreID }
+        let secondStoreProducts = products.filter { $0.storeID == secondStoreID }
+
+        #expect(firstStoreProducts.map(\.name) == ["Produto restaurado"])
+        #expect(secondStoreProducts.map(\.name) == ["Produto da outra loja"])
+    }
+
     @Test func versaoDesconhecidaEhRecusadaSemApagarOBanco() throws {
         let context = try makeContext()
         context.insert(Product(name: "Produto atual", quantity: 3))

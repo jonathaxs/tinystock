@@ -9,6 +9,14 @@
 import Foundation
 import SwiftData
 
+// MARK: - Escopo sem loja
+
+/// Identificador reservado para objetos criados fora de uma loja, como fixtures antigas.
+/// O app sempre informa uma loja real ao criar dados novos.
+public enum StoreScope {
+    public static let unassignedStoreID = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
+}
+
 // MARK: - Loja
 
 /// Uma loja independente dentro do TinyStock.

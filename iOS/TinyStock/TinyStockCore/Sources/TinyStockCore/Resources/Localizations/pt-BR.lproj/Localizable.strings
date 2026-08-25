@@ -105,6 +105,7 @@
 "sale.error.invalidQuantity" = "A quantidade precisa ser de pelo menos uma unidade.";
 "sale.error.insufficientStock" = "Restam só %1$d unidades de %2$@ em estoque.";
 "sale.error.invalidChannelFeePercentage" = "A taxa do canal precisa ficar entre 0% e 100%.";
+"sale.error.mixedStores" = "Adicione produtos da mesma loja.";
 
 
 /* MARK: - Formas de pagamento */
@@ -206,6 +207,7 @@
 "store.error.emptyName" = "Informe um nome para a loja.";
 "store.error.duplicateName" = "Já existe uma loja com esse nome.";
 "store.error.lastActiveStore" = "Mantenha pelo menos uma loja ativa.";
+"store.error.archivedStore" = "Escolha uma loja ativa.";
 
 
 /* MARK: - Erro do banco de dados */

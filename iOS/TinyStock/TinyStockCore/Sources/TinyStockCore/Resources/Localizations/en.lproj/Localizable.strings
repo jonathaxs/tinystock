@@ -105,6 +105,7 @@
 "sale.error.invalidQuantity" = "The quantity must be at least one unit.";
 "sale.error.insufficientStock" = "Only %1$d units of %2$@ left in stock.";
 "sale.error.invalidChannelFeePercentage" = "The channel fee must be between 0% and 100%.";
+"sale.error.mixedStores" = "Add products from the same store.";
 
 
 /* MARK: - Payment methods */
@@ -206,6 +207,7 @@
 "store.error.emptyName" = "Enter a name for the store.";
 "store.error.duplicateName" = "A store with this name already exists.";
 "store.error.lastActiveStore" = "Keep at least one active store.";
+"store.error.archivedStore" = "Choose an active store.";
 
 
 /* MARK: - Data store error */

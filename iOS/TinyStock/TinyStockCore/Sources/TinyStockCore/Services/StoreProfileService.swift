@@ -15,6 +15,7 @@ public enum StoreProfileError: Error, Equatable, Sendable {
     case emptyName
     case duplicateName
     case lastActiveStore
+    case archivedStore
 }
 
 public extension StoreProfileError {
@@ -27,6 +28,8 @@ public extension StoreProfileError {
             String(localized: "store.error.duplicateName", bundle: .tinyStockCore)
         case .lastActiveStore:
             String(localized: "store.error.lastActiveStore", bundle: .tinyStockCore)
+        case .archivedStore:
+            String(localized: "store.error.archivedStore", bundle: .tinyStockCore)
         }
     }
 }

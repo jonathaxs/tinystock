@@ -18,6 +18,9 @@ public final class Sale {
 
     public var id: UUID = UUID()
 
+    /// Loja em que a venda foi registrada.
+    public var storeID: UUID = StoreScope.unassignedStoreID
+
     /// Quando a venda aconteceu. É por essa data que o histórico agrupa e os relatórios filtram.
     public var date: Date = Date()
 
@@ -46,6 +49,7 @@ public final class Sale {
 
     public init(
         id: UUID = UUID(),
+        storeID: UUID = StoreScope.unassignedStoreID,
         date: Date = Date(),
         paymentMethod: PaymentMethod = .pix,
         note: String = "",
@@ -53,6 +57,7 @@ public final class Sale {
         channelFeeAmount: Decimal = 0
     ) {
         self.id = id
+        self.storeID = storeID
         self.date = date
         self.paymentMethodRawValue = paymentMethod.rawValue
         self.note = note

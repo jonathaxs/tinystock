@@ -21,6 +21,9 @@ public final class Product {
     /// Sem `.unique` de propósito, pra não quebrar o mirror do CloudKit no futuro.
     public var id: UUID = UUID()
 
+    /// Loja dona do produto. UUID simples evita apagar o produto ao arquivar uma loja.
+    public var storeID: UUID = StoreScope.unassignedStoreID
+
     /// Nome do produto exibido nas listas.
     public var name: String = ""
 
@@ -52,6 +55,7 @@ public final class Product {
 
     public init(
         id: UUID = UUID(),
+        storeID: UUID = StoreScope.unassignedStoreID,
         name: String = "",
         category: String = "",
         quantity: Int = 0,
@@ -63,6 +67,7 @@ public final class Product {
         updatedAt: Date = Date()
     ) {
         self.id = id
+        self.storeID = storeID
         self.name = name
         self.category = category
         self.quantity = quantity
