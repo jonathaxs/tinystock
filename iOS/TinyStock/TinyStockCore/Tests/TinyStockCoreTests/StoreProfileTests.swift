@@ -115,6 +115,16 @@ struct StoreProfileTests {
         #expect(first.updatedAt == archivedAt)
     }
 
+    @Test func lojaArquivadaPodeSerRestaurada() throws {
+        let restoredAt = Date(timeIntervalSince1970: 1_800_000_000)
+        let store = StoreProfile(name: "VHS Plus", isArchived: true)
+
+        StoreProfileService.restore(store, date: restoredAt)
+
+        #expect(store.isArchived == false)
+        #expect(store.updatedAt == restoredAt)
+    }
+
     @Test func todoErroTemMensagemLocalizada() {
         let errors: [StoreProfileError] = [
             .emptyName,

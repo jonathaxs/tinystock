@@ -129,6 +129,17 @@ public enum StoreProfileService {
         store.updatedAt = date
     }
 
+    /// Traz uma loja arquivada de volta sem alterar seus produtos ou histórico.
+    public static func restore(
+        _ store: StoreProfile,
+        date: Date = Date()
+    ) {
+        guard store.isArchived else { return }
+
+        store.isArchived = false
+        store.updatedAt = date
+    }
+
     // MARK: - Apoio
 
     private static func sanitized(_ name: String) -> String {
