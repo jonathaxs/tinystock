@@ -208,6 +208,25 @@
 "store.error.duplicateName" = "A store with this name already exists.";
 "store.error.lastActiveStore" = "Keep at least one active store.";
 "store.error.archivedStore" = "Choose an active store.";
+"store.error.title" = "Store could not be saved";
+"store.switcher.accessibility" = "Choose store";
+"store.form.title.new" = "New Store";
+"store.form.title.edit" = "Edit Store";
+"store.form.section.identification" = "Identification";
+"store.form.name" = "Store name";
+"store.form.photo.choose" = "Choose store image";
+"store.form.photo.remove" = "Remove image";
+"stores.title" = "Stores";
+"stores.add" = "Add store";
+"stores.section.active" = "Active";
+"stores.section.archived" = "Archived";
+"stores.section.footer" = "Each store keeps its products, orders and reports separate.";
+"stores.archive" = "Archive";
+"stores.restore" = "Restore";
+"stores.current" = "Current store";
+"stores.actions.accessibility" = "Actions for %@";
+"settings.store.section" = "Store";
+"settings.store.manage" = "Manage stores";
 
 
 /* MARK: - Data store error */

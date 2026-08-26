@@ -61,6 +61,10 @@ struct ProductsView: View {
             }
             .navigationTitle(String(localized: "tab.products", bundle: .tinyStockCore))
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    StoreSwitcherView()
+                }
+
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         isPresentingForm = true

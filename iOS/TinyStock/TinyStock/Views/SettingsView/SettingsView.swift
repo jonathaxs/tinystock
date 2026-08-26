@@ -13,6 +13,7 @@ import TinyStockCore
 
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
+    @Query private var selectedStores: [StoreProfile]
     @Query private var products: [Product]
     @Query private var sales: [Sale]
 
@@ -34,6 +35,9 @@ struct SettingsView: View {
 
     init(storeID: UUID) {
         self.storeID = storeID
+        _selectedStores = Query(
+            filter: #Predicate<StoreProfile> { $0.id == storeID }
+        )
         _products = Query(
             filter: #Predicate<Product> { $0.storeID == storeID },
             sort: \Product.name
@@ -48,6 +52,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
+                storeSection
                 iCloudBackupSection
                 localBackupSection
             }
@@ -120,6 +125,29 @@ struct SettingsView: View {
                 message: Text(message.message),
                 dismissButton: .default(Text("OK"))
             )
+        }
+    }
+
+    // MARK: - Loja
+
+    private var storeSection: some View {
+        Section(String(localized: "settings.store.section", bundle: .tinyStockCore)) {
+            NavigationLink {
+                StoresView()
+            } label: {
+                HStack(spacing: 12) {
+                    StoreImageView(imageData: selectedStores.first?.imageData)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(selectedStores.first?.name ?? StoreProfileService.localizedDefaultName)
+                            .foregroundStyle(.primary)
+
+                        Text(String(localized: "settings.store.manage", bundle: .tinyStockCore))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
         }
     }
 

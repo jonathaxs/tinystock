@@ -66,6 +66,11 @@ struct ReportsView: View {
                 }
             }
             .navigationTitle(String(localized: "tab.reports", bundle: .tinyStockCore))
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    StoreSwitcherView()
+                }
+            }
         }
     }
 

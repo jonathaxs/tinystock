@@ -208,6 +208,25 @@
 "store.error.duplicateName" = "Já existe uma loja com esse nome.";
 "store.error.lastActiveStore" = "Mantenha pelo menos uma loja ativa.";
 "store.error.archivedStore" = "Escolha uma loja ativa.";
+"store.error.title" = "Não foi possível salvar a loja";
+"store.switcher.accessibility" = "Escolher loja";
+"store.form.title.new" = "Nova loja";
+"store.form.title.edit" = "Editar loja";
+"store.form.section.identification" = "Identificação";
+"store.form.name" = "Nome da loja";
+"store.form.photo.choose" = "Escolher imagem da loja";
+"store.form.photo.remove" = "Remover imagem";
+"stores.title" = "Lojas";
+"stores.add" = "Adicionar loja";
+"stores.section.active" = "Ativas";
+"stores.section.archived" = "Arquivadas";
+"stores.section.footer" = "Cada loja mantém seus produtos, pedidos e relatórios separados.";
+"stores.archive" = "Arquivar";
+"stores.restore" = "Restaurar";
+"stores.current" = "Loja atual";
+"stores.actions.accessibility" = "Ações de %@";
+"settings.store.section" = "Loja";
+"settings.store.manage" = "Gerenciar lojas";
 
 
 /* MARK: - Erro do banco de dados */

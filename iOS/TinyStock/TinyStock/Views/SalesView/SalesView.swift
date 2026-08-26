@@ -58,6 +58,10 @@ struct SalesView: View {
             }
             .navigationTitle(String(localized: "tab.sales", bundle: .tinyStockCore))
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    StoreSwitcherView()
+                }
+
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         isPresentingNewSale = true
