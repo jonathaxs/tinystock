@@ -61,6 +61,10 @@
 "product.detail.potentialProfit.footer" = "Quanto esse produto ainda pode render se todo o estoque atual for vendido.";
 "product.delete.confirm.title" = "Excluir este produto?";
 "product.delete.confirm.message" = "O produto sai do estoque e essa ação não pode ser desfeita.";
+"product.error.emptyName" = "Informe um nome para o produto.";
+"product.error.duplicateName" = "Já existe um produto com esse nome nesta loja.";
+"product.error.negativeCostPrice" = "O custo de produção não pode ser negativo.";
+"product.error.negativeSalePrice" = "O preço de venda não pode ser negativo.";
 
 
 /* MARK: - Vendas */

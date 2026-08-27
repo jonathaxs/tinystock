@@ -11,7 +11,7 @@ import SwiftData
 
 // MARK: - Modelo SwiftData
 
-/// Product representa um item cadastrado no estoque do TinyStock.
+/// Product representa um item do catálogo de uma loja.
 /// Cada propriedade tem valor padrão, o que mantém o model compatível com uma
 /// futura sincronização via CloudKit (que exige defaults ou opcionais).
 @Model
@@ -27,13 +27,14 @@ public final class Product {
     /// Nome do produto exibido nas listas.
     public var name: String = ""
 
-    /// Categoria livre (ex.: "Crochê", "Impressão 3D"). Vazio significa sem categoria.
+    /// Campo legado mantido enquanto as telas antigas ainda estão ativas.
+    /// Novos cadastros usam variações livres em vez de categoria.
     public var category: String = ""
 
-    /// Quantidade atual em estoque.
+    /// Estoque legado mantido até variações e movimentações substituírem o fluxo antigo.
     public var quantity: Int = 0
 
-    /// Estoque mínimo pro alerta de reposição. Zero desliga o alerta.
+    /// Alerta legado mantido até a nova regra de estoque estar funcional.
     public var minimumStock: Int = 0
 
     /// Custo unitário de produção ou compra. Decimal evita erro de ponto flutuante com dinheiro.

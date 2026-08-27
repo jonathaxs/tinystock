@@ -61,6 +61,10 @@
 "product.detail.potentialProfit.footer" = "What this product can still earn if the whole current stock is sold.";
 "product.delete.confirm.title" = "Delete this product?";
 "product.delete.confirm.message" = "The product leaves your stock and this cannot be undone.";
+"product.error.emptyName" = "Enter a name for the product.";
+"product.error.duplicateName" = "A product with this name already exists in this store.";
+"product.error.negativeCostPrice" = "The production cost cannot be negative.";
+"product.error.negativeSalePrice" = "The sale price cannot be negative.";
 
 
 /* MARK: - Sales */
