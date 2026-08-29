@@ -65,6 +65,10 @@
 "product.error.duplicateName" = "Já existe um produto com esse nome nesta loja.";
 "product.error.negativeCostPrice" = "O custo de produção não pode ser negativo.";
 "product.error.negativeSalePrice" = "O preço de venda não pode ser negativo.";
+"variant.error.emptyName" = "Informe um nome para a variação.";
+"variant.error.duplicateName" = "Já existe uma variação com esse nome neste produto.";
+"variant.error.negativeQuantity" = "A quantidade da variação não pode ser negativa.";
+"variant.error.productMismatch" = "Esta variação pertence a outro produto.";
 
 
 /* MARK: - Vendas */

@@ -65,6 +65,10 @@
 "product.error.duplicateName" = "A product with this name already exists in this store.";
 "product.error.negativeCostPrice" = "The production cost cannot be negative.";
 "product.error.negativeSalePrice" = "The sale price cannot be negative.";
+"variant.error.emptyName" = "Enter a name for the variation.";
+"variant.error.duplicateName" = "A variation with this name already exists for this product.";
+"variant.error.negativeQuantity" = "The variation quantity cannot be negative.";
+"variant.error.productMismatch" = "This variation belongs to another product.";
 
 
 /* MARK: - Sales */

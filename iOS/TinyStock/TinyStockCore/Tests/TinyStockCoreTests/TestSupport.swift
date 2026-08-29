@@ -23,7 +23,7 @@ enum TestDatabase {
     static let container: ModelContainer = {
         do {
             return try ModelContainer(
-                for: StoreProfile.self, Product.self, Sale.self, SaleItem.self,
+                for: StoreProfile.self, Product.self, ProductVariant.self, Sale.self, SaleItem.self,
                 configurations: ModelConfiguration(isStoredInMemoryOnly: true)
             )
         } catch {
@@ -38,6 +38,7 @@ enum TestDatabase {
 
         try context.delete(model: SaleItem.self)
         try context.delete(model: Sale.self)
+        try context.delete(model: ProductVariant.self)
         try context.delete(model: Product.self)
         try context.delete(model: StoreProfile.self)
         try context.save()
