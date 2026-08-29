@@ -20,7 +20,13 @@ struct TinyStockApp: App {
     private let storeSession: StoreSession
 
     init() {
-        let schema = Schema([StoreProfile.self, Product.self, Sale.self, SaleItem.self])
+        let schema = Schema([
+            StoreProfile.self,
+            Product.self,
+            ProductVariant.self,
+            Sale.self,
+            SaleItem.self
+        ])
         // URL explícita + cloudKitDatabase: .none evita que o iOS ligue o mirror do CloudKit
         // só por causa de um entitlement de iCloud Documents (usado no futuro pro backup).
         // O arquivo v2 preserva o banco antigo enquanto o novo domínio é construído.
