@@ -50,6 +50,31 @@ public extension StockError {
 
 public enum StockService {
 
+    /// Entrada pela tela do produto, em uma variacao existente ou em uma nova opcao.
+    @discardableResult
+    public static func registerEntry(
+        quantity: Int,
+        for product: Product,
+        variantID: UUID?,
+        newVariantName: String = "",
+        note: String = "",
+        in context: ModelContext
+    ) throws -> StockMovement {
+        guard quantity > 0 else { throw StockError.invalidQuantity }
+        let variant: ProductVariant
+        if let variantID {
+            guard let existing = try ProductVariantService.variants(for: product, in: context)
+                .first(where: { $0.id == variantID }) else {
+                throw StockError.productMismatch
+            }
+            variant = existing
+        } else {
+            // A opcao nasce zerada: o recebimento e registrado como entrada, nao como saldo inicial.
+            variant = try ProductVariantService.create(for: product, name: newVariantName, in: context)
+        }
+        return try registerEntry(quantity: quantity, to: variant, product: product, note: note, in: context)
+    }
+
     /// Soma unidades recebidas ao saldo atual.
     @discardableResult
     public static func registerEntry(

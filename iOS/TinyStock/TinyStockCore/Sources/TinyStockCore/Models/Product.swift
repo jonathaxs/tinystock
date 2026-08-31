@@ -111,4 +111,12 @@ public final class Product {
         return name.localizedStandardContains(query)
             || category.localizedStandardContains(query)
     }
+
+    /// A nova lista busca pelo catalogo atual, sem considerar a categoria legada.
+    public func matches(searchText: String, variants: [ProductVariant]) -> Bool {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        return query.isEmpty || name.localizedStandardContains(query) || variants.contains {
+            $0.belongs(to: self) && $0.name.localizedStandardContains(query)
+        }
+    }
 }

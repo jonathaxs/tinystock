@@ -119,7 +119,16 @@ public enum ProductVariantService {
         for product: Product,
         in context: ModelContext
     ) throws -> Int {
-        try variants(for: product, in: context).reduce(0) { $0 + $1.quantity }
+        try variants(for: product, in: context).reduce(0) { total, variant in
+            let sum = total.addingReportingOverflow(variant.quantity)
+            guard !sum.overflow else { throw StockError.quantityOverflow }
+            return sum.partialValue
+        }
+    }
+
+    /// Soma para exibicao sem limitar o total de varias variacoes ao tamanho de um Int.
+    public static func displayedQuantity(for product: Product, among variants: [ProductVariant]) -> Decimal {
+        variants.filter { $0.belongs(to: product) }.reduce(Decimal.zero) { $0 + Decimal($1.quantity) }
     }
 
     // MARK: - Validação

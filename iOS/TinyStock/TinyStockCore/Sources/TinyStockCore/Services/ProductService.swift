@@ -96,6 +96,21 @@ public enum ProductService {
         product.updatedAt = date
     }
 
+    /// Remove o catalogo e seu estoque sem tocar nos retratos financeiros das vendas.
+    public static func delete(_ product: Product, in context: ModelContext) throws {
+        let productID = product.id
+        let storeID = product.storeID
+        let variants = try ProductVariantService.variants(for: product, in: context)
+        let movements = try context.fetch(FetchDescriptor<StockMovement>(predicate: #Predicate {
+            $0.productID == productID && $0.storeID == storeID
+        }))
+
+        // Conclui as consultas antes das exclusoes para nao deixar um lote parcial se a leitura falhar.
+        for movement in movements { context.delete(movement) }
+        for variant in variants { context.delete(variant) }
+        context.delete(product)
+    }
+
     // MARK: - Validação
 
     private static func validatedName(
