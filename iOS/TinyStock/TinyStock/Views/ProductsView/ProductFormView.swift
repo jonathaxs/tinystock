@@ -1,135 +1,99 @@
-// ⌘
-//  TinyStock/Views/ProductsView/ProductFormView.swift
+// TinyStock/Views/ProductsView/ProductFormView.swift
 //
-//  Propósito: Formulário de cadastro e edição de produto, com leitura dos preços e gravação no SwiftData.
+// Proposito: Formulario de produto com foto e variacoes, sem gravacao antes de salvar.
 //
-//  Created by Jonathas Motta (@jonathaxs) on 2026-08-08.
-// ⌘
+// Created by Jonathas Motta (@jonathaxs) on 2026-08-08.
 
-import SwiftUI
-import SwiftData
+import AVFoundation
 import PhotosUI
+import SwiftData
+import SwiftUI
 import TinyStockCore
 
+/// Mantem os campos em memoria ate a confirmacao do cadastro ou da edicao.
 struct ProductFormView: View {
-
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
-    /// Produto sendo editado. Nil significa cadastro novo.
     private let editingProduct: Product?
     private let storeID: UUID
 
-    // MARK: - Campos do formulário
-
     @State private var name: String
-    @State private var category: String
-    @State private var quantity: Int
-    @State private var minimumStock: Int
-
-    // Dinheiro entra como texto livre e só vira Decimal na leitura abaixo.
-    // Assim o usuário digita "45,90" ou "45.90" sem o campo brigar com ele.
     @State private var costPriceText: String
     @State private var salePriceText: String
-
-    /// Foto já reduzida, pronta pra ir pro banco.
     @State private var imageData: Data?
-
-    /// Item devolvido pelo seletor de fotos, usado só como gatilho do carregamento.
+    @State private var variants: [ProductVariantInput] = []
+    @State private var editingVariant: ProductVariantInput?
+    @State private var didLoadVariants = false
+    @State private var errorMessage: String?
     @State private var pickerItem: PhotosPickerItem?
-
-    /// Segura a interface enquanto a foto é carregada e reduzida.
+    @State private var isPresentingPhotos = false
+    @State private var isPresentingCamera = false
     @State private var isLoadingPhoto = false
-
-    /// Controla a calculadora sem persistir os campos auxiliares no produto.
     @State private var isPresentingCostCalculator = false
 
-    // MARK: - Inicializador
-
-    /// Sem argumento abre em branco pra cadastrar; com um produto abre preenchido pra editar.
     init(storeID: UUID, product: Product? = nil) {
         self.storeID = storeID
         editingProduct = product
-
         _name = State(initialValue: product?.name ?? "")
-        _category = State(initialValue: product?.category ?? "")
-        _quantity = State(initialValue: product?.quantity ?? 0)
-        _minimumStock = State(initialValue: product?.minimumStock ?? 0)
-
-        // Preço vira texto de edição, ou seja, sem símbolo e sem separador de milhar.
-        _costPriceText = State(
-            initialValue: CurrencyFormatter.editableText(from: product?.costPrice ?? 0)
-        )
-        _salePriceText = State(
-            initialValue: CurrencyFormatter.editableText(from: product?.salePrice ?? 0)
-        )
-
+        _costPriceText = State(initialValue: CurrencyFormatter.editableText(from: product?.costPrice ?? 0))
+        _salePriceText = State(initialValue: CurrencyFormatter.editableText(from: product?.salePrice ?? 0))
         _imageData = State(initialValue: product?.imageData)
     }
 
-    // MARK: - Valores derivados
-
-    /// Campo vazio conta como zero, que é o padrão do model.
-    private var costPrice: Decimal {
-        CurrencyFormatter.decimal(from: costPriceText) ?? 0
+    private func price(from text: String) -> Decimal? {
+        text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0 : CurrencyFormatter.decimal(from: text)
     }
 
-    private var salePrice: Decimal {
-        CurrencyFormatter.decimal(from: salePriceText) ?? 0
-    }
-
-    private var unitProfit: Decimal {
-        salePrice - costPrice
-    }
-
-    /// Nome é o único campo obrigatório. O resto tem padrão que faz sentido.
     private var canSave: Bool {
-        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        guard let cost = price(from: costPriceText), let sale = price(from: salePriceText) else { return false }
+        return !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && cost >= 0 && sale >= 0 && didLoadVariants && !isLoadingPhoto
     }
 
-    /// Chave literal nos dois lados pra ferramenta de localização conseguir enxergar ambas.
-    private var photoButtonTitle: String {
-        imageData == nil
-            ? String(localized: "product.form.photo.choose", bundle: .tinyStockCore)
-            : String(localized: "product.form.photo.change", bundle: .tinyStockCore)
-    }
-
-    /// Chave literal nos dois lados pra ferramenta de localização conseguir enxergar ambas.
-    private var navigationTitle: String {
+    private var title: String {
         editingProduct == nil
             ? String(localized: "product.form.title.new", bundle: .tinyStockCore)
             : String(localized: "product.form.title.edit", bundle: .tinyStockCore)
     }
 
-    /// Placeholder dos campos de dinheiro sai do próprio formatador, então
-    /// acompanha o idioma do aparelho sem string fixa espalhada na view.
-    private var currencyPlaceholder: String {
-        Decimal.zero.currencyText
-    }
-
-    // MARK: - Corpo
-
     var body: some View {
         NavigationStack {
             Form {
                 photoSection
-                identificationSection
-                stockSection
+                Section {
+                    TextField(String(localized: "product.form.name", bundle: .tinyStockCore), text: $name)
+                        .textInputAutocapitalization(.words)
+                }
                 pricesSection
+                variantsSection
             }
-            .navigationTitle(navigationTitle)
+            .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(String(localized: "common.cancel", bundle: .tinyStockCore)) {
-                        dismiss()
-                    }
+                    Button(String(localized: "common.cancel", bundle: .tinyStockCore)) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(String(localized: "common.save", bundle: .tinyStockCore)) {
-                        save()
-                    }
-                    .disabled(!canSave)
+                    Button(String(localized: "common.save", bundle: .tinyStockCore), action: save)
+                        .disabled(!canSave)
+                }
+            }
+            .alert(String(localized: "product.form.error.title", bundle: .tinyStockCore), isPresented: Binding(
+                get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } }
+            )) {
+                Button("OK") { errorMessage = nil }
+            } message: {
+                Text(errorMessage ?? "")
+            }
+        }
+        .task { loadVariants() }
+        .sheet(item: $editingVariant) { input in
+            ProductVariantFormView(input: input) { updated in
+                if let index = variants.firstIndex(where: { $0.id == updated.id }) {
+                    variants[index] = updated
+                } else {
+                    variants.append(updated)
                 }
             }
         }
@@ -139,204 +103,189 @@ struct ProductFormView: View {
                 salePriceText = CurrencyFormatter.editableText(from: result.suggestedPrice)
             }
         }
+        .photosPicker(isPresented: $isPresentingPhotos, selection: $pickerItem, matching: .images)
+        .task(id: pickerItem) {
+            guard let pickerItem else { return }
+            isLoadingPhoto = true
+            defer { isLoadingPhoto = false }
+            do {
+                guard let data = try await pickerItem.loadTransferable(type: Data.self) else {
+                    throw ProductPhotoError.unreadable
+                }
+                try await preparePhoto(data)
+            } catch {
+                if !Task.isCancelled { showPhotoError() }
+            }
+        }
+        .fullScreenCover(isPresented: $isPresentingCamera) {
+            ProductCameraView { data in
+                isPresentingCamera = false
+                guard let data else { return }
+                Task {
+                    isLoadingPhoto = true
+                    defer { isLoadingPhoto = false }
+                    do { try await preparePhoto(data) } catch { showPhotoError() }
+                }
+            }
+            .ignoresSafeArea()
+        }
     }
-
-    // MARK: - Seções
 
     private var photoSection: some View {
         Section {
-            // Foto centralizada pra ficar claro que ela representa o produto inteiro.
-            HStack {
-                Spacer()
-                ProductImageView(imageData: imageData, side: 120)
-                    .overlay {
-                        if isLoadingPhoto {
-                            ProgressView()
-                        }
-                    }
-                Spacer()
-            }
-            .listRowBackground(Color.clear)
-
-            PhotosPicker(selection: $pickerItem, matching: .images, photoLibrary: .shared()) {
-                Label(photoButtonTitle, systemImage: "photo")
-            }
-
-            if imageData != nil {
-                Button(role: .destructive) {
-                    imageData = nil
-                    pickerItem = nil
-                } label: {
-                    Label(
-                        String(localized: "product.form.photo.remove", bundle: .tinyStockCore),
-                        systemImage: "trash"
-                    )
+            Menu {
+                Button(String(localized: "product.form.photo.choose", bundle: .tinyStockCore), systemImage: "photo") {
+                    isPresentingPhotos = true
                 }
-            }
-        } header: {
-            Text(String(localized: "product.form.section.photo", bundle: .tinyStockCore))
-        } footer: {
-            Text(String(localized: "product.form.photo.footer", bundle: .tinyStockCore))
-        }
-        .onChange(of: pickerItem) { _, newItem in
-            Task { await loadPhoto(newItem) }
-        }
-    }
-
-    private var identificationSection: some View {
-        Section(String(localized: "product.form.section.identification", bundle: .tinyStockCore)) {
-            TextField(
-                String(localized: "product.form.name", bundle: .tinyStockCore),
-                text: $name,
-                prompt: Text(String(localized: "product.form.name.placeholder", bundle: .tinyStockCore))
-            )
-
-            TextField(
-                String(localized: "product.form.category", bundle: .tinyStockCore),
-                text: $category,
-                prompt: Text(String(localized: "product.form.category.placeholder", bundle: .tinyStockCore))
-            )
-        }
-    }
-
-    private var stockSection: some View {
-        Section {
-            LabeledContent {
-                TextField("0", value: $quantity, format: .number)
-                    .keyboardType(.numberPad)
-                    .multilineTextAlignment(.trailing)
+                if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                    Button(String(localized: "product.form.photo.camera", bundle: .tinyStockCore), systemImage: "camera") {
+                        Task { await openCamera() }
+                    }
+                }
+                if imageData != nil {
+                    Button(String(localized: "product.form.photo.remove", bundle: .tinyStockCore), systemImage: "trash", role: .destructive) {
+                        pickerItem = nil
+                        imageData = nil
+                    }
+                }
             } label: {
-                Text(String(localized: "product.form.quantity", bundle: .tinyStockCore))
+                ZStack(alignment: .bottomTrailing) {
+                    ProductImageView(imageData: imageData, side: 104)
+                    Image(systemName: "camera.fill")
+                        .foregroundStyle(.white)
+                        .padding(8)
+                        .background(Color.accentColor, in: Circle())
+                        .overlay(Circle().stroke(Color(.systemBackground), lineWidth: 3))
+                }
+                .overlay { if isLoadingPhoto { ProgressView() } }
             }
-
-            LabeledContent {
-                TextField("0", value: $minimumStock, format: .number)
-                    .keyboardType(.numberPad)
-                    .multilineTextAlignment(.trailing)
-            } label: {
-                Text(String(localized: "product.form.minimumStock", bundle: .tinyStockCore))
-            }
-        } header: {
-            Text(String(localized: "product.form.section.stock", bundle: .tinyStockCore))
-        } footer: {
-            Text(String(localized: "product.form.stock.footer", bundle: .tinyStockCore))
+            .buttonStyle(.plain)
+            .disabled(isLoadingPhoto)
+            .accessibilityLabel(String(localized: "product.form.photo.change", bundle: .tinyStockCore))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .listRowBackground(Color.clear)
         }
     }
 
     private var pricesSection: some View {
-        Section {
-            LabeledContent {
-                TextField(currencyPlaceholder, text: $costPriceText)
-                    .keyboardType(.decimalPad)
-                    .multilineTextAlignment(.trailing)
-            } label: {
-                Text(String(localized: "product.form.costPrice", bundle: .tinyStockCore))
+        Section(String(localized: "product.form.section.prices", bundle: .tinyStockCore)) {
+            priceField(String(localized: "product.form.salePrice", bundle: .tinyStockCore), text: $salePriceText)
+            priceField(String(localized: "product.form.costPrice", bundle: .tinyStockCore), text: $costPriceText)
+            if let sale = price(from: salePriceText), let cost = price(from: costPriceText) {
+                LabeledContent(String(localized: "product.form.unitProfit", bundle: .tinyStockCore)) {
+                    Text((sale - cost).currencyText)
+                        .foregroundStyle(sale < cost ? Color.red : Color.primary)
+                }
             }
-
-            LabeledContent {
-                TextField(currencyPlaceholder, text: $salePriceText)
-                    .keyboardType(.decimalPad)
-                    .multilineTextAlignment(.trailing)
-            } label: {
-                Text(String(localized: "product.form.salePrice", bundle: .tinyStockCore))
-            }
-
-            // Resumo em tempo real pra pessoa perceber na hora se está vendendo no prejuízo.
-            LabeledContent {
-                Text(unitProfit.currencyText)
-                    .foregroundStyle(unitProfit < 0 ? Color.red : Color.primary)
-            } label: {
-                Text(String(localized: "product.form.unitProfit", bundle: .tinyStockCore))
-            }
-
             Button {
                 isPresentingCostCalculator = true
             } label: {
-                Label(
-                    String(localized: "product.form.costCalculator", bundle: .tinyStockCore),
-                    systemImage: "calculator"
-                )
+                Label(String(localized: "product.form.costCalculator", bundle: .tinyStockCore), systemImage: "calculator")
             }
-        } header: {
-            Text(String(localized: "product.form.section.prices", bundle: .tinyStockCore))
-        } footer: {
-            Text(String(localized: "product.form.prices.footer", bundle: .tinyStockCore))
         }
     }
 
-    // MARK: - Carregamento da foto
+    private func priceField(_ title: String, text: Binding<String>) -> some View {
+        LabeledContent(title) {
+            TextField(Decimal.zero.currencyText, text: text)
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.trailing)
+                .accessibilityLabel(title)
+        }
+    }
 
-    /// Traz a foto escolhida e já reduz antes de guardar no estado.
-    /// A redução roda fora da main thread pra não travar a interface com foto grande.
-    private func loadPhoto(_ item: PhotosPickerItem?) async {
-        guard let item else { return }
+    private var variantsSection: some View {
+        Section(String(localized: "product.form.variants", bundle: .tinyStockCore)) {
+            ForEach(variants) { input in
+                Button { editingVariant = input } label: {
+                    LabeledContent(input.name) {
+                        Text(input.initialQuantity, format: .number)
+                            .foregroundStyle(.secondary)
+                    }
+                    .foregroundStyle(.primary)
+                }
+                // Uma variacao persistida pode ter historico. Somente rascunhos sao removidos aqui.
+                .deleteDisabled(input.existingID != nil)
+            }
+            .onDelete { offsets in
+                variants = variants.enumerated().filter {
+                    !offsets.contains($0.offset) || $0.element.existingID != nil
+                }.map(\.element)
+            }
+            Button {
+                editingVariant = ProductVariantInput()
+            } label: {
+                Label(String(localized: "product.form.variant.add", bundle: .tinyStockCore), systemImage: "plus")
+            }
+            .disabled(!didLoadVariants)
+        }
+    }
 
-        isLoadingPhoto = true
-        defer { isLoadingPhoto = false }
+    private func loadVariants() {
+        guard !didLoadVariants else { return }
+        do {
+            if let editingProduct {
+                variants = try ProductVariantService.variants(for: editingProduct, in: modelContext).map {
+                    ProductVariantInput(id: $0.id, existingID: $0.id, name: $0.name, initialQuantity: $0.quantity)
+                }
+            }
+            didLoadVariants = true
+        } catch { errorMessage = error.localizedDescription }
+    }
 
-        guard let rawData = try? await item.loadTransferable(type: Data.self) else { return }
-
+    private func preparePhoto(_ data: Data) async throws {
         let prepared = await Task.detached(priority: .userInitiated) {
-            ProductImageProcessor.prepared(from: rawData)
+            ProductImageProcessor.prepared(from: data)
         }.value
-
-        // Se o arquivo não for uma imagem legível, mantém a foto anterior em vez de apagar.
-        guard let prepared else { return }
-
+        // A troca de selecao cancela a tarefa anterior, que nao deve sobrescrever a foto nova.
+        try Task.checkCancellation()
+        guard let prepared else { throw ProductPhotoError.unreadable }
         imageData = prepared
     }
 
-    // MARK: - Gravação
+    private func showPhotoError() {
+        errorMessage = String(localized: "product.form.photo.error", bundle: .tinyStockCore)
+    }
+
+    private func openCamera() async {
+        let granted = await AVCaptureDevice.requestAccess(for: .video)
+        if granted {
+            isPresentingCamera = true
+        } else {
+            errorMessage = String(localized: "product.form.photo.permission", bundle: .tinyStockCore)
+        }
+    }
 
     private func save() {
-        let cleanName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        let cleanCategory = category.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        // Trava em zero pra um valor negativo digitado não virar estoque inválido.
-        let safeQuantity = max(0, quantity)
-        let safeMinimumStock = max(0, minimumStock)
-
-        if let product = editingProduct {
-            // Edição altera o objeto que já está no banco, mantendo o createdAt original.
-            product.name = cleanName
-            product.category = cleanCategory
-            product.quantity = safeQuantity
-            product.minimumStock = safeMinimumStock
-            product.costPrice = costPrice
-            product.salePrice = salePrice
-            product.imageData = imageData
-            product.updatedAt = Date()
-        } else {
-            let now = Date()
-            let product = Product(
-                storeID: storeID,
-                name: cleanName,
-                category: cleanCategory,
-                quantity: safeQuantity,
-                minimumStock: safeMinimumStock,
-                costPrice: costPrice,
-                salePrice: salePrice,
-                imageData: imageData,
-                createdAt: now,
-                updatedAt: now
-            )
-            // O contexto do ambiente tem autosave ligado, então basta inserir.
-            modelContext.insert(product)
+        guard canSave, let cost = price(from: costPriceText), let sale = price(from: salePriceText) else { return }
+        // Salva pendencias anteriores antes do lote para nao desfaze-las caso este cadastro falhe.
+        do { try modelContext.save() } catch {
+            errorMessage = error.localizedDescription
+            return
         }
-
-        dismiss()
+        do {
+            try ProductFormService.apply(to: editingProduct, storeID: storeID, name: name,
+                                         costPrice: cost, salePrice: sale, imageData: imageData,
+                                         variants: variants, in: modelContext)
+            try modelContext.save()
+            dismiss()
+        } catch {
+            modelContext.rollback()
+            if let error = error as? ProductError {
+                errorMessage = error.localizedMessage
+            } else if let error = error as? ProductVariantError {
+                errorMessage = error.localizedMessage
+            } else {
+                errorMessage = error.localizedDescription
+            }
+        }
     }
 }
 
-#Preview("Cadastro") {
-    ProductFormView(storeID: UUID())
-        .modelContainer(for: [StoreProfile.self, Product.self], inMemory: true)
-}
+private enum ProductPhotoError: Error { case unreadable }
 
-#Preview("Edição") {
-    ProductFormView(
-        storeID: StoreScope.unassignedStoreID,
-        product: Product(name: "Amigurumi Gato", category: "Crochê", quantity: 12, costPrice: 20, salePrice: 45)
-    )
-    .modelContainer(for: [StoreProfile.self, Product.self], inMemory: true)
+#Preview {
+    ProductFormView(storeID: UUID())
+        .modelContainer(for: [Product.self, ProductVariant.self, StockMovement.self], inMemory: true)
 }

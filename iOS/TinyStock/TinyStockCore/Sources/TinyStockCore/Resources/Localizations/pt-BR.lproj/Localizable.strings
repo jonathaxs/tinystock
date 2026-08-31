@@ -248,3 +248,13 @@
 /* MARK: - Erro do banco de dados */
 "app.error.dataStore.title" = "Não foi possível abrir o banco de dados";
 "app.error.dataStore.message" = "Force o fechamento e reabra o app. Se continuar, reinicie o aparelho.";
+"product.form.error.title" = "Não foi possível salvar o produto";
+"product.form.variants" = "Variações";
+"product.form.variant.add" = "Adicionar variação";
+"product.form.variant.title" = "Variação";
+"product.form.variant.name" = "Nome da variação";
+"product.form.variant.initialStock" = "Estoque inicial";
+"product.form.variant.available" = "Estoque disponível";
+"product.form.photo.camera" = "Tirar foto";
+"product.form.photo.error" = "Não foi possível ler esta foto. Escolha outra imagem.";
+"product.form.photo.permission" = "O acesso à câmera está desativado. Permita o acesso nos Ajustes do iPhone para fotografar o produto.";

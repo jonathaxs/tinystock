@@ -1,2 +1,3 @@
 /* O bundle principal precisa anunciar cada idioma para o iOS oferecer a escolha por app. */
 "CFBundleDisplayName" = "TinyStock";
+"NSCameraUsageDescription" = "Take a photo to identify your product.";

@@ -248,3 +248,13 @@
 /* MARK: - Data store error */
 "app.error.dataStore.title" = "Could not open the database";
 "app.error.dataStore.message" = "Please force quit and reopen the app. If it keeps happening, restart your device.";
+"product.form.error.title" = "Unable to save product";
+"product.form.variants" = "Variations";
+"product.form.variant.add" = "Add variation";
+"product.form.variant.title" = "Variation";
+"product.form.variant.name" = "Variation name";
+"product.form.variant.initialStock" = "Initial stock";
+"product.form.variant.available" = "Available stock";
+"product.form.photo.camera" = "Take photo";
+"product.form.photo.error" = "Unable to read this photo. Please choose another image.";
+"product.form.photo.permission" = "Camera access is disabled. Allow access in iPhone Settings to take a product photo.";
