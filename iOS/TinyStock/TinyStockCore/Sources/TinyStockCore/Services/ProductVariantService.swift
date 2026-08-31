@@ -124,6 +124,45 @@ public enum ProductVariantService {
 
     // MARK: - Validação
 
+    /// Considera os nomes finais juntos, inclusive quando duas variacoes trocam de nome.
+    static func validateEdits(_ inputs: [ProductVariantInput], existing: [ProductVariant]) throws {
+        let existingIDs = Set(existing.map(\.id))
+        let editedIDs = inputs.compactMap(\.existingID)
+        guard Set(editedIDs).count == editedIDs.count,
+              Set(editedIDs).isSubset(of: existingIDs) else {
+            throw ProductVariantError.productMismatch
+        }
+
+        var names = Set(existing.filter { !editedIDs.contains($0.id) }.map { comparableName($0.name) })
+        for input in inputs {
+            let name = input.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !name.isEmpty else { throw ProductVariantError.emptyName }
+            guard names.insert(comparableName(name)).inserted else { throw ProductVariantError.duplicateName }
+            if input.existingID == nil, input.initialQuantity < 0 {
+                throw ProductVariantError.negativeQuantity
+            }
+        }
+    }
+
+    static func applyEdits(
+        _ inputs: [ProductVariantInput], existing: [ProductVariant],
+        for product: Product, in context: ModelContext
+    ) throws {
+        // Primeiro renomeia todas as existentes. Seus saldos e historicos nao sao alterados.
+        for input in inputs {
+            if let variant = existing.first(where: { $0.id == input.existingID }) {
+                let name = input.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                if variant.name != name {
+                    variant.name = name
+                    variant.updatedAt = Date()
+                }
+            }
+        }
+        for input in inputs where input.existingID == nil {
+            try create(for: product, name: input.name, initialQuantity: input.initialQuantity, in: context)
+        }
+    }
+
     private static func validatedName(
         _ name: String,
         for product: Product,
