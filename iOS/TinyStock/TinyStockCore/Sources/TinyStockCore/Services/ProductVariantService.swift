@@ -59,11 +59,22 @@ public enum ProductVariantService {
             storeID: product.storeID,
             productID: product.id,
             name: cleanName,
-            quantity: initialQuantity,
+            quantity: 0,
             createdAt: date,
             updatedAt: date
         )
         context.insert(variant)
+
+        if initialQuantity > 0 {
+            try StockService.registerInitialStock(
+                quantity: initialQuantity,
+                to: variant,
+                product: product,
+                date: date,
+                in: context
+            )
+        }
+
         return variant
     }
 

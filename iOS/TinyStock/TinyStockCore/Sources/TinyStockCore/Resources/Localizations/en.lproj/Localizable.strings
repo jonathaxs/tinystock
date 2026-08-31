@@ -69,6 +69,14 @@
 "variant.error.duplicateName" = "A variation with this name already exists for this product.";
 "variant.error.negativeQuantity" = "The variation quantity cannot be negative.";
 "variant.error.productMismatch" = "This variation belongs to another product.";
+"stock.error.invalidQuantity" = "Enter a quantity greater than zero.";
+"stock.error.negativeBalance" = "Stock cannot become negative.";
+"stock.error.noChange" = "The new quantity is the same as the current stock.";
+"stock.error.quantityOverflow" = "This quantity exceeds the supported stock limit.";
+"stock.error.productMismatch" = "This variation belongs to another product.";
+"stock.error.movementMismatch" = "This stock movement belongs to another variation.";
+"stock.error.alreadyReversed" = "This stock movement has already been reversed.";
+"stock.error.reversalNotAllowed" = "A reversal cannot be reversed directly.";
 
 
 /* MARK: - Sales */
