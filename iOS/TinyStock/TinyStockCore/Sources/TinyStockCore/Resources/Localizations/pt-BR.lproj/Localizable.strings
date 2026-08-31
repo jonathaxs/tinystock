@@ -258,3 +258,13 @@
 "product.form.photo.camera" = "Tirar foto";
 "product.form.photo.error" = "Não foi possível ler esta foto. Escolha outra imagem.";
 "product.form.photo.permission" = "O acesso à câmera está desativado. Permita o acesso nos Ajustes do iPhone para fotografar o produto.";
+"products.catalog.search" = "Buscar produto ou variação";
+"products.catalog.quantity" = "%@ em estoque";
+"products.delete.stock.message" = "O produto, suas variações e movimentações de estoque serão excluídos. As vendas registradas serão mantidas. Esta ação não pode ser desfeita.";
+"products.error.title" = "Não foi possível excluir o produto";
+"stock.entry.title" = "Entrada de estoque";
+"stock.entry.newVariant" = "Nova variação";
+"stock.entry.quantity" = "Unidades recebidas";
+"stock.entry.result" = "Estoque após a entrada";
+"stock.entry.note" = "Observação (opcional)";
+"stock.entry.error" = "Não foi possível registrar a entrada";

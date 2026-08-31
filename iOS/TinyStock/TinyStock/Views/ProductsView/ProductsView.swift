@@ -1,121 +1,167 @@
-// ⌘
-//  TinyStock/Views/ProductsView/ProductsView.swift
-//
-//  Propósito: Lista de produtos do estoque e porta de entrada pro cadastro de um novo produto.
-//
-//  Created by Jonathas Motta (@jonathaxs) on 2026-08-07.
-// ⌘
+// Proposito: Catalogo por loja com menu operacional e modo de edicao.
+// Created by Jonathas Motta (@jonathaxs) on 2026-08-07.
 
 import SwiftUI
 import SwiftData
 import TinyStockCore
 
 struct ProductsView: View {
-
     @Environment(\.modelContext) private var modelContext
-
     private let storeID: UUID
-
-    /// Lista ordenada por nome.
     @Query private var products: [Product]
-
+    @Query private var variants: [ProductVariant]
+    @State private var editMode: EditMode = .inactive
     @State private var isPresentingForm = false
+    @State private var editingProduct: Product?
+    @State private var stockProduct: Product?
+    @State private var pendingDeletion: [Product] = []
+    @State private var isConfirmingDelete = false
+    @State private var errorMessage: String?
     @State private var searchText = ""
 
     init(storeID: UUID) {
         self.storeID = storeID
-        _products = Query(
-            filter: #Predicate<Product> { $0.storeID == storeID },
-            sort: \Product.name
-        )
+        _products = Query(filter: #Predicate<Product> { $0.storeID == storeID }, sort: \Product.name)
+        _variants = Query(filter: #Predicate<ProductVariant> { $0.storeID == storeID })
     }
 
-    /// Filtra em memória de propósito: o estoque de um pequeno negócio tem dezenas de itens,
-    /// então o custo é irrelevante e o código fica bem mais simples do que remontar o @Query.
     private var filteredProducts: [Product] {
-        products.filter { $0.matches(searchText: searchText) }
+        products.filter { $0.matches(searchText: searchText, variants: variants) }
     }
 
     var body: some View {
         NavigationStack {
-            Group {
-                if products.isEmpty {
-                    emptyState
-                } else if filteredProducts.isEmpty {
-                    // Estado nativo de "nada encontrado", já localizado pelo sistema.
-                    ContentUnavailableView.search(text: searchText)
-                } else {
-                    List {
-                        ForEach(filteredProducts) { product in
-                            NavigationLink {
-                                ProductDetailView(product: product)
-                            } label: {
-                                ProductRowView(product: product)
-                            }
-                        }
-                        // O swipe já funciona como confirmação, então aqui não tem alerta.
-                        // A exclusão pelo detalhe é que pede confirmação.
-                        .onDelete(perform: delete)
-                    }
-                }
-            }
+            catalogContent
             .navigationTitle(String(localized: "tab.products", bundle: .tinyStockCore))
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    StoreSwitcherView()
-                }
+            .toolbar { productToolbar }
+            .searchable(text: $searchText, prompt: Text(String(localized: "products.catalog.search", bundle: .tinyStockCore)))
+            .sheet(isPresented: $isPresentingForm) { ProductFormView(storeID: storeID) }
+            .sheet(item: $editingProduct) { ProductFormView(storeID: $0.storeID, product: $0) }
+            .sheet(item: $stockProduct) { StockEntryView(product: $0) }
+            .alert(String(localized: "product.delete.confirm.title", bundle: .tinyStockCore), isPresented: $isConfirmingDelete) {
+                Button(String(localized: "common.cancel", bundle: .tinyStockCore), role: .cancel) { pendingDeletion = [] }
+                Button(String(localized: "common.delete", bundle: .tinyStockCore), role: .destructive, action: deleteProducts)
+            } message: {
+                Text(pendingDeletion.map(\.name).joined(separator: ", ") + "\n\n"
+                     + String(localized: "products.delete.stock.message", bundle: .tinyStockCore))
+            }
+            .alert(String(localized: "products.error.title", bundle: .tinyStockCore), isPresented: Binding(
+                get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } }
+            )) {
+                Button("OK") { errorMessage = nil }
+            } message: { Text(errorMessage ?? "") }
+        }
+        .environment(\.editMode, $editMode)
+        .onChange(of: storeID) { _, _ in
+            // Nao carrega a selecao ou o modo de edicao de uma loja para outra.
+            editingProduct = nil
+            stockProduct = nil
+            pendingDeletion = []
+            isConfirmingDelete = false
+            isPresentingForm = false
+            editMode = .inactive
+            searchText = ""
+        }
+        .onChange(of: products.isEmpty) { _, empty in
+            if empty { editMode = .inactive }
+        }
+    }
 
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        isPresentingForm = true
-                    } label: {
-                        Label(
-                            String(localized: "products.add", bundle: .tinyStockCore),
-                            systemImage: "plus"
-                        )
+    private var catalogContent: some View {
+        Group {
+            if products.isEmpty {
+                ContentUnavailableView {
+                    Label(String(localized: "products.empty.title", bundle: .tinyStockCore), systemImage: "shippingbox")
+                } description: {
+                    Text(String(localized: "products.empty.message", bundle: .tinyStockCore))
+                } actions: {
+                    Button(String(localized: "products.add", bundle: .tinyStockCore)) { isPresentingForm = true }
+                        .buttonStyle(.borderedProminent)
+                }
+            } else if filteredProducts.isEmpty {
+                ContentUnavailableView.search(text: searchText)
+            } else {
+                List {
+                    ForEach(filteredProducts) { product in
+                        productRow(product)
+                            .deleteDisabled(!editMode.isEditing)
                     }
+                    // O menos nativo so aparece em Editar; a confirmacao usa os objetos da lista filtrada.
+                    .onDelete(perform: requestDeletion)
                 }
             }
-            .searchable(
-                text: $searchText,
-                prompt: Text(String(localized: "products.search.prompt", bundle: .tinyStockCore))
-            )
-            .sheet(isPresented: $isPresentingForm) {
-                ProductFormView(storeID: storeID)
-            }
         }
     }
 
-    // MARK: - Exclusão
-
-    /// Os índices vêm do ForEach, que itera a lista JÁ FILTRADA pela busca.
-    /// Usar `products` aqui apagaria o produto errado sempre que houvesse busca ativa.
-    private func delete(at offsets: IndexSet) {
-        for index in offsets {
-            modelContext.delete(filteredProducts[index])
-        }
-    }
-
-    // MARK: - Estado vazio
-
-    private var emptyState: some View {
-        ContentUnavailableView {
-            Label(
-                String(localized: "products.empty.title", bundle: .tinyStockCore),
-                systemImage: "shippingbox"
-            )
-        } description: {
-            Text(String(localized: "products.empty.message", bundle: .tinyStockCore))
-        } actions: {
-            Button(String(localized: "products.add", bundle: .tinyStockCore)) {
+    @ToolbarContentBuilder
+    private var productToolbar: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) { StoreSwitcherView() }
+        ToolbarItemGroup(placement: .topBarTrailing) {
+            Button {
                 isPresentingForm = true
+            } label: {
+                Label(String(localized: "products.add", bundle: .tinyStockCore), systemImage: "plus")
             }
-            .buttonStyle(.borderedProminent)
+            EditButton().disabled(products.isEmpty)
+        }
+    }
+
+    @ViewBuilder
+    private func productRow(_ product: Product) -> some View {
+        if editMode.isEditing {
+            Button { editingProduct = product } label: {
+                rowLabel(product)
+            }
+            .buttonStyle(.plain)
+        } else {
+            Menu {
+                // A R12 conectara esta acao ao pedido por variacao, sem usar a baixa legada.
+                Button {} label: {
+                    Label(String(localized: "sale.new.title", bundle: .tinyStockCore), systemImage: "cart.badge.plus")
+                }
+                .disabled(true)
+                Button { stockProduct = product } label: {
+                    Label(String(localized: "stock.entry.title", bundle: .tinyStockCore), systemImage: "shippingbox.and.arrow.backward")
+                }
+            } label: {
+                rowLabel(product)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func rowLabel(_ product: Product) -> some View {
+        ProductRowView(product: product, quantity: ProductVariantService.displayedQuantity(for: product, among: variants))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+    }
+
+    private func requestDeletion(at offsets: IndexSet) {
+        pendingDeletion = offsets.compactMap { filteredProducts.indices.contains($0) ? filteredProducts[$0] : nil }
+        isConfirmingDelete = !pendingDeletion.isEmpty
+    }
+
+    private func deleteProducts() {
+        // Preserva pendencias anteriores caso a gravacao deste lote falhe.
+        do { try modelContext.save() } catch {
+            errorMessage = error.localizedDescription
+            return
+        }
+        do {
+            for product in pendingDeletion { try ProductService.delete(product, in: modelContext) }
+            try modelContext.save()
+            pendingDeletion = []
+        } catch {
+            modelContext.rollback()
+            pendingDeletion = []
+            errorMessage = error.localizedDescription
         }
     }
 }
 
 #Preview {
-    ProductsView(storeID: UUID())
-        .modelContainer(for: [StoreProfile.self, Product.self], inMemory: true)
+    let storeID = UUID()
+    ProductsView(storeID: storeID)
+        .environment(StoreSession(selectedStoreID: storeID))
+        .modelContainer(for: [StoreProfile.self, Product.self, ProductVariant.self, StockMovement.self], inMemory: true)
 }

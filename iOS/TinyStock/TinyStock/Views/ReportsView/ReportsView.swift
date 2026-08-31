@@ -256,5 +256,5 @@ struct ReportsView: View {
 
 #Preview {
     ReportsView(storeID: UUID())
-        .modelContainer(for: [StoreProfile.self, Product.self, Sale.self, SaleItem.self], inMemory: true)
+        .modelContainer(for: [StoreProfile.self, Product.self, ProductVariant.self, StockMovement.self, Sale.self, SaleItem.self], inMemory: true)
 }
