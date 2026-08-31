@@ -25,6 +25,8 @@ struct TinyStockApp: App {
             Product.self,
             ProductVariant.self,
             StockMovement.self,
+            SalesOrder.self,
+            SalesOrderItem.self,
             Sale.self,
             SaleItem.self
         ])
