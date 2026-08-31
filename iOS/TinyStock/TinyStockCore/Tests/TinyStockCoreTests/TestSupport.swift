@@ -24,7 +24,7 @@ enum TestDatabase {
         do {
             return try ModelContainer(
                 for: StoreProfile.self, Product.self, ProductVariant.self, StockMovement.self,
-                Sale.self, SaleItem.self,
+                Sale.self, SaleItem.self, SalesOrder.self, SalesOrderItem.self,
                 configurations: ModelConfiguration(isStoredInMemoryOnly: true)
             )
         } catch {
@@ -37,6 +37,8 @@ enum TestDatabase {
     static func makeCleanContext() throws -> ModelContext {
         let context = ModelContext(container)
 
+        try context.delete(model: SalesOrderItem.self)
+        try context.delete(model: SalesOrder.self)
         try context.delete(model: SaleItem.self)
         try context.delete(model: Sale.self)
         try context.delete(model: StockMovement.self)
