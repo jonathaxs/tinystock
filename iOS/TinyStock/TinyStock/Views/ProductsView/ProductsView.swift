@@ -154,7 +154,7 @@ struct ProductsView: View {
         } catch {
             modelContext.rollback()
             pendingDeletion = []
-            errorMessage = error.localizedDescription
+            errorMessage = (error as? ProductError)?.localizedMessage ?? error.localizedDescription
         }
     }
 }
@@ -163,5 +163,5 @@ struct ProductsView: View {
     let storeID = UUID()
     ProductsView(storeID: storeID)
         .environment(StoreSession(selectedStoreID: storeID))
-        .modelContainer(for: [StoreProfile.self, Product.self, ProductVariant.self, StockMovement.self], inMemory: true)
+        .modelContainer(for: [StoreProfile.self, Product.self, ProductVariant.self, StockMovement.self, SalesOrder.self, SalesOrderItem.self], inMemory: true)
 }

@@ -64,5 +64,5 @@ struct MainView: View {
 
     MainView()
         .environment(StoreSession(selectedStoreID: storeID))
-        .modelContainer(for: [StoreProfile.self, Product.self, ProductVariant.self, StockMovement.self, Sale.self, SaleItem.self], inMemory: true)
+        .modelContainer(for: [StoreProfile.self, Product.self, ProductVariant.self, StockMovement.self, Sale.self, SaleItem.self, SalesOrder.self, SalesOrderItem.self], inMemory: true)
 }
