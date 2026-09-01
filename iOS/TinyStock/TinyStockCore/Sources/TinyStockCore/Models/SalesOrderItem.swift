@@ -68,7 +68,8 @@ public final class SalesOrderItem {
     ) throws -> SalesOrderItem {
         guard variant.belongs(to: product) else { throw SalesOrderItemError.variantMismatch }
         guard quantity > 0 else { throw SalesOrderItemError.invalidQuantity }
-        guard product.salePrice >= 0, product.costPrice >= 0 else { throw SalesOrderItemError.invalidPrices }
+        guard !product.salePrice.isNaN, !product.costPrice.isNaN,
+              product.salePrice >= 0, product.costPrice >= 0 else { throw SalesOrderItemError.invalidPrices }
         return SalesOrderItem(
             storeID: product.storeID, productID: product.id, variantID: variant.id,
             productName: product.name, variantName: variant.name,

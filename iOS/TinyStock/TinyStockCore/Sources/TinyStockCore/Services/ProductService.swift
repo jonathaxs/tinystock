@@ -16,6 +16,7 @@ public enum ProductError: Error, Equatable, Sendable {
     case duplicateName
     case negativeCostPrice
     case negativeSalePrice
+    case activeOrders
 }
 
 public extension ProductError {
@@ -30,6 +31,8 @@ public extension ProductError {
             String(localized: "product.error.negativeCostPrice", bundle: .tinyStockCore)
         case .negativeSalePrice:
             String(localized: "product.error.negativeSalePrice", bundle: .tinyStockCore)
+        case .activeOrders:
+            String(localized: "product.error.activeOrders", bundle: .tinyStockCore)
         }
     }
 }
@@ -100,6 +103,11 @@ public enum ProductService {
     public static func delete(_ product: Product, in context: ModelContext) throws {
         let productID = product.id
         let storeID = product.storeID
+        let orders = try context.fetch(FetchDescriptor<SalesOrder>(predicate: #Predicate { $0.storeID == storeID }))
+        // Estados desconhecidos tambem bloqueiam exclusao: nao podemos presumir que o pedido terminou.
+        guard !orders.contains(where: { order in
+            order.status?.isTerminal != true && order.itemList.contains { $0.productID == productID }
+        }) else { throw ProductError.activeOrders }
         let variants = try ProductVariantService.variants(for: product, in: context)
         let movements = try context.fetch(FetchDescriptor<StockMovement>(predicate: #Predicate {
             $0.productID == productID && $0.storeID == storeID

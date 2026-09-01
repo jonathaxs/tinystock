@@ -133,7 +133,8 @@ struct ProductServiceTests {
             .emptyName,
             .duplicateName,
             .negativeCostPrice,
-            .negativeSalePrice
+            .negativeSalePrice,
+            .activeOrders
         ]
 
         for error in errors {

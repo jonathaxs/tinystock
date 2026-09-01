@@ -20,6 +20,7 @@ public enum StockError: Error, Equatable, Sendable {
     case movementMismatch
     case alreadyReversed
     case reversalNotAllowed
+    case orderManagedMovement
 }
 
 public extension StockError {
@@ -42,6 +43,8 @@ public extension StockError {
             String(localized: "stock.error.alreadyReversed", bundle: .tinyStockCore)
         case .reversalNotAllowed:
             String(localized: "stock.error.reversalNotAllowed", bundle: .tinyStockCore)
+        case .orderManagedMovement:
+            String(localized: "stock.error.orderManaged", bundle: .tinyStockCore)
         }
     }
 }
@@ -141,6 +144,7 @@ public enum StockService {
         in context: ModelContext
     ) throws -> StockMovement {
         guard movement.kind != .reversal else { throw StockError.reversalNotAllowed }
+        guard movement.kind != .orderWithdrawal else { throw StockError.orderManagedMovement }
         guard movement.reversedAt == nil else { throw StockError.alreadyReversed }
         guard movement.belongs(to: variant, product: product) else {
             throw StockError.movementMismatch
@@ -187,6 +191,17 @@ public enum StockService {
     }
 
     // MARK: - Uso interno
+
+    /// Somente o servico de pedidos pode registrar a baixa vinculada ao atendimento.
+    @discardableResult
+    static func registerOrderWithdrawal(
+        quantity: Int, from variant: ProductVariant, product: Product,
+        orderID: UUID, date: Date, in context: ModelContext
+    ) throws -> StockMovement {
+        guard quantity > 0 else { throw StockError.invalidQuantity }
+        return try apply(delta: -quantity, kind: .orderWithdrawal, to: variant, product: product,
+                         note: "", referenceID: orderID, reversedMovementID: nil, date: date, in: context)
+    }
 
     /// Registra o saldo informado junto com a criação de uma variação.
     @discardableResult

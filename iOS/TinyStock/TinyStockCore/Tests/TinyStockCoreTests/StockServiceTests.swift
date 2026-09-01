@@ -285,7 +285,8 @@ struct StockServiceTests {
             .productMismatch,
             .movementMismatch,
             .alreadyReversed,
-            .reversalNotAllowed
+            .reversalNotAllowed,
+            .orderManagedMovement
         ]
 
         for error in errors {

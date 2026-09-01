@@ -14,6 +14,7 @@ public enum StockMovementKind: String, CaseIterable, Codable, Sendable {
     case entry
     case adjustment
     case reversal
+    case orderWithdrawal
 }
 
 /// Registro auditável de uma mudança no saldo de uma variação.

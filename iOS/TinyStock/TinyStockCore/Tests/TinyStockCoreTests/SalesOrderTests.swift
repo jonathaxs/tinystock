@@ -220,7 +220,7 @@ struct SalesOrderTests {
     @Test func excluirCatalogoNaoApagaRetratosDoPedido() throws {
         let context = try TestDatabase.makeCleanContext()
         let (product, variant) = try makeProduct(in: context)
-        let order = SalesOrder(storeID: product.storeID)
+        let order = SalesOrder(storeID: product.storeID, status: .completed)
         context.insert(order)
         let item = try SalesOrderItem.snapshot(product: product, variant: variant, quantity: 2)
         context.insert(item)
