@@ -14,6 +14,7 @@ struct ProductsView: View {
     @State private var isPresentingForm = false
     @State private var editingProduct: Product?
     @State private var stockProduct: Product?
+    @State private var salesProduct: Product?
     @State private var pendingDeletion: [Product] = []
     @State private var isConfirmingDelete = false
     @State private var errorMessage: String?
@@ -38,6 +39,7 @@ struct ProductsView: View {
             .sheet(isPresented: $isPresentingForm) { ProductFormView(storeID: storeID) }
             .sheet(item: $editingProduct) { ProductFormView(storeID: $0.storeID, product: $0) }
             .sheet(item: $stockProduct) { StockEntryView(product: $0) }
+            .sheet(item: $salesProduct) { SalesOrderFormView(product: $0) }
             .alert(String(localized: "product.delete.confirm.title", bundle: .tinyStockCore), isPresented: $isConfirmingDelete) {
                 Button(String(localized: "common.cancel", bundle: .tinyStockCore), role: .cancel) { pendingDeletion = [] }
                 Button(String(localized: "common.delete", bundle: .tinyStockCore), role: .destructive, action: deleteProducts)
@@ -56,6 +58,7 @@ struct ProductsView: View {
             // Nao carrega a selecao ou o modo de edicao de uma loja para outra.
             editingProduct = nil
             stockProduct = nil
+            salesProduct = nil
             pendingDeletion = []
             isConfirmingDelete = false
             isPresentingForm = false
@@ -115,11 +118,9 @@ struct ProductsView: View {
             .buttonStyle(.plain)
         } else {
             Menu {
-                // A R12 conectara esta acao ao pedido por variacao, sem usar a baixa legada.
-                Button {} label: {
+                Button { salesProduct = product } label: {
                     Label(String(localized: "sale.new.title", bundle: .tinyStockCore), systemImage: "cart.badge.plus")
                 }
-                .disabled(true)
                 Button { stockProduct = product } label: {
                     Label(String(localized: "stock.entry.title", bundle: .tinyStockCore), systemImage: "shippingbox.and.arrow.backward")
                 }
