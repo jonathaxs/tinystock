@@ -1,117 +1,172 @@
-// ⌘
-//  TinyStock/Views/SalesView/SalesView.swift
-//
-//  Propósito: Histórico de vendas e porta de entrada pro registro de uma venda nova.
-//
-//  Created by Jonathas Motta (@jonathaxs) on 2026-08-07.
-// ⌘
+// Proposito: Exibir a fila operacional de pedidos da loja selecionada.
+// Created by Jonathas Motta (@jonathaxs) on 2026-08-07.
 
 import SwiftUI
 import SwiftData
 import TinyStockCore
 
 struct SalesView: View {
-
     @Environment(\.modelContext) private var modelContext
     private let storeID: UUID
-
-    /// Mais recente primeiro. O agrupamento por dia acontece logo abaixo, na memória:
-    /// o `#Predicate` do SwiftData não sabe agrupar, e o histórico é pequeno.
-    @Query private var sales: [Sale]
-
-    @State private var isPresentingNewSale = false
+    @Query private var orders: [SalesOrder]
+    @State private var pendingCancellation: SalesOrder?
+    @State private var cancellationReason = ""
+    @State private var errorMessage: String?
 
     init(storeID: UUID) {
         self.storeID = storeID
-        _sales = Query(
-            filter: #Predicate<Sale> { $0.storeID == storeID },
-            sort: \Sale.date,
+        _orders = Query(
+            filter: #Predicate<SalesOrder> { $0.storeID == storeID },
+            sort: \SalesOrder.orderedAt,
             order: .reverse
         )
     }
 
-    private var dayGroups: [SaleDayGroup] {
-        SaleDayGroup.groups(from: sales)
+    private var sections: [SalesOrderQueueSection] {
+        SalesOrderQueueSection.make(from: orders)
     }
 
     var body: some View {
         NavigationStack {
             Group {
-                if sales.isEmpty {
-                    emptyState
-                } else {
-                    List {
-                        ForEach(dayGroups) { group in
-                            Section {
-                                ForEach(group.sales) { sale in
-                                    SaleRowView(sale: sale)
-                                }
-                                .onDelete { offsets in
-                                    delete(offsets, from: group)
-                                }
-                            } header: {
-                                SaleDayHeaderView(group: group)
-                            }
-                        }
-                    }
-                }
+                if orders.isEmpty { emptyState } else { orderList }
             }
             .navigationTitle(String(localized: "tab.sales", bundle: .tinyStockCore))
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    StoreSwitcherView()
-                }
+                ToolbarItem(placement: .topBarLeading) { StoreSwitcherView() }
+            }
+            .alert(String(localized: "order.cancel.title", bundle: .tinyStockCore), isPresented: Binding(
+                get: { pendingCancellation != nil },
+                set: { if !$0 { clearCancellation() } }
+            )) {
+                TextField(String(localized: "order.cancel.reason", bundle: .tinyStockCore), text: $cancellationReason)
+                Button(String(localized: "common.cancel", bundle: .tinyStockCore), role: .cancel, action: clearCancellation)
+                Button(String(localized: "order.action.cancel", bundle: .tinyStockCore), role: .destructive, action: cancelOrder)
+            } message: {
+                Text(String(localized: "order.cancel.message", bundle: .tinyStockCore))
+            }
+            .alert(String(localized: "order.operation.error.title", bundle: .tinyStockCore), isPresented: Binding(
+                get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } }
+            )) {
+                Button("OK") { errorMessage = nil }
+            } message: { Text(errorMessage ?? "") }
+        }
+        .onChange(of: storeID) { _, _ in
+            clearCancellation()
+            errorMessage = nil
+        }
+    }
 
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        isPresentingNewSale = true
-                    } label: {
-                        Label(
-                            String(localized: "sales.add", bundle: .tinyStockCore),
-                            systemImage: "plus"
-                        )
+    private var orderList: some View {
+        List {
+            ForEach(sections) { section in
+                Section {
+                    ForEach(section.orders) { order in
+                        NavigationLink {
+                            SalesOrderDetailView(order: order)
+                        } label: {
+                            SalesOrderRowView(order: order)
+                        }
+                        .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                            if let action = SalesOrderPresentation.quickAction(for: order) {
+                                Button { transition(order, to: action.status) } label: {
+                                    Label(action.title, systemImage: action.systemImage)
+                                }
+                                .tint(action.tint)
+                            }
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            if SalesOrderPresentation.canCancel(order) {
+                                Button(role: .destructive) { pendingCancellation = order } label: {
+                                    Label(String(localized: "order.action.cancel", bundle: .tinyStockCore), systemImage: "xmark")
+                                }
+                            }
+                        }
+                    }
+                } header: {
+                    HStack {
+                        Text(section.title)
+                        Spacer()
+                        Text(section.orders.count, format: .number)
                     }
                 }
             }
-            .sheet(isPresented: $isPresentingNewSale) {
-                NewSaleView(storeID: storeID)
-            }
         }
+        .listStyle(.insetGrouped)
     }
-
-    // MARK: - Exclusão
-
-    /// Apaga só o registro da venda. O estoque não volta de propósito: desfazer
-    /// venda é outro assunto, e devolver silenciosamente confundiria a contagem.
-    ///
-    /// O índice vem do `ForEach` do grupo, então tem que voltar no grupo. Indexar
-    /// a lista inteira aqui apagaria a venda errada.
-    private func delete(_ offsets: IndexSet, from group: SaleDayGroup) {
-        for index in offsets {
-            modelContext.delete(group.sales[index])
-        }
-    }
-
-    // MARK: - Estado vazio
 
     private var emptyState: some View {
         ContentUnavailableView {
-            Label(
-                String(localized: "sales.placeholder.title", bundle: .tinyStockCore),
-                systemImage: "cart"
-            )
+            Label(String(localized: "order.queue.empty.title", bundle: .tinyStockCore), systemImage: "calendar.badge.clock")
         } description: {
-            Text(String(localized: "sales.placeholder.message", bundle: .tinyStockCore))
-        } actions: {
-            Button(String(localized: "sales.add", bundle: .tinyStockCore)) {
-                isPresentingNewSale = true
-            }
-            .buttonStyle(.borderedProminent)
+            Text(String(localized: "order.queue.empty.message", bundle: .tinyStockCore))
+        }
+    }
+
+    private func transition(_ order: SalesOrder, to status: SalesOrderStatus) {
+        do {
+            try SalesOrderService.transition(id: order.id, to: status, in: modelContext)
+        } catch {
+            errorMessage = SalesOrderPresentation.message(for: error)
+        }
+    }
+
+    private func cancelOrder() {
+        guard let order = pendingCancellation else { return }
+        do {
+            try SalesOrderService.cancel(id: order.id, reason: cancellationReason, in: modelContext)
+            clearCancellation()
+        } catch {
+            clearCancellation()
+            errorMessage = SalesOrderPresentation.message(for: error)
+        }
+    }
+
+    private func clearCancellation() {
+        pendingCancellation = nil
+        cancellationReason = ""
+    }
+}
+
+private struct SalesOrderQueueSection: Identifiable {
+    let id: String
+    let title: String
+    let orders: [SalesOrder]
+
+    static func make(from orders: [SalesOrder]) -> [SalesOrderQueueSection] {
+        var result = SalesOrderStatus.allCases.compactMap { status -> SalesOrderQueueSection? in
+            let matches = orders.filter { $0.status == status }
+            guard !matches.isEmpty else { return nil }
+            return SalesOrderQueueSection(
+                id: status.rawValue,
+                title: status.localizedName,
+                orders: sorted(matches, terminal: status.isTerminal)
+            )
+        }
+        let unknown = orders.filter { $0.status == nil }
+        if !unknown.isEmpty {
+            result.append(SalesOrderQueueSection(
+                id: "unknown",
+                title: String(localized: "order.queue.unknown", bundle: .tinyStockCore),
+                orders: sorted(unknown, terminal: false)
+            ))
+        }
+        return result
+    }
+
+    private static func sorted(_ orders: [SalesOrder], terminal: Bool) -> [SalesOrder] {
+        orders.sorted {
+            let left = SalesOrderPresentation.queueDate(for: $0)
+            let right = SalesOrderPresentation.queueDate(for: $1)
+            if left == right { return $0.id.uuidString < $1.id.uuidString }
+            return terminal ? left > right : left < right
         }
     }
 }
 
 #Preview {
-    SalesView(storeID: UUID())
-        .modelContainer(for: [StoreProfile.self, Product.self, Sale.self, SaleItem.self], inMemory: true)
+    let storeID = UUID()
+    SalesView(storeID: storeID)
+        .environment(StoreSession(selectedStoreID: storeID))
+        .modelContainer(for: [StoreProfile.self, Product.self, ProductVariant.self, StockMovement.self, SalesOrder.self, SalesOrderItem.self], inMemory: true)
 }
