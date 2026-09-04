@@ -12,6 +12,7 @@ public struct SalesOrderDetails: Sendable {
     public let orderedAt: Date
     public let productionDueAt: Date?
     public let shippingDueAt: Date
+    public let trackingCode: String
     public let note: String
     public let channelFeePercentage: Decimal
 
@@ -23,6 +24,7 @@ public struct SalesOrderDetails: Sendable {
         orderedAt: Date,
         productionDueAt: Date? = nil,
         shippingDueAt: Date,
+        trackingCode: String = "",
         note: String = "",
         channelFeePercentage: Decimal = 0
     ) {
@@ -33,6 +35,7 @@ public struct SalesOrderDetails: Sendable {
         self.orderedAt = orderedAt
         self.productionDueAt = productionDueAt
         self.shippingDueAt = shippingDueAt
+        self.trackingCode = trackingCode
         self.note = note
         self.channelFeePercentage = channelFeePercentage
     }
@@ -45,6 +48,8 @@ public enum SalesOrderManagementError: Error, Equatable, Sendable {
     case invalidOrderData
     case stockHistoryMismatch
     case quantityOverflow
+    case transitionNotAllowed
+    case invalidTransitionDate
 
     public var localizedMessage: String {
         switch self {
@@ -54,6 +59,8 @@ public enum SalesOrderManagementError: Error, Equatable, Sendable {
         case .invalidOrderData: String(localized: "order.management.error.data", bundle: .tinyStockCore)
         case .stockHistoryMismatch: String(localized: "order.management.error.stockHistory", bundle: .tinyStockCore)
         case .quantityOverflow: String(localized: "order.management.error.quantityOverflow", bundle: .tinyStockCore)
+        case .transitionNotAllowed: String(localized: "order.management.error.transition", bundle: .tinyStockCore)
+        case .invalidTransitionDate: String(localized: "order.management.error.transitionDate", bundle: .tinyStockCore)
         }
     }
 }
@@ -101,6 +108,7 @@ public extension SalesOrderService {
             order.orderedAt = details.orderedAt
             order.productionDueAt = fulfillment == .production ? details.productionDueAt : nil
             order.shippingDueAt = details.shippingDueAt
+            order.trackingCode = clean(details.trackingCode)
             order.note = clean(details.note)
             order.channelFeePercentage = details.channelFeePercentage
             order.channelFeeAmount = fee
@@ -124,10 +132,65 @@ public extension SalesOrderService {
     ) throws -> SalesOrder {
         try cancel(id: id, reason: reason, date: date, in: context, saving: { try $0.save() })
     }
+
+    /// Avanca o pedido por uma transicao permitida e registra a data efetiva correspondente.
+    @discardableResult
+    static func transition(
+        id: UUID,
+        to nextStatus: SalesOrderStatus,
+        date: Date = Date(),
+        in context: ModelContext
+    ) throws -> SalesOrder {
+        try transition(id: id, to: nextStatus, date: date, in: context, saving: { try $0.save() })
+    }
 }
 
 @MainActor
 extension SalesOrderService {
+    static func transition(
+        id: UUID,
+        to nextStatus: SalesOrderStatus,
+        date: Date,
+        in context: ModelContext,
+        saving: (ModelContext) throws -> Void
+    ) throws -> SalesOrder {
+        let order = try requiredOrder(id: id, in: context)
+        guard nextStatus != .cancelled, order.canTransition(to: nextStatus) else {
+            throw SalesOrderManagementError.transitionNotAllowed
+        }
+        guard date.timeIntervalSinceReferenceDate.isFinite, date >= order.orderedAt else {
+            throw SalesOrderManagementError.invalidTransitionDate
+        }
+        if let previousDate = effectivePreviousDate(for: nextStatus, order: order), date < previousDate {
+            throw SalesOrderManagementError.invalidTransitionDate
+        }
+
+        try context.save()
+        let previous = OrderState(order)
+        do {
+            order.statusRawValue = nextStatus.rawValue
+            switch nextStatus {
+            case .inProduction:
+                order.productionStartedAt = date
+            case .readyToShip:
+                if order.fulfillment == .production { order.producedAt = date }
+            case .shipped:
+                order.shippedAt = date
+            case .completed:
+                order.completedAt = date
+            case .new, .awaitingProduction, .cancelled:
+                break
+            }
+            order.updatedAt = date
+            try saving(context)
+            return order
+        } catch {
+            previous.restore(order)
+            context.rollback()
+            throw error
+        }
+    }
+
     static func cancel(
         id: UUID,
         reason: String,
@@ -206,7 +269,12 @@ extension SalesOrderService {
         let orderedAt: Date
         let productionDueAt: Date?
         let shippingDueAt: Date?
+        let productionStartedAt: Date?
+        let producedAt: Date?
+        let shippedAt: Date?
+        let completedAt: Date?
         let note: String
+        let trackingCode: String
         let channelFeePercentage: Decimal
         let channelFeeAmount: Decimal
         let statusRawValue: String
@@ -222,7 +290,12 @@ extension SalesOrderService {
             orderedAt = order.orderedAt
             productionDueAt = order.productionDueAt
             shippingDueAt = order.shippingDueAt
+            productionStartedAt = order.productionStartedAt
+            producedAt = order.producedAt
+            shippedAt = order.shippedAt
+            completedAt = order.completedAt
             note = order.note
+            trackingCode = order.trackingCode
             channelFeePercentage = order.channelFeePercentage
             channelFeeAmount = order.channelFeeAmount
             statusRawValue = order.statusRawValue
@@ -239,7 +312,12 @@ extension SalesOrderService {
             order.orderedAt = orderedAt
             order.productionDueAt = productionDueAt
             order.shippingDueAt = shippingDueAt
+            order.productionStartedAt = productionStartedAt
+            order.producedAt = producedAt
+            order.shippedAt = shippedAt
+            order.completedAt = completedAt
             order.note = note
+            order.trackingCode = trackingCode
             order.channelFeePercentage = channelFeePercentage
             order.channelFeeAmount = channelFeeAmount
             order.statusRawValue = statusRawValue
@@ -255,6 +333,19 @@ extension SalesOrderService {
             throw SalesOrderManagementError.orderUnavailable
         }
         return order
+    }
+
+    private static func effectivePreviousDate(for status: SalesOrderStatus, order: SalesOrder) -> Date? {
+        switch status {
+        case .readyToShip:
+            order.productionStartedAt
+        case .shipped:
+            order.producedAt
+        case .completed:
+            order.shippedAt
+        case .new, .awaitingProduction, .inProduction, .cancelled:
+            nil
+        }
     }
 
     private static func cancellationTargets(for order: SalesOrder, in context: ModelContext) throws -> [CancellationTarget] {

@@ -68,6 +68,7 @@ struct SalesOrderManagementServiceTests {
             orderedAt: orderedAt ?? now,
             productionDueAt: fulfillment == .production ? (productionDueAt ?? now) : productionDueAt,
             shippingDueAt: shippingDueAt ?? now.addingTimeInterval(86_400),
+            trackingCode: "  BR123  ",
             note: "  Entregar pela manha  ",
             channelFeePercentage: fee
         )
@@ -90,6 +91,7 @@ struct SalesOrderManagementServiceTests {
         #expect(order.channel == .other && order.channelDisplayName == "Minha loja")
         #expect(order.buyerName == "Maria" && order.externalReference == "PED-10")
         #expect(order.note == "Entregar pela manha" && order.channelFeePercentage == Decimal(string: "12.5"))
+        #expect(order.trackingCode == "BR123")
         #expect(order.channelFeeAmount == Decimal(string: "6.25") && order.netProfit == Decimal(string: "23.75"))
         #expect(order.productionDueAt == nil && order.updatedAt == changedAt)
         #expect(order.status == .readyToShip && order.itemList.first === previousItem)
@@ -283,10 +285,94 @@ struct SalesOrderManagementServiceTests {
         #expect(try reader.fetch(FetchDescriptor<SalesOrder>()).first?.status == .readyToShip)
     }
 
+    @Test func prontaEntregaAvancaParaDespachadoEConcluidoSemMudarEstoque() throws {
+        let f = try fixture()
+        let shippedAt = now.addingTimeInterval(3_600)
+        let completedAt = shippedAt.addingTimeInterval(3_600)
+
+        _ = try SalesOrderService.transition(id: f.order.id, to: .shipped, date: shippedAt, in: f.context)
+        #expect(f.order.status == .shipped && f.order.shippedAt == shippedAt)
+        #expect(f.order.completedAt == nil && f.variant.quantity == 3)
+
+        _ = try SalesOrderService.transition(id: f.order.id, to: .completed, date: completedAt, in: f.context)
+        #expect(f.order.status == .completed && f.order.completedAt == completedAt)
+        #expect(f.variant.quantity == 3)
+        #expect(try f.context.fetchCount(FetchDescriptor<StockMovement>()) == 2)
+    }
+
+    @Test func producaoRegistraTodasAsDatasEfetivasEmOrdem() throws {
+        let f = try fixture(fulfillment: .production, stock: 0, sold: 3)
+        let startedAt = now.addingTimeInterval(1_000)
+        let producedAt = startedAt.addingTimeInterval(1_000)
+        let shippedAt = producedAt.addingTimeInterval(1_000)
+        let completedAt = shippedAt.addingTimeInterval(1_000)
+
+        _ = try SalesOrderService.transition(id: f.order.id, to: .inProduction, date: startedAt, in: f.context)
+        _ = try SalesOrderService.transition(id: f.order.id, to: .readyToShip, date: producedAt, in: f.context)
+        _ = try SalesOrderService.transition(id: f.order.id, to: .shipped, date: shippedAt, in: f.context)
+        _ = try SalesOrderService.transition(id: f.order.id, to: .completed, date: completedAt, in: f.context)
+
+        #expect(f.order.productionStartedAt == startedAt && f.order.producedAt == producedAt)
+        #expect(f.order.shippedAt == shippedAt && f.order.completedAt == completedAt)
+        #expect(f.order.status == .completed && f.variant.quantity == 0)
+    }
+
+    @Test func acaoProduzidoPodePularInicioDaProducao() throws {
+        let f = try fixture(fulfillment: .production, stock: 0, sold: 1)
+        let producedAt = now.addingTimeInterval(1_000)
+        _ = try SalesOrderService.transition(id: f.order.id, to: .readyToShip, date: producedAt, in: f.context)
+        #expect(f.order.status == .readyToShip && f.order.productionStartedAt == nil)
+        #expect(f.order.producedAt == producedAt)
+    }
+
+    @Test func transicoesInvalidasEDatasForaDeOrdemNaoAlteramPedido() throws {
+        let f = try fixture(fulfillment: .production, stock: 0, sold: 1)
+        #expect(throws: SalesOrderManagementError.transitionNotAllowed) {
+            try SalesOrderService.transition(id: f.order.id, to: .shipped, date: now, in: f.context)
+        }
+        #expect(throws: SalesOrderManagementError.transitionNotAllowed) {
+            try SalesOrderService.transition(id: f.order.id, to: .cancelled, date: now, in: f.context)
+        }
+        #expect(throws: SalesOrderManagementError.invalidTransitionDate) {
+            try SalesOrderService.transition(
+                id: f.order.id, to: .readyToShip, date: now.addingTimeInterval(-1), in: f.context
+            )
+        }
+        #expect(f.order.status == .awaitingProduction && f.order.producedAt == nil)
+        #expect(!f.context.hasChanges)
+    }
+
+    @Test func dataEfetivaNaoPodeAntecederAOperacaoAnterior() throws {
+        let f = try fixture(fulfillment: .production, stock: 0, sold: 1)
+        let startedAt = now.addingTimeInterval(2_000)
+        _ = try SalesOrderService.transition(id: f.order.id, to: .inProduction, date: startedAt, in: f.context)
+        #expect(throws: SalesOrderManagementError.invalidTransitionDate) {
+            try SalesOrderService.transition(id: f.order.id, to: .readyToShip, date: startedAt.addingTimeInterval(-1), in: f.context)
+        }
+        #expect(f.order.status == .inProduction && f.order.producedAt == nil)
+    }
+
+    @Test func falhaNoSaveDaTransicaoRestauraEstadoEDatas() throws {
+        let f = try fixture()
+        let previousUpdatedAt = f.order.updatedAt
+        enum SaveFailure: Error { case simulated }
+        #expect(throws: SaveFailure.simulated) {
+            try SalesOrderService.transition(
+                id: f.order.id, to: .shipped, date: now.addingTimeInterval(1), in: f.context,
+                saving: { _ in throw SaveFailure.simulated }
+            )
+        }
+        #expect(f.order.status == .readyToShip && f.order.shippedAt == nil)
+        #expect(f.order.updatedAt == previousUpdatedAt && !f.context.hasChanges)
+        let reader = ModelContext(TestDatabase.container)
+        #expect(try reader.fetch(FetchDescriptor<SalesOrder>()).first?.status == .readyToShip)
+    }
+
     @Test func errosDeGerenciamentoPossuemMensagensLocalizadas() {
         let errors: [SalesOrderManagementError] = [
             .orderUnavailable, .editingNotAllowed, .cancellationNotAllowed,
-            .invalidOrderData, .stockHistoryMismatch, .quantityOverflow
+            .invalidOrderData, .stockHistoryMismatch, .quantityOverflow,
+            .transitionNotAllowed, .invalidTransitionDate
         ]
         for error in errors {
             #expect(!error.localizedMessage.isEmpty && !error.localizedMessage.hasPrefix("order."))
