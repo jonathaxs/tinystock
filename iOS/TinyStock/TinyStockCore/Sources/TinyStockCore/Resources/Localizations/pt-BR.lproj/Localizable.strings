@@ -329,3 +329,9 @@
 "order.form.netProfit" = "Lucro líquido";
 "order.form.section.notes" = "Observações";
 "order.form.note" = "Observação (opcional)";
+"order.management.error.unavailable" = "Este pedido não está mais disponível.";
+"order.management.error.editing" = "Pedidos despachados, concluídos ou cancelados não podem ser editados.";
+"order.management.error.cancellation" = "Este pedido não pode mais ser cancelado automaticamente.";
+"order.management.error.data" = "O pedido contém dados que esta versão do TinyStock não pode alterar com segurança.";
+"order.management.error.stockHistory" = "O histórico de estoque não corresponde a este pedido. Nenhuma alteração foi feita.";
+"order.management.error.quantityOverflow" = "A devolução deste pedido ultrapassaria o limite de estoque suportado.";

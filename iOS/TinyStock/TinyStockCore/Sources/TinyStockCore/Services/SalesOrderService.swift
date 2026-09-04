@@ -193,7 +193,7 @@ public enum SalesOrderService {
         return result
     }
 
-    private static func validateDates(
+    static func validateDates(
         fulfillment: OrderFulfillment, orderedAt: Date, productionDueAt: Date?,
         shippingDueAt: Date, now: Date, calendar: Calendar
     ) throws {
@@ -215,5 +215,5 @@ public enum SalesOrderService {
         }
     }
 
-    private static func clean(_ text: String) -> String { text.trimmingCharacters(in: .whitespacesAndNewlines) }
+    static func clean(_ text: String) -> String { text.trimmingCharacters(in: .whitespacesAndNewlines) }
 }

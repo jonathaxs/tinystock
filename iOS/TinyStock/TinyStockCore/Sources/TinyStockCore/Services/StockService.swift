@@ -203,6 +203,40 @@ public enum StockService {
                          note: "", referenceID: orderID, reversedMovementID: nil, date: date, in: context)
     }
 
+    /// Somente o cancelamento coordenado pode devolver uma baixa de pedido ao estoque.
+    @discardableResult
+    static func reverseOrderWithdrawal(
+        _ movement: StockMovement,
+        orderID: UUID,
+        variant: ProductVariant,
+        product: Product,
+        note: String,
+        date: Date,
+        in context: ModelContext
+    ) throws -> StockMovement {
+        guard movement.kind == .orderWithdrawal, movement.referenceID == orderID else {
+            throw StockError.orderManagedMovement
+        }
+        guard movement.reversedAt == nil else { throw StockError.alreadyReversed }
+        guard movement.belongs(to: variant, product: product) else { throw StockError.movementMismatch }
+
+        let oppositeDelta = movement.quantityDelta.multipliedReportingOverflow(by: -1)
+        guard !oppositeDelta.overflow else { throw StockError.quantityOverflow }
+        let reversal = try apply(
+            delta: oppositeDelta.partialValue,
+            kind: .reversal,
+            to: variant,
+            product: product,
+            note: note,
+            referenceID: orderID,
+            reversedMovementID: movement.id,
+            date: date,
+            in: context
+        )
+        movement.reversedAt = date
+        return reversal
+    }
+
     /// Registra o saldo informado junto com a criação de uma variação.
     @discardableResult
     static func registerInitialStock(

@@ -329,3 +329,9 @@
 "order.form.netProfit" = "Net profit";
 "order.form.section.notes" = "Notes";
 "order.form.note" = "Note (optional)";
+"order.management.error.unavailable" = "This order is no longer available.";
+"order.management.error.editing" = "Shipped, completed or cancelled orders cannot be edited.";
+"order.management.error.cancellation" = "This order can no longer be cancelled automatically.";
+"order.management.error.data" = "The order contains data that this version of TinyStock cannot safely change.";
+"order.management.error.stockHistory" = "The stock history does not match this order. No changes were made.";
+"order.management.error.quantityOverflow" = "Returning this order would exceed the supported stock limit.";

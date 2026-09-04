@@ -26,6 +26,7 @@ public final class SalesOrder {
     public var shippedAt: Date?
     public var completedAt: Date?
     public var cancelledAt: Date?
+    public var cancellationReason: String = ""
     public var trackingCode: String = ""
     public var note: String = ""
 
@@ -50,6 +51,7 @@ public final class SalesOrder {
         orderedAt: Date = Date(),
         productionDueAt: Date? = nil,
         shippingDueAt: Date? = nil,
+        cancellationReason: String = "",
         trackingCode: String = "",
         note: String = "",
         channelFeePercentage: Decimal = 0,
@@ -68,6 +70,7 @@ public final class SalesOrder {
         self.orderedAt = orderedAt
         self.productionDueAt = productionDueAt
         self.shippingDueAt = shippingDueAt
+        self.cancellationReason = cancellationReason
         self.trackingCode = trackingCode
         self.note = note
         self.channelFeePercentage = channelFeePercentage
