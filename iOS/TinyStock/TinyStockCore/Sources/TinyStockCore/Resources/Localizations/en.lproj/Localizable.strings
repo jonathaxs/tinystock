@@ -10,7 +10,7 @@
 
 /* MARK: - Tabs */
 "tab.products" = "Products";
-"tab.sales" = "Sales";
+"tab.sales" = "Calendar";
 "tab.reports" = "Reports";
 "tab.settings" = "Settings";
 
@@ -373,3 +373,17 @@
 "order.edit.title" = "Edit order";
 "order.edit.items.footer" = "Product, variation, quantity and fulfillment are preserved from the original sale.";
 "order.edit.tracking" = "Tracking code";
+
+// Calendario operacional
+"order.calendar.mode" = "View";
+"order.calendar.day" = "Day";
+"order.calendar.list" = "List";
+"order.calendar.today" = "Today";
+"order.calendar.previousMonth" = "Previous month";
+"order.calendar.nextMonth" = "Next month";
+"order.calendar.dayCount" = "Orders: %@";
+"order.calendar.filter" = "Filter orders";
+"order.calendar.allStatuses" = "All orders";
+"order.calendar.overdue" = "Overdue";
+"order.calendar.overdueBadge" = "Overdue";
+"order.calendar.empty" = "No orders for this selection";

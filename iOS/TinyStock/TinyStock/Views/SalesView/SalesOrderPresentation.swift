@@ -86,6 +86,19 @@ enum SalesOrderPresentation {
         return String(format: format, date)
     }
 
+    static func calendarTitle(for entry: SalesOrderScheduleEntry) -> String {
+        let format: String
+        switch entry.kind {
+        case .production: format = String(localized: "order.queue.productionDate", bundle: .tinyStockCore)
+        case .shipping: format = String(localized: "order.queue.shippingDate", bundle: .tinyStockCore)
+        case .shipped: format = String(localized: "order.queue.shippedDate", bundle: .tinyStockCore)
+        case .completed: format = String(localized: "order.queue.completedDate", bundle: .tinyStockCore)
+        case .cancelled: format = String(localized: "order.queue.cancelledDate", bundle: .tinyStockCore)
+        case .ordered: format = String(localized: "order.queue.orderDate", bundle: .tinyStockCore)
+        }
+        return String(format: format, entry.date.formatted(date: .abbreviated, time: .omitted))
+    }
+
     static func message(for error: Error) -> String {
         if let error = error as? SalesOrderManagementError { return error.localizedMessage }
         if let error = error as? SalesOrderError { return error.localizedMessage }

@@ -10,7 +10,7 @@
 
 /* MARK: - Abas */
 "tab.products" = "Produtos";
-"tab.sales" = "Vendas";
+"tab.sales" = "Calendário";
 "tab.reports" = "Relatórios";
 "tab.settings" = "Ajustes";
 
@@ -373,3 +373,17 @@
 "order.edit.title" = "Editar pedido";
 "order.edit.items.footer" = "Produto, variação, quantidade e atendimento são preservados da venda original.";
 "order.edit.tracking" = "Código de rastreio";
+
+// Calendario operacional
+"order.calendar.mode" = "Visualização";
+"order.calendar.day" = "Dia";
+"order.calendar.list" = "Lista";
+"order.calendar.today" = "Hoje";
+"order.calendar.previousMonth" = "Mês anterior";
+"order.calendar.nextMonth" = "Próximo mês";
+"order.calendar.dayCount" = "Pedidos: %@";
+"order.calendar.filter" = "Filtrar pedidos";
+"order.calendar.allStatuses" = "Todos os pedidos";
+"order.calendar.overdue" = "Atrasados";
+"order.calendar.overdueBadge" = "Atrasado";
+"order.calendar.empty" = "Nenhum pedido nesta seleção";

@@ -1,7 +1,7 @@
 // ⌘
 //  TinyStock/Views/MainView.swift
 //
-//  Propósito: Hospeda o TabView principal e roteia pras telas de Produtos, Vendas, Relatórios e Ajustes.
+//  Propósito: Hospeda o TabView principal e roteia pras telas de Produtos, Calendário, Relatórios e Ajustes.
 //
 //  Created by Jonathas Motta (@jonathaxs) on 2026-08-07.
 // ⌘
@@ -40,7 +40,7 @@ struct MainView: View {
 
             SalesView(storeID: storeSession.selectedStoreID)
                 .tabItem {
-                    Label(String(localized: "tab.sales", bundle: .tinyStockCore), systemImage: "cart.fill")
+                    Label(String(localized: "tab.sales", bundle: .tinyStockCore), systemImage: "calendar")
                 }
                 .tag(Tab.sales)
 

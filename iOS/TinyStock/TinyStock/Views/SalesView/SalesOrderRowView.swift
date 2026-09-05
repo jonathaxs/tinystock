@@ -6,7 +6,17 @@ import TinyStockCore
 
 struct SalesOrderRowView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.calendar) private var calendar
     let order: SalesOrder
+    var selectedDate: Date? = nil
+    var now: Date = Date()
+
+    private var deadlineTitles: [String] {
+        guard let selectedDate else { return [SalesOrderPresentation.deadlineTitle(for: order)] }
+        return SalesOrderSchedule.entries(for: order)
+            .filter { calendar.isDate($0.date, inSameDayAs: selectedDate) }
+            .map { SalesOrderPresentation.calendarTitle(for: $0) }
+    }
 
     private var firstItem: SalesOrderItem? { order.itemList.first }
     private var title: String {
@@ -48,9 +58,16 @@ struct SalesOrderRowView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             }
-            Label(SalesOrderPresentation.deadlineTitle(for: order), systemImage: "calendar")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            ForEach(Array(deadlineTitles.enumerated()), id: \.offset) { _, title in
+                Label(title, systemImage: "calendar")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            if SalesOrderSchedule.isOverdue(order, now: now, calendar: calendar) {
+                Label(String(localized: "order.calendar.overdueBadge", bundle: .tinyStockCore), systemImage: "exclamationmark.circle")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.red)
+            }
         }
     }
 
