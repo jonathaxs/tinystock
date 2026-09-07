@@ -17,6 +17,7 @@
 
 /* MARK: - Common actions */
 "common.save" = "Save";
+"common.apply" = "Apply";
 "common.cancel" = "Cancel";
 "common.edit" = "Edit";
 "common.delete" = "Delete";
@@ -133,15 +134,39 @@
 
 /* MARK: - Reports */
 "reports.placeholder.title" = "No data yet";
-"reports.placeholder.message" = "Reports will appear here once you register products and sales.";
+"reports.placeholder.message" = "Reports will appear here once you register orders.";
 "reports.period.today" = "Today";
 "reports.period.sevenDays" = "7 days";
 "reports.period.month" = "Month";
 "reports.period.all" = "All";
-"reports.metric.revenue" = "Total sold";
+"reports.period.custom" = "Custom";
+"reports.period.label" = "Period";
+"reports.custom.title" = "Custom period";
+"reports.custom.start" = "Start date";
+"reports.custom.end" = "End date";
+"reports.custom.invalid" = "The end date cannot be before the start date.";
+"reports.received.title" = "Orders received in the period";
+"reports.metric.revenue" = "Order value";
 "reports.metric.profit" = "Net profit";
+"reports.metric.netProfit" = "Estimated net profit";
+"reports.metric.orders" = "Orders received";
 "reports.metric.sales" = "Sales";
 "reports.metric.units" = "Units";
+"reports.metric.cost" = "Production cost";
+"reports.metric.fees" = "Channel fees";
+"reports.activity.title" = "Activity in the period";
+"reports.activity.dispatched" = "Dispatched";
+"reports.activity.completed" = "Completed";
+"reports.activity.cancelled" = "Cancelled";
+"reports.operation.title" = "Current operation";
+"reports.operation.toProduce" = "To produce";
+"reports.operation.readyToShip" = "Ready to dispatch";
+"reports.operation.overdue" = "Overdue";
+"reports.operation.shipped" = "Dispatched";
+"reports.operation.openCalendar" = "Opens the Calendar with this filter.";
+"reports.count.orders.one" = "%d order";
+"reports.count.orders.other" = "%d orders";
+"reports.count.units" = "%@ units";
 "reports.daily.title" = "By day";
 "reports.daily.sales.one" = "%d sale";
 "reports.daily.sales.other" = "%d sales";
@@ -149,8 +174,9 @@
 "reports.empty.period.title" = "No sales in this period";
 "reports.empty.period.message" = "Choose another period or register a new sale.";
 "reports.bestSellers.title" = "Best sellers";
-"reports.bestSellers.units.one" = "%d unit sold";
-"reports.bestSellers.units.other" = "%d units sold";
+"reports.bestSellers.units.one" = "%@ unit sold";
+"reports.bestSellers.units.other" = "%@ units sold";
+"reports.channels.title" = "By sales channel";
 "reports.restock.title" = "Needs restocking";
 "reports.restock.stock" = "%1$d in stock · minimum %2$d";
 

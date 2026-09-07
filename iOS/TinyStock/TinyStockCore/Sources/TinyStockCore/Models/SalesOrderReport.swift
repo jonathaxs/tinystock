@@ -106,6 +106,14 @@ public struct SalesOrderProductRanking: Identifiable, Equatable, Sendable {
     public var id: UUID { productID }
     // Taxas pertencem ao pedido; nao ha rateio arbitrario de lucro liquido por produto.
     public var grossProfit: Decimal { revenue - cost }
+
+    public init(productID: UUID, productName: String, quantity: Decimal, revenue: Decimal, cost: Decimal) {
+        self.productID = productID
+        self.productName = productName
+        self.quantity = quantity
+        self.revenue = revenue
+        self.cost = cost
+    }
 }
 
 public struct SalesOrderChannelSummary: Identifiable, Equatable, Sendable {

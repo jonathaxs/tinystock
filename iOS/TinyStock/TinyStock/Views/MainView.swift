@@ -28,6 +28,7 @@ struct MainView: View {
 
     // Aba selecionada, persistida pra permitir navegação entre abas no futuro.
     @AppStorage("app.selectedTab") private var selectedTab: Int = 0
+    @State private var calendarFilterRequest: CalendarOrderFilter?
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -38,13 +39,19 @@ struct MainView: View {
                 }
                 .tag(Tab.products)
 
-            SalesView(storeID: storeSession.selectedStoreID)
+            SalesView(
+                storeID: storeSession.selectedStoreID,
+                filterRequest: $calendarFilterRequest
+            )
                 .tabItem {
                     Label(String(localized: "tab.sales", bundle: .tinyStockCore), systemImage: "calendar")
                 }
                 .tag(Tab.sales)
 
-            ReportsView(storeID: storeSession.selectedStoreID)
+            ReportsView(storeID: storeSession.selectedStoreID) { filter in
+                calendarFilterRequest = filter
+                selectedTab = Tab.sales
+            }
                 .tabItem {
                     Label(String(localized: "tab.reports", bundle: .tinyStockCore), systemImage: "chart.bar.fill")
                 }

@@ -12,26 +12,26 @@ import TinyStockCore
 struct ReportDayRowView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
-    let group: SaleDayGroup
+    let group: SalesOrderReportDay
 
     private var salesCountText: String {
-        if group.sales.count == 1 {
+        if group.totals.orderCount == 1 {
             return String(
-                format: String(localized: "reports.daily.sales.one", bundle: .tinyStockCore),
-                group.sales.count
+                format: String(localized: "reports.count.orders.one", bundle: .tinyStockCore),
+                group.totals.orderCount
             )
         }
 
         return String(
-            format: String(localized: "reports.daily.sales.other", bundle: .tinyStockCore),
-            group.sales.count
+            format: String(localized: "reports.count.orders.other", bundle: .tinyStockCore),
+            group.totals.orderCount
         )
     }
 
     private var profitText: String {
         String(
             format: String(localized: "reports.daily.profit", bundle: .tinyStockCore),
-            group.profit.currencyText
+            group.totals.netProfit.currencyText
         )
     }
 
@@ -59,7 +59,7 @@ struct ReportDayRowView: View {
 
     private var dayInformation: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(group.title())
+            Text(group.day.formatted(date: .abbreviated, time: .omitted))
                 .font(.headline)
 
             Text(salesCountText)
@@ -70,13 +70,13 @@ struct ReportDayRowView: View {
 
     private var financialInformation: some View {
         VStack(alignment: dynamicTypeSize.isAccessibilitySize ? .leading : .trailing, spacing: 4) {
-            Text(group.total.currencyText)
+            Text(group.totals.revenue.currencyText)
                 .font(.headline)
                 .monospacedDigit()
 
             Text(profitText)
                 .font(.subheadline)
-                .foregroundStyle(group.profit < 0 ? Color.red : Color.secondary)
+                .foregroundStyle(group.totals.netProfit < 0 ? Color.red : Color.secondary)
                 .monospacedDigit()
         }
     }

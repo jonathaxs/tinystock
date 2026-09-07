@@ -13,19 +13,19 @@ struct BestSellingRowView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     let position: Int
-    let ranking: ProductSalesRanking
+    let ranking: SalesOrderProductRanking
 
     private var unitsText: String {
         if ranking.quantity == 1 {
             return String(
                 format: String(localized: "reports.bestSellers.units.one", bundle: .tinyStockCore),
-                ranking.quantity
+                ranking.quantity.formatted(.number.precision(.fractionLength(0)))
             )
         }
 
         return String(
             format: String(localized: "reports.bestSellers.units.other", bundle: .tinyStockCore),
-            ranking.quantity
+            ranking.quantity.formatted(.number.precision(.fractionLength(0)))
         )
     }
 
@@ -75,11 +75,12 @@ struct BestSellingRowView: View {
 #Preview {
     BestSellingRowView(
         position: 1,
-        ranking: ProductSalesRanking(
+        ranking: SalesOrderProductRanking(
             productID: UUID(),
             productName: "Amigurumi Gato",
             quantity: 12,
-            revenue: 540
+            revenue: 540,
+            cost: 240
         )
     )
     .padding()

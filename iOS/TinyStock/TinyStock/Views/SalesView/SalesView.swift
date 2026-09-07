@@ -10,15 +10,17 @@ struct SalesView: View {
     @Environment(\.calendar) private var calendar
     private let storeID: UUID
     @Query private var orders: [SalesOrder]
+    @Binding private var filterRequest: CalendarOrderFilter?
     @State private var pendingCancellation: SalesOrder?
     @State private var cancellationReason = ""
     @State private var errorMessage: String?
     @AppStorage("orders.displayMode") private var displayMode: OrderDisplayMode = .day
     @State private var selectedDate = Date()
-    @State private var filter: OrderQueueFilter = .all
+    @State private var filter: CalendarOrderFilter = .all
 
-    init(storeID: UUID) {
+    init(storeID: UUID, filterRequest: Binding<CalendarOrderFilter?> = .constant(nil)) {
         self.storeID = storeID
+        _filterRequest = filterRequest
         _orders = Query(
             filter: #Predicate<SalesOrder> { $0.storeID == storeID },
             sort: \SalesOrder.orderedAt,
@@ -28,11 +30,7 @@ struct SalesView: View {
 
     private func filteredOrders(now: Date) -> [SalesOrder] {
         orders.filter { order in
-            switch filter {
-            case .all: true
-            case .overdue: SalesOrderSchedule.isOverdue(order, now: now, calendar: calendar)
-            case .status(let status): order.status == status
-            }
+            filter.includes(order, now: now, calendar: calendar)
         }
     }
 
@@ -48,10 +46,11 @@ struct SalesView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Picker(String(localized: "order.calendar.filter", bundle: .tinyStockCore), selection: $filter) {
-                            Text(String(localized: "order.calendar.allStatuses", bundle: .tinyStockCore)).tag(OrderQueueFilter.all)
-                            Text(String(localized: "order.calendar.overdue", bundle: .tinyStockCore)).tag(OrderQueueFilter.overdue)
+                            Text(String(localized: "order.calendar.allStatuses", bundle: .tinyStockCore)).tag(CalendarOrderFilter.all)
+                            Text(String(localized: "order.calendar.overdue", bundle: .tinyStockCore)).tag(CalendarOrderFilter.overdue)
+                            Text(String(localized: "reports.operation.toProduce", bundle: .tinyStockCore)).tag(CalendarOrderFilter.production)
                             ForEach(SalesOrderStatus.allCases, id: \.self) { status in
-                                Text(status.localizedName).tag(OrderQueueFilter.status(status))
+                                Text(status.localizedName).tag(CalendarOrderFilter.status(status))
                             }
                         }
                     } label: {
@@ -85,6 +84,14 @@ struct SalesView: View {
         .onChange(of: filter) { _, newValue in
             // Atrasados costuma envolver dias anteriores ao selecionado no calendario.
             if newValue == .overdue { displayMode = .list }
+        }
+        .onChange(of: filterRequest, initial: true) { _, request in
+            guard let request else { return }
+            filter = request
+            displayMode = .list
+            selectedDate = Date()
+            // A solicitacao e consumida para que o mesmo atalho funcione novamente depois.
+            filterRequest = nil
         }
     }
 
@@ -209,18 +216,6 @@ struct SalesView: View {
 
 private enum OrderDisplayMode: String {
     case day, list
-}
-
-private enum OrderQueueFilter: Hashable {
-    case all, overdue, status(SalesOrderStatus)
-
-    var title: String {
-        switch self {
-        case .all: String(localized: "order.calendar.allStatuses", bundle: .tinyStockCore)
-        case .overdue: String(localized: "order.calendar.overdue", bundle: .tinyStockCore)
-        case .status(let status): status.localizedName
-        }
-    }
 }
 
 private struct SalesOrderQueueSection: Identifiable {

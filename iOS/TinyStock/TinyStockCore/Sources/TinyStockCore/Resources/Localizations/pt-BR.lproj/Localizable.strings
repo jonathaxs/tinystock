@@ -17,6 +17,7 @@
 
 /* MARK: - Ações comuns */
 "common.save" = "Salvar";
+"common.apply" = "Aplicar";
 "common.cancel" = "Cancelar";
 "common.edit" = "Editar";
 "common.delete" = "Excluir";
@@ -133,15 +134,39 @@
 
 /* MARK: - Relatórios */
 "reports.placeholder.title" = "Sem dados ainda";
-"reports.placeholder.message" = "Os relatórios aparecem aqui quando você cadastrar produtos e vendas.";
+"reports.placeholder.message" = "Os relatórios aparecem aqui quando você registrar pedidos.";
 "reports.period.today" = "Hoje";
 "reports.period.sevenDays" = "7 dias";
 "reports.period.month" = "Mês";
 "reports.period.all" = "Tudo";
-"reports.metric.revenue" = "Total vendido";
+"reports.period.custom" = "Personalizado";
+"reports.period.label" = "Período";
+"reports.custom.title" = "Período personalizado";
+"reports.custom.start" = "Data inicial";
+"reports.custom.end" = "Data final";
+"reports.custom.invalid" = "A data final não pode ser anterior à data inicial.";
+"reports.received.title" = "Pedidos recebidos no período";
+"reports.metric.revenue" = "Valor dos pedidos";
 "reports.metric.profit" = "Lucro líquido";
+"reports.metric.netProfit" = "Lucro líquido estimado";
+"reports.metric.orders" = "Pedidos recebidos";
 "reports.metric.sales" = "Vendas";
 "reports.metric.units" = "Unidades";
+"reports.metric.cost" = "Custo de produção";
+"reports.metric.fees" = "Taxas dos canais";
+"reports.activity.title" = "Atividade no período";
+"reports.activity.dispatched" = "Despachados";
+"reports.activity.completed" = "Concluídos";
+"reports.activity.cancelled" = "Cancelados";
+"reports.operation.title" = "Operação atual";
+"reports.operation.toProduce" = "A produzir";
+"reports.operation.readyToShip" = "Prontos para despacho";
+"reports.operation.overdue" = "Atrasados";
+"reports.operation.shipped" = "Despachados";
+"reports.operation.openCalendar" = "Abre o Calendário com este filtro.";
+"reports.count.orders.one" = "%d pedido";
+"reports.count.orders.other" = "%d pedidos";
+"reports.count.units" = "%@ unidades";
 "reports.daily.title" = "Por dia";
 "reports.daily.sales.one" = "%d venda";
 "reports.daily.sales.other" = "%d vendas";
@@ -149,8 +174,9 @@
 "reports.empty.period.title" = "Nenhuma venda no período";
 "reports.empty.period.message" = "Escolha outro período ou registre uma nova venda.";
 "reports.bestSellers.title" = "Mais vendidos";
-"reports.bestSellers.units.one" = "%d unidade vendida";
-"reports.bestSellers.units.other" = "%d unidades vendidas";
+"reports.bestSellers.units.one" = "%@ unidade vendida";
+"reports.bestSellers.units.other" = "%@ unidades vendidas";
+"reports.channels.title" = "Por canal de venda";
 "reports.restock.title" = "Precisa repor";
 "reports.restock.stock" = "%1$d un · mínimo %2$d";
 
