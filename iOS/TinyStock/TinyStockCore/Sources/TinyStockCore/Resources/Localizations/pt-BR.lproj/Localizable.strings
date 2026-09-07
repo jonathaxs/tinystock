@@ -413,3 +413,13 @@
 "order.calendar.overdue" = "Atrasados";
 "order.calendar.overdueBadge" = "Atrasado";
 "order.calendar.empty" = "Nenhum pedido nesta seleção";
+
+/* MARK: - Lembretes de pedidos */
+"reminder.production.tomorrow" = "Produção para amanhã";
+"reminder.production.today" = "Produção para hoje";
+"reminder.production.overdue" = "Produção atrasada";
+"reminder.shipping.tomorrow" = "Despacho para amanhã";
+"reminder.shipping.today" = "Despacho para hoje";
+"reminder.shipping.overdue" = "Despacho atrasado";
+"reminder.body" = "%1$@: %2$@";
+"reminder.product.fallback" = "Pedido";
