@@ -44,12 +44,12 @@ public final class OrderReminderService {
 
     public func authorization() async -> OrderReminderAuthorization { await center.authorization() }
 
-    /// A R19 chamara este metodo somente na acao de ativar notificacoes.
+    /// Solicitar permissao somente na acao explicita de ativar notificacoes.
     public func requestAuthorization() async throws -> Bool { try await center.requestAuthorization() }
 
     /// Deve receber um retrato completo de todas as lojas, apos salvar os dados com sucesso.
     /// O teto de 60 e uma politica conservadora do app; a fila prioriza os prazos proximos.
-    /// A R19 renovara o plano ao abrir o app, editar pedidos ou mudar preferencias/fuso/idioma.
+    /// Renovar o plano ao abrir o app, editar pedidos ou mudar preferencias/fuso/idioma.
     public func synchronize(
         orders: [SalesOrder], stores: [StoreProfile], settings: OrderReminderSettings,
         now: Date = Date(), calendar: Calendar = .current

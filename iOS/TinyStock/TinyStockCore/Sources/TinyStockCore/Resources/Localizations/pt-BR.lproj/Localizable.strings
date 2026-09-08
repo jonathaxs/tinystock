@@ -423,3 +423,37 @@
 "reminder.shipping.overdue" = "Despacho atrasado";
 "reminder.body" = "%1$@: %2$@";
 "reminder.product.fallback" = "Pedido";
+
+/* Configuracoes de notificacoes */
+"notifications.title" = "Notificações";
+"notifications.enabled" = "Lembretes de pedidos";
+"notifications.scope" = "Todas as lojas ativas neste dispositivo.";
+"notifications.permission" = "Permissão do iOS";
+"notifications.permission.status" = "Estado";
+"notifications.permission.request" = "Permitir notificações";
+"notifications.permission.settings" = "Abrir ajustes de notificações";
+"notifications.authorization.notDetermined" = "Não solicitada";
+"notifications.authorization.denied" = "Bloqueada no iOS";
+"notifications.authorization.authorized" = "Permitida";
+"notifications.authorization.provisional" = "Entrega silenciosa";
+"notifications.authorization.unknown" = "Indisponível";
+"notifications.stages" = "Etapas";
+"notifications.production" = "Produção";
+"notifications.shipping" = "Despacho";
+"notifications.when" = "Quando lembrar";
+"notifications.dayBefore" = "Na véspera do prazo";
+"notifications.dueDay" = "No dia do prazo";
+"notifications.overdue" = "No primeiro dia de atraso";
+"notifications.time" = "Horário dos lembretes";
+"notifications.time.footer" = "Os lembretes usam este horário local, não o horário do pedido. O aviso de atraso ocorre uma única vez, no dia seguinte ao prazo.";
+"notifications.sound" = "Som";
+"notifications.scheduled" = "Lembretes agendados";
+"notifications.deferred" = "Aguardando espaço";
+"notifications.capacity.footer" = "Os lembretes mais próximos têm prioridade. Abra o TinyStock regularmente para agendar os demais conforme houver espaço.";
+"notifications.retry" = "Tentar novamente";
+"notifications.error.preferences" = "Não foi possível carregar ou salvar as preferências de notificações. Configure suas preferências novamente.";
+"notifications.error.permission" = "O iOS não concluiu a solicitação de permissão. Tente novamente.";
+"notifications.error.data" = "Não foi possível ler os pedidos. Os lembretes agendados anteriormente foram mantidos.";
+"notifications.error.scheduling" = "Não foi possível atualizar alguns lembretes. Tente novamente.";
+"notifications.order.unavailable" = "Pedido indisponível ou loja arquivada.";
+"notifications.order.error" = "Não foi possível abrir o pedido. Tente novamente pelo Calendário.";

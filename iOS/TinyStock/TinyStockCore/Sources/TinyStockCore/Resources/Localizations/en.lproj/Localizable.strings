@@ -423,3 +423,37 @@
 "reminder.shipping.overdue" = "Dispatch overdue";
 "reminder.body" = "%1$@: %2$@";
 "reminder.product.fallback" = "Order";
+
+/* Notification settings */
+"notifications.title" = "Notifications";
+"notifications.enabled" = "Order reminders";
+"notifications.scope" = "All active stores on this device.";
+"notifications.permission" = "iOS permission";
+"notifications.permission.status" = "Status";
+"notifications.permission.request" = "Allow notifications";
+"notifications.permission.settings" = "Open notification settings";
+"notifications.authorization.notDetermined" = "Not requested";
+"notifications.authorization.denied" = "Blocked in iOS";
+"notifications.authorization.authorized" = "Allowed";
+"notifications.authorization.provisional" = "Quiet delivery";
+"notifications.authorization.unknown" = "Unavailable";
+"notifications.stages" = "Stages";
+"notifications.production" = "Production";
+"notifications.shipping" = "Dispatch";
+"notifications.when" = "When to remind";
+"notifications.dayBefore" = "Day before the deadline";
+"notifications.dueDay" = "On the deadline";
+"notifications.overdue" = "First day overdue";
+"notifications.time" = "Reminder time";
+"notifications.time.footer" = "Reminders use this local time, not the order time. The overdue reminder occurs only once, on the day after the deadline.";
+"notifications.sound" = "Sound";
+"notifications.scheduled" = "Scheduled reminders";
+"notifications.deferred" = "Waiting for space";
+"notifications.capacity.footer" = "The nearest reminders take priority. Open TinyStock regularly to schedule the remaining reminders as space becomes available.";
+"notifications.retry" = "Try again";
+"notifications.error.preferences" = "Notification preferences could not be loaded or saved. Set your preferences again.";
+"notifications.error.permission" = "iOS could not complete the permission request. Try again.";
+"notifications.error.data" = "Orders could not be read. Previously scheduled reminders have been kept.";
+"notifications.error.scheduling" = "Some reminders could not be updated. Try again.";
+"notifications.order.unavailable" = "Order unavailable or store archived.";
+"notifications.order.error" = "The order could not be opened. Try again from Calendar.";
