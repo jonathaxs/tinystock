@@ -53,6 +53,13 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 storeSection
+                Section {
+                    NavigationLink {
+                        NotificationSettingsView()
+                    } label: {
+                        Label(String(localized: "notifications.title", bundle: .tinyStockCore), systemImage: "bell.badge")
+                    }
+                }
                 iCloudBackupSection
                 localBackupSection
             }

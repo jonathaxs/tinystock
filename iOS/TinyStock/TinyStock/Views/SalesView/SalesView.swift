@@ -11,6 +11,7 @@ struct SalesView: View {
     private let storeID: UUID
     @Query private var orders: [SalesOrder]
     @Binding private var filterRequest: CalendarOrderFilter?
+    @Binding private var reminderRoute: OrderReminderRoute?
     @State private var pendingCancellation: SalesOrder?
     @State private var cancellationReason = ""
     @State private var errorMessage: String?
@@ -18,9 +19,13 @@ struct SalesView: View {
     @State private var selectedDate = Date()
     @State private var filter: CalendarOrderFilter = .all
 
-    init(storeID: UUID, filterRequest: Binding<CalendarOrderFilter?> = .constant(nil)) {
+    init(
+        storeID: UUID, filterRequest: Binding<CalendarOrderFilter?> = .constant(nil),
+        reminderRoute: Binding<OrderReminderRoute?> = .constant(nil)
+    ) {
         self.storeID = storeID
         _filterRequest = filterRequest
+        _reminderRoute = reminderRoute
         _orders = Query(
             filter: #Predicate<SalesOrder> { $0.storeID == storeID },
             sort: \SalesOrder.orderedAt,
@@ -41,6 +46,9 @@ struct SalesView: View {
                 orderList(now: context.date)
             }
             .navigationTitle(String(localized: "tab.sales", bundle: .tinyStockCore))
+            .navigationDestination(item: scopedReminderRoute) { route in
+                ReminderOrderDestination(route: route)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) { StoreSwitcherView() }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -93,6 +101,16 @@ struct SalesView: View {
             // A solicitacao e consumida para que o mesmo atalho funcione novamente depois.
             filterRequest = nil
         }
+    }
+
+    private var scopedReminderRoute: Binding<OrderReminderRoute?> {
+        Binding(
+            get: { reminderRoute?.storeID == storeID ? reminderRoute : nil },
+            set: { route in
+                // Uma pilha sendo removida nao pode limpar o destino da nova loja.
+                if route != nil || reminderRoute?.storeID == storeID { reminderRoute = route }
+            }
+        )
     }
 
     private func orderList(now: Date) -> some View {

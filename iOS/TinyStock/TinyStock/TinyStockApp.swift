@@ -12,12 +12,14 @@ import TinyStockCore
 
 @main
 struct TinyStockApp: App {
+    @UIApplicationDelegateAdaptor(TinyStockAppDelegate.self) private var appDelegate
 
     // Sinaliza falha ao abrir o banco (disco cheio, arquivo corrompido, etc.).
     // Quando true, o app mostra uma tela de erro em vez de travar.
     private let containerInitFailed: Bool
     private let sharedModelContainer: ModelContainer
     private let storeSession: StoreSession
+    private let reminderCoordinator: OrderReminderCoordinator
 
     init() {
         let schema = Schema([
@@ -61,6 +63,11 @@ struct TinyStockApp: App {
             storeSession = try! StoreSession.bootstrap(in: context)
             containerInitFailed = true
         }
+        let container = sharedModelContainer
+        reminderCoordinator = OrderReminderCoordinator(
+            service: OrderReminderService(center: SystemOrderReminderCenter()),
+            loadSnapshot: { try OrderReminderSnapshot(container: container) }
+        )
     }
 
     var body: some Scene {
@@ -70,9 +77,12 @@ struct TinyStockApp: App {
                     DataStoreErrorView()
                 } else {
                     MainView()
+                        .modifier(OrderReminderLifecycle(coordinator: reminderCoordinator))
                 }
             }
             .environment(storeSession)
+            .environment(reminderCoordinator)
+            .environment(appDelegate.reminderRouter)
         }
         .modelContainer(sharedModelContainer)
     }

@@ -25,10 +25,14 @@ extension MainView {
 struct MainView: View {
 
     @Environment(StoreSession.self) private var storeSession
+    @Environment(OrderReminderRouter.self) private var reminderRouter
+    @Environment(\.modelContext) private var modelContext
 
     // Aba selecionada, persistida pra permitir navegação entre abas no futuro.
     @AppStorage("app.selectedTab") private var selectedTab: Int = 0
     @State private var calendarFilterRequest: CalendarOrderFilter?
+    @State private var reminderRoute: OrderReminderRoute?
+    @State private var reminderError: String?
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -41,8 +45,10 @@ struct MainView: View {
 
             SalesView(
                 storeID: storeSession.selectedStoreID,
-                filterRequest: $calendarFilterRequest
+                filterRequest: $calendarFilterRequest,
+                reminderRoute: $reminderRoute
             )
+                .id(storeSession.selectedStoreID)
                 .tabItem {
                     Label(String(localized: "tab.sales", bundle: .tinyStockCore), systemImage: "calendar")
                 }
@@ -63,6 +69,30 @@ struct MainView: View {
                 }
                 .tag(Tab.settings)
         }
+        .onChange(of: reminderRouter.request, initial: true) { _, route in
+            guard let route else { return }
+            reminderRouter.request = nil
+            do {
+                guard let destination = try route.resolve(in: modelContext) else {
+                    reminderError = String(localized: "notifications.order.unavailable", bundle: .tinyStockCore)
+                    return
+                }
+                try storeSession.select(destination.store)
+                calendarFilterRequest = .all
+                selectedTab = Tab.sales
+                reminderRoute = route
+            } catch {
+                reminderError = String(localized: "notifications.order.error", bundle: .tinyStockCore)
+            }
+        }
+        .onChange(of: storeSession.selectedStoreID) { _, storeID in
+            if reminderRoute?.storeID != storeID { reminderRoute = nil }
+        }
+        .alert(String(localized: "notifications.title", bundle: .tinyStockCore), isPresented: Binding(
+            get: { reminderError != nil }, set: { if !$0 { reminderError = nil } }
+        )) {
+            Button("OK") { reminderError = nil }
+        } message: { Text(reminderError ?? "") }
     }
 }
 
@@ -71,5 +101,6 @@ struct MainView: View {
 
     MainView()
         .environment(StoreSession(selectedStoreID: storeID))
+        .environment(OrderReminderRouter())
         .modelContainer(for: [StoreProfile.self, Product.self, ProductVariant.self, StockMovement.self, Sale.self, SaleItem.self, SalesOrder.self, SalesOrderItem.self], inMemory: true)
 }
