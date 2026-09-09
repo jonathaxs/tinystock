@@ -1,7 +1,7 @@
 // ⌘
 //  TinyStock/Views/SettingsView/BackupSettingsView.swift
 //
-//  Propósito: Reunir os backups locais e do iCloud Drive da loja selecionada.
+//  Propósito: Reunir os backups locais e do iCloud Drive de todas as lojas.
 //
 //  Created by Jonathas Motta (@jonathaxs) on 2026-08-07.
 // ⌘
@@ -13,8 +13,7 @@ import TinyStockCore
 
 struct BackupSettingsView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var products: [Product]
-    @Query private var sales: [Sale]
+    @Environment(StoreSession.self) private var storeSession
 
     private let storeID: UUID
 
@@ -34,15 +33,6 @@ struct BackupSettingsView: View {
 
     init(storeID: UUID) {
         self.storeID = storeID
-        _products = Query(
-            filter: #Predicate<Product> { $0.storeID == storeID },
-            sort: \Product.name
-        )
-        _sales = Query(
-            filter: #Predicate<Sale> { $0.storeID == storeID },
-            sort: \Sale.date,
-            order: .forward
-        )
     }
 
     var body: some View {
@@ -201,7 +191,7 @@ struct BackupSettingsView: View {
         isSavingToICloud = true
 
         do {
-            let data = try BackupManager.export(products: products, sales: sales)
+            let data = try BackupManager.export(from: modelContext, selectedStoreID: storeSession.selectedStoreID)
             try await ICloudBackupManager.save(data)
             await refreshICloudStatus()
             isSavingToICloud = false
@@ -229,12 +219,15 @@ struct BackupSettingsView: View {
             }
 
             let payload = try BackupManager.decode(data)
-            try BackupManager.apply(payload, into: modelContext, storeID: storeID)
+            let result = try BackupManager.apply(payload, into: modelContext, storeID: storeID)
+            try selectRestoredStore(result.selectedStoreID)
             await refreshICloudStatus()
             isRestoringFromICloud = false
             showMessage(
                 titleKey: "settings.backup.success.title",
-                messageKey: "settings.backup.icloud.restore.success"
+                messageKey: result.migratedLegacyBackup
+                    ? "settings.backup.restore.legacy.success"
+                    : "settings.backup.icloud.restore.success"
             )
         } catch {
             isRestoringFromICloud = false
@@ -270,7 +263,7 @@ struct BackupSettingsView: View {
 
     private func prepareExport() {
         do {
-            let data = try BackupManager.export(products: products, sales: sales)
+            let data = try BackupManager.export(from: modelContext, selectedStoreID: storeSession.selectedStoreID)
             exportDocument = BackupDocument(data: data)
             exportFilename = BackupManager.suggestedFilename()
             isExporting = true
@@ -300,11 +293,14 @@ struct BackupSettingsView: View {
         guard let pendingPayload else { return }
 
         do {
-            try BackupManager.apply(pendingPayload, into: modelContext, storeID: storeID)
+            let result = try BackupManager.apply(pendingPayload, into: modelContext, storeID: storeID)
+            try selectRestoredStore(result.selectedStoreID)
             self.pendingPayload = nil
             showMessage(
                 titleKey: "settings.backup.success.title",
-                messageKey: "settings.backup.import.success"
+                messageKey: result.migratedLegacyBackup
+                    ? "settings.backup.restore.legacy.success"
+                    : "settings.backup.import.success"
             )
         } catch {
             show(error)
@@ -312,11 +308,29 @@ struct BackupSettingsView: View {
     }
 
     private func importConfirmationMessage(for payload: BackupPayload) -> String {
-        String(
-            format: String(localized: "settings.backup.import.confirm.message", bundle: .tinyStockCore),
-            payload.products.count,
-            payload.sales.count
+        if payload.isLegacy {
+            return String(
+                format: String(localized: "settings.backup.import.confirm.legacy", bundle: .tinyStockCore),
+                payload.products.count,
+                payload.sales.count
+            )
+        }
+        let summary = payload.summary
+        return String(
+            format: String(localized: "settings.backup.import.confirm.message.v2", bundle: .tinyStockCore),
+            summary.storeCount,
+            summary.productCount,
+            summary.variantCount,
+            summary.orderCount
         )
+    }
+
+    private func selectRestoredStore(_ id: UUID) throws {
+        let id = id
+        guard let store = try modelContext.fetch(FetchDescriptor<StoreProfile>(predicate: #Predicate {
+            $0.id == id && !$0.isArchived
+        })).first else { throw BackupError.invalidFile }
+        try storeSession.select(store)
     }
 
     // MARK: - Retorno das ações
@@ -348,6 +362,14 @@ private struct PresentedMessage: Identifiable {
 }
 
 #Preview {
-    BackupSettingsView(storeID: UUID())
-        .modelContainer(for: [StoreProfile.self, Product.self, Sale.self, SaleItem.self], inMemory: true)
+    let storeID = UUID()
+    BackupSettingsView(storeID: storeID)
+        .environment(StoreSession(selectedStoreID: storeID))
+        .modelContainer(
+            for: [
+                StoreProfile.self, Product.self, ProductVariant.self, StockMovement.self,
+                Sale.self, SaleItem.self, SalesOrder.self, SalesOrderItem.self
+            ],
+            inMemory: true
+        )
 }
