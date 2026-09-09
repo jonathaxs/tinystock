@@ -457,3 +457,27 @@
 "notifications.error.scheduling" = "Some reminders could not be updated. Try again.";
 "notifications.order.unavailable" = "Order unavailable or store archived.";
 "notifications.order.error" = "The order could not be opened. Try again from Calendar.";
+
+/* Settings */
+"settings.section.system" = "System";
+"settings.section.data" = "Data";
+"settings.section.about" = "About";
+"settings.preferences.title" = "Preferences";
+"settings.language" = "Language";
+"settings.language.footer" = "TinyStock follows the language selected for the app in iOS Settings. Available languages are English and Brazilian Portuguese.";
+"settings.backup.title" = "Backup";
+"settings.about.title" = "About TinyStock";
+"settings.about.description" = "TinyStock helps small sellers organize products, variations, inventory, orders, production and dispatch deadlines.";
+"settings.about.information" = "Information";
+"settings.about.developer" = "Developer";
+"settings.about.feedback" = "Send feedback";
+"settings.about.website" = "Developer website";
+"settings.about.versionBuild" = "Version %1$@ (%2$@)";
+"settings.about.icon" = "TinyStock app icon";
+"settings.privacy.title" = "Privacy";
+"settings.privacy.local.title" = "Data on this device";
+"settings.privacy.local.message" = "Products, inventory, stores and orders are stored by TinyStock on your device. TinyStock does not require an account and does not send this data to the developer.";
+"settings.privacy.icloud.title" = "Apple services";
+"settings.privacy.icloud.message" = "When you use backup or synchronization features, data may be stored in your private iCloud account and handled according to your Apple Account settings.";
+"settings.privacy.notifications.title" = "Notifications";
+"settings.privacy.notifications.message" = "Order reminders are scheduled locally by iOS. Notification permission and delivery are controlled in iOS Settings.";

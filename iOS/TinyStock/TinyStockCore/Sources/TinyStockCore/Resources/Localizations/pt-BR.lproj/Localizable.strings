@@ -457,3 +457,27 @@
 "notifications.error.scheduling" = "Não foi possível atualizar alguns lembretes. Tente novamente.";
 "notifications.order.unavailable" = "Pedido indisponível ou loja arquivada.";
 "notifications.order.error" = "Não foi possível abrir o pedido. Tente novamente pelo Calendário.";
+
+/* Ajustes */
+"settings.section.system" = "Sistema";
+"settings.section.data" = "Dados";
+"settings.section.about" = "Sobre";
+"settings.preferences.title" = "Preferências";
+"settings.language" = "Idioma";
+"settings.language.footer" = "O TinyStock usa o idioma selecionado para o app nos Ajustes do iOS. Os idiomas disponíveis são English e Português do Brasil.";
+"settings.backup.title" = "Backup";
+"settings.about.title" = "Sobre o TinyStock";
+"settings.about.description" = "O TinyStock ajuda pequenos vendedores a organizar produtos, variações, estoque, pedidos, produção e prazos de despacho.";
+"settings.about.information" = "Informações";
+"settings.about.developer" = "Desenvolvedor";
+"settings.about.feedback" = "Enviar feedback";
+"settings.about.website" = "Site do desenvolvedor";
+"settings.about.versionBuild" = "Versão %1$@ (%2$@)";
+"settings.about.icon" = "Ícone do app TinyStock";
+"settings.privacy.title" = "Privacidade";
+"settings.privacy.local.title" = "Dados neste dispositivo";
+"settings.privacy.local.message" = "Produtos, estoque, lojas e pedidos são armazenados pelo TinyStock no dispositivo. O TinyStock não exige uma conta e não envia esses dados ao desenvolvedor.";
+"settings.privacy.icloud.title" = "Serviços Apple";
+"settings.privacy.icloud.message" = "Ao usar recursos de backup ou sincronização, os dados podem ser armazenados na sua conta privada do iCloud e tratados conforme os ajustes da sua Conta Apple.";
+"settings.privacy.notifications.title" = "Notificações";
+"settings.privacy.notifications.message" = "Os lembretes de pedidos são agendados localmente pelo iOS. A permissão e a entrega das notificações são controladas nos Ajustes do iOS.";
