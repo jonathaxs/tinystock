@@ -192,13 +192,15 @@
 "settings.backup.section.local" = "Local backup";
 "settings.backup.export" = "Export data";
 "settings.backup.import" = "Import data";
-"settings.backup.section.footer" = "The JSON file includes your products, photos, stock and complete sales history.";
+"settings.backup.section.footer" = "The JSON file includes all stores, photos, products, variations, inventory history and orders.";
 "settings.backup.import.confirm.title" = "Replace current data?";
-"settings.backup.import.confirm.message" = "This backup contains %1$d products and %2$d sales. Your current data will be replaced.";
+"settings.backup.import.confirm.message.v2" = "This backup contains %1$d stores, %2$d products, %3$d variations and %4$d orders. All current TinyStock data will be replaced.";
+"settings.backup.import.confirm.legacy" = "This older backup contains %1$d products and %2$d sales. It will replace the selected store and migrate its data to the current format.";
 "settings.backup.import.confirm.action" = "Restore backup";
 "settings.backup.success.title" = "Backup complete";
 "settings.backup.export.success" = "The TinyStock backup was exported.";
 "settings.backup.import.success" = "The TinyStock backup was restored.";
+"settings.backup.restore.legacy.success" = "The older backup was restored and migrated to the current format.";
 "settings.backup.error.title" = "Backup failed";
 "icloud.error.unavailable" = "iCloud Drive is unavailable. Check your Apple Account and iCloud Drive settings.";
 "icloud.error.downloadTimeout" = "The iCloud backup could not be downloaded in time. Please try again.";
@@ -209,9 +211,10 @@
 "settings.backup.icloud.noBackup" = "No TinyStock backup was found in iCloud Drive.";
 "settings.backup.icloud.lastBackup" = "Last backup: %@";
 "settings.backup.icloud.restore.confirm.title" = "Restore iCloud backup?";
-"settings.backup.icloud.restore.confirm.message" = "Your current products and sales will be replaced by the iCloud backup.";
+"settings.backup.icloud.restore.confirm.message" = "The iCloud backup will be validated before replacing the current TinyStock data.";
 "settings.backup.icloud.save.success" = "The TinyStock backup was saved to iCloud Drive.";
 "settings.backup.icloud.restore.success" = "The iCloud backup was restored.";
+"backup.legacy.variant.default" = "Default";
 
 
 /* MARK: - Production cost calculator */
