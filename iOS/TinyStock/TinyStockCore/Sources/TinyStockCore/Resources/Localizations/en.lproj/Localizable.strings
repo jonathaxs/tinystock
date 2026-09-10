@@ -21,6 +21,7 @@
 "common.cancel" = "Cancel";
 "common.edit" = "Edit";
 "common.delete" = "Delete";
+"common.ok" = "OK";
 
 
 /* MARK: - Products */
@@ -270,6 +271,7 @@
 "stores.restore" = "Restore";
 "stores.current" = "Current store";
 "stores.actions.accessibility" = "Actions for %@";
+"stores.select.hint" = "Selects this store.";
 "settings.store.section" = "Store";
 "settings.store.manage" = "Manage stores";
 
@@ -289,6 +291,7 @@
 "product.form.photo.permission" = "Camera access is disabled. Allow access in iPhone Settings to take a product photo.";
 "products.catalog.search" = "Search by product or variation";
 "products.catalog.quantity" = "%@ in stock";
+"products.actions.hint" = "Opens product actions.";
 "products.delete.stock.message" = "The product, its variations and stock movements will be deleted. Recorded sales will be kept. This cannot be undone.";
 "products.error.title" = "Unable to delete product";
 "stock.entry.title" = "Stock entry";

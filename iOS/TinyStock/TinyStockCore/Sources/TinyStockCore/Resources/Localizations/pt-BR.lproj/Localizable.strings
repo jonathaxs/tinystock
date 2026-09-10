@@ -21,6 +21,7 @@
 "common.cancel" = "Cancelar";
 "common.edit" = "Editar";
 "common.delete" = "Excluir";
+"common.ok" = "OK";
 
 
 /* MARK: - Produtos */
@@ -270,6 +271,7 @@
 "stores.restore" = "Restaurar";
 "stores.current" = "Loja atual";
 "stores.actions.accessibility" = "Ações de %@";
+"stores.select.hint" = "Seleciona esta loja.";
 "settings.store.section" = "Loja";
 "settings.store.manage" = "Gerenciar lojas";
 
@@ -289,6 +291,7 @@
 "product.form.photo.permission" = "O acesso à câmera está desativado. Permita o acesso nos Ajustes do iPhone para fotografar o produto.";
 "products.catalog.search" = "Buscar produto ou variação";
 "products.catalog.quantity" = "%@ em estoque";
+"products.actions.hint" = "Abre as ações do produto.";
 "products.delete.stock.message" = "O produto, suas variações e movimentações de estoque serão excluídos. As vendas registradas serão mantidas. Esta ação não pode ser desfeita.";
 "products.error.title" = "Não foi possível excluir o produto";
 "stock.entry.title" = "Entrada de estoque";
