@@ -7,11 +7,21 @@ import TinyStockCore
 
 struct SalesOrderDetailView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.calendar) private var calendar
+    @Query private var stores: [StoreProfile]
     @Bindable var order: SalesOrder
+    @AppStorage(OrderCalendarExportSettings.isEnabledKey) private var isCalendarExportEnabled = true
     @State private var isEditing = false
     @State private var isConfirmingCancellation = false
     @State private var cancellationReason = ""
     @State private var errorMessage: String?
+    @State private var selectedCalendarDraft: OrderCalendarEventDraft?
+
+    init(order: SalesOrder) {
+        self.order = order
+        let storeID = order.storeID
+        _stores = Query(filter: #Predicate<StoreProfile> { $0.id == storeID })
+    }
 
     var body: some View {
         List {
@@ -21,6 +31,7 @@ struct SalesOrderDetailView: View {
             datesSection
             financialSection
             additionalSection
+            calendarExportSection
             actionsSection
         }
         .navigationTitle(String(localized: "order.detail.title", bundle: .tinyStockCore))
@@ -32,6 +43,11 @@ struct SalesOrderDetailView: View {
             }
         }
         .sheet(isPresented: $isEditing) { SalesOrderEditView(order: order) }
+        .sheet(item: $selectedCalendarDraft) { draft in
+            CalendarEventEditView(draft: draft) {
+                selectedCalendarDraft = nil
+            }
+        }
         .alert(String(localized: "order.cancel.title", bundle: .tinyStockCore), isPresented: $isConfirmingCancellation) {
             TextField(String(localized: "order.cancel.reason", bundle: .tinyStockCore), text: $cancellationReason)
             Button(String(localized: "common.cancel", bundle: .tinyStockCore), role: .cancel) { cancellationReason = "" }
@@ -126,6 +142,27 @@ struct SalesOrderDetailView: View {
     }
 
     @ViewBuilder
+    private var calendarExportSection: some View {
+        if isCalendarExportEnabled && !calendarDrafts.isEmpty {
+            Section(String(localized: "calendar.export.section", bundle: .tinyStockCore)) {
+                ForEach(calendarDrafts) { draft in
+                    Button {
+                        selectedCalendarDraft = draft
+                    } label: {
+                        HStack {
+                            Label(draft.kind.localizedActionTitle, systemImage: draft.kind.symbolName)
+                            Spacer()
+                            Text(draft.startDate, format: .dateTime.day().month(.abbreviated))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .accessibilityHint(String(localized: "calendar.export.open.hint", bundle: .tinyStockCore))
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
     private var actionsSection: some View {
         if let action = SalesOrderPresentation.quickAction(for: order) {
             Section {
@@ -147,6 +184,14 @@ struct SalesOrderDetailView: View {
         LabeledContent(String(localized: key, bundle: .tinyStockCore)) {
             Text(includesTime ? date.formatted(date: .abbreviated, time: .shortened) : date.formatted(date: .abbreviated, time: .omitted))
         }
+    }
+
+    private var calendarDrafts: [OrderCalendarEventDraft] {
+        OrderCalendarExportPlanner.drafts(
+            for: order,
+            storeName: stores.first?.name ?? StoreProfileService.localizedDefaultName,
+            calendar: calendar
+        )
     }
 
     private func transition(to status: SalesOrderStatus) {

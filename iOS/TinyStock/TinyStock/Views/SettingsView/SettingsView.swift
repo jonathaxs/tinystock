@@ -28,6 +28,12 @@ struct SettingsView: View {
                         Label(String(localized: "notifications.title", bundle: .tinyStockCore), systemImage: "bell.badge")
                     }
 
+                    NavigationLink {
+                        CalendarExportSettingsView()
+                    } label: {
+                        Label(String(localized: "settings.calendar.title", bundle: .tinyStockCore), systemImage: "calendar.badge.plus")
+                    }
+
                 }
 
                 Section(String(localized: "settings.section.data", bundle: .tinyStockCore)) {
