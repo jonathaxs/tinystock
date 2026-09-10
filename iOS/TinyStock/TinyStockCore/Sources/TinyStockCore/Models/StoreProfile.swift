@@ -15,6 +15,10 @@ import SwiftData
 /// O app sempre informa uma loja real ao criar dados novos.
 public enum StoreScope {
     public static let unassignedStoreID = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
+
+    /// Identidade compartilhada pela loja criada na primeira execucao de cada dispositivo.
+    /// O UUID fixo permite consolidar as copias quando o CloudKit importar os dados.
+    public static let primaryStoreID = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
 }
 
 // MARK: - Loja

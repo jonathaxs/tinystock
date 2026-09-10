@@ -152,6 +152,37 @@ struct BackupManagerTests {
         #expect(restoredOrder.total == Decimal(string: "79.80"))
     }
 
+    @Test func restauracaoV2PreservaIdentidadeDeRegistrosExistentes() throws {
+        let payload = makeV2Payload()
+        let context = try makeContext()
+        let storeSnapshot = try #require(payload.stores.first)
+        let productSnapshot = try #require(payload.products.first)
+        let store = StoreProfile(id: storeSnapshot.id, name: "Nome anterior")
+        let product = Product(
+            id: productSnapshot.id,
+            storeID: storeSnapshot.id,
+            name: "Produto anterior"
+        )
+        context.insert(store)
+        context.insert(product)
+        try context.save()
+        let storeModelID = store.persistentModelID
+        let productModelID = product.persistentModelID
+
+        try BackupManager.apply(payload, into: context)
+
+        let restoredStore = try #require(context.fetch(FetchDescriptor<StoreProfile>()).first {
+            $0.id == storeSnapshot.id
+        })
+        let restoredProduct = try #require(context.fetch(FetchDescriptor<Product>()).first {
+            $0.id == productSnapshot.id
+        })
+        #expect(restoredStore.persistentModelID == storeModelID)
+        #expect(restoredProduct.persistentModelID == productModelID)
+        #expect(restoredStore.name == storeSnapshot.name)
+        #expect(restoredProduct.name == productSnapshot.name)
+    }
+
     @Test func falhaAoSalvarDesfazTodaRestauracaoV2() throws {
         let context = try makeContext()
         let oldStore = StoreProfile(name: "Loja preservada")

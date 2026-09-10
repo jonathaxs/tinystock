@@ -90,7 +90,83 @@ public enum StoreProfileService {
             return archived
         }
 
-        return try create(name: name ?? localizedDefaultName, in: context)
+        let store = StoreProfile(
+            id: StoreScope.primaryStoreID,
+            name: name ?? localizedDefaultName
+        )
+        context.insert(store)
+        return store
+    }
+
+    /// Prepara bancos criados antes do CloudKit, quando a primeira loja ainda tinha UUID aleatorio.
+    /// Somente a loja mais antiga muda de identidade; todas as referencias de escopo acompanham.
+    @discardableResult
+    public static func prepareForCloudSync(
+        preferredStoreID: UUID? = nil,
+        in context: ModelContext
+    ) throws -> StoreProfile {
+        let stores = try context.fetch(
+            FetchDescriptor<StoreProfile>(sortBy: [SortDescriptor(\StoreProfile.createdAt)])
+        )
+
+        if stores.isEmpty {
+            return try ensureDefaultStore(in: context)
+        }
+
+        if !stores.contains(where: { $0.id == StoreScope.primaryStoreID }),
+           let initialStore = stores.first {
+            let previousID = initialStore.id
+            try remapStoreScope(from: previousID, to: StoreScope.primaryStoreID, in: context)
+            initialStore.id = StoreScope.primaryStoreID
+        }
+
+        return try reconcileCloudStores(preferredStoreID: preferredStoreID, in: context)
+    }
+
+    /// Consolida copias da loja inicial e devolve uma selecao ativa depois de uma importacao remota.
+    @discardableResult
+    public static func reconcileCloudStores(
+        preferredStoreID: UUID? = nil,
+        in context: ModelContext
+    ) throws -> StoreProfile {
+        var stores = try context.fetch(
+            FetchDescriptor<StoreProfile>(sortBy: [SortDescriptor(\StoreProfile.createdAt)])
+        )
+        let primaryCopies = stores.filter { $0.id == StoreScope.primaryStoreID }
+
+        if let canonical = primaryCopies.first {
+            let newest = primaryCopies.max { $0.updatedAt < $1.updatedAt } ?? canonical
+            canonical.name = newest.name
+            canonical.imageData = newest.imageData
+            canonical.isArchived = newest.isArchived
+            canonical.updatedAt = newest.updatedAt
+
+            for duplicate in primaryCopies.dropFirst() {
+                context.delete(duplicate)
+            }
+        }
+
+        stores = try context.fetch(
+            FetchDescriptor<StoreProfile>(sortBy: [SortDescriptor(\StoreProfile.createdAt)])
+        )
+        if stores.isEmpty {
+            let created = try ensureDefaultStore(in: context)
+            return created
+        }
+
+        if let preferredStoreID,
+           let preferred = stores.first(where: { $0.id == preferredStoreID && !$0.isArchived }) {
+            return preferred
+        }
+        if let active = stores.first(where: { !$0.isArchived }) {
+            return active
+        }
+
+        // Mantem o app utilizavel se uma importacao remota deixar todas as lojas arquivadas.
+        let recovered = stores[0]
+        recovered.isArchived = false
+        recovered.updatedAt = Date()
+        return recovered
     }
 
     /// Atualiza os dados sem alterar a data original de criação.
@@ -166,5 +242,31 @@ public enum StoreProfileService {
                 locale: Locale(identifier: "pt_BR")
             )
             .lowercased()
+    }
+
+    /// Os models usam UUIDs escalares para que a troca de identidade nao dependa de relacoes obrigatorias.
+    private static func remapStoreScope(
+        from previousID: UUID,
+        to newID: UUID,
+        in context: ModelContext
+    ) throws {
+        for value in try context.fetch(FetchDescriptor<Product>()) where value.storeID == previousID {
+            value.storeID = newID
+        }
+        for value in try context.fetch(FetchDescriptor<ProductVariant>()) where value.storeID == previousID {
+            value.storeID = newID
+        }
+        for value in try context.fetch(FetchDescriptor<StockMovement>()) where value.storeID == previousID {
+            value.storeID = newID
+        }
+        for value in try context.fetch(FetchDescriptor<SalesOrder>()) where value.storeID == previousID {
+            value.storeID = newID
+        }
+        for value in try context.fetch(FetchDescriptor<SalesOrderItem>()) where value.storeID == previousID {
+            value.storeID = newID
+        }
+        for value in try context.fetch(FetchDescriptor<Sale>()) where value.storeID == previousID {
+            value.storeID = newID
+        }
     }
 }

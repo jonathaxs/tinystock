@@ -49,6 +49,31 @@ public final class StoreSession {
         return StoreSession(selectedStoreID: selectedStore.id, defaults: defaults)
     }
 
+    /// Prepara a identidade da loja inicial antes do primeiro envio ao CloudKit.
+    public static func bootstrapForCloudSync(
+        in context: ModelContext,
+        defaults: UserDefaults = .standard
+    ) throws -> StoreSession {
+        let storedID = defaults.string(forKey: selectedStoreKey).flatMap(UUID.init(uuidString:))
+        let selectedStore = try StoreProfileService.prepareForCloudSync(
+            preferredStoreID: storedID,
+            in: context
+        )
+        return StoreSession(selectedStoreID: selectedStore.id, defaults: defaults)
+    }
+
+    /// Corrige a selecao quando o CloudKit importa, arquiva ou remove uma loja.
+    public func reconcileCloudChanges(in context: ModelContext) throws {
+        let selectedStore = try StoreProfileService.reconcileCloudStores(
+            preferredStoreID: selectedStoreID,
+            in: context
+        )
+        guard selectedStore.id != selectedStoreID else { return }
+
+        selectedStoreID = selectedStore.id
+        persistSelection()
+    }
+
     /// Troca a seleção somente para uma loja ativa.
     public func select(_ store: StoreProfile) throws {
         guard !store.isArchived else { throw StoreProfileError.archivedStore }

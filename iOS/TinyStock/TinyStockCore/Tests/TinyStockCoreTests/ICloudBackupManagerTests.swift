@@ -58,6 +58,14 @@ struct ICloudBackupManagerTests {
     @Test func configuracaoUsaContainerEArquivoDoTinyStock() {
         #expect(ICloudBackupManager.containerIdentifier == "iCloud.com.jonathaxs.TinyStock")
         #expect(ICloudBackupManager.filename == "TinyStock-Backup.json")
+
+        let url = URL(fileURLWithPath: "/tmp/TinyStock-R22.store")
+        let configuration = TinyStockPersistence.cloudConfiguration(
+            schema: TinyStockPersistence.schema,
+            url: url
+        )
+        #expect(configuration.url == url)
+        #expect(configuration.cloudKitContainerIdentifier == ICloudBackupManager.containerIdentifier)
     }
 
     @Test func todoErroTemMensagemLocalizada() {

@@ -23,8 +23,7 @@ enum TestDatabase {
     static let container: ModelContainer = {
         do {
             return try ModelContainer(
-                for: StoreProfile.self, Product.self, ProductVariant.self, StockMovement.self,
-                Sale.self, SaleItem.self, SalesOrder.self, SalesOrderItem.self,
+                for: TinyStockPersistence.schema,
                 configurations: ModelConfiguration(isStoredInMemoryOnly: true)
             )
         } catch {

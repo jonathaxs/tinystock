@@ -57,7 +57,72 @@ struct StoreProfileTests {
 
         #expect(stores.count == 1)
         #expect(first.id == second.id)
+        #expect(first.id == StoreScope.primaryStoreID)
         #expect(second.name == "Minha loja")
+    }
+
+    @Test func preparacaoDoCloudKitRemapeiaLojaInicialETodoOEscopo() throws {
+        let context = try TestDatabase.makeCleanContext()
+        let oldID = UUID()
+        let product = Product(storeID: oldID, name: "Caneca")
+        let variant = ProductVariant(storeID: oldID, productID: product.id, name: "Branca")
+        let movement = StockMovement(storeID: oldID, productID: product.id, variantID: variant.id)
+        let order = SalesOrder(storeID: oldID)
+        let orderItem = SalesOrderItem(
+            storeID: oldID, productID: product.id, variantID: variant.id,
+            productName: product.name, variantName: variant.name
+        )
+        let legacySale = Sale(storeID: oldID)
+        let store = StoreProfile(id: oldID, name: "Loja antiga")
+        context.insert(store)
+        context.insert(product)
+        context.insert(variant)
+        context.insert(movement)
+        context.insert(order)
+        context.insert(orderItem)
+        context.insert(legacySale)
+        orderItem.order = order
+
+        let selected = try StoreProfileService.prepareForCloudSync(
+            preferredStoreID: oldID,
+            in: context
+        )
+
+        #expect(selected.id == StoreScope.primaryStoreID)
+        #expect(store.id == StoreScope.primaryStoreID)
+        #expect(product.storeID == StoreScope.primaryStoreID)
+        #expect(variant.storeID == StoreScope.primaryStoreID)
+        #expect(movement.storeID == StoreScope.primaryStoreID)
+        #expect(order.storeID == StoreScope.primaryStoreID)
+        #expect(orderItem.storeID == StoreScope.primaryStoreID)
+        #expect(legacySale.storeID == StoreScope.primaryStoreID)
+    }
+
+    @Test func reconciliacaoDoCloudKitConsolidaCopiasDaLojaInicial() throws {
+        let context = try TestDatabase.makeCleanContext()
+        let older = StoreProfile(
+            id: StoreScope.primaryStoreID,
+            name: "Minha loja",
+            createdAt: Date(timeIntervalSince1970: 100),
+            updatedAt: Date(timeIntervalSince1970: 100)
+        )
+        let newer = StoreProfile(
+            id: StoreScope.primaryStoreID,
+            name: "VHS Plus",
+            createdAt: Date(timeIntervalSince1970: 200),
+            updatedAt: Date(timeIntervalSince1970: 300)
+        )
+        context.insert(older)
+        context.insert(newer)
+
+        let selected = try StoreProfileService.reconcileCloudStores(in: context)
+        try context.save()
+
+        let stores = try context.fetch(FetchDescriptor<StoreProfile>())
+        #expect(stores.count == 1)
+        #expect(selected.id == StoreScope.primaryStoreID)
+        #expect(selected.name == "VHS Plus")
+        #expect(selected.createdAt == Date(timeIntervalSince1970: 100))
     }
 
     @Test func edicaoPreservaDataDeCriacao() throws {
@@ -173,6 +238,21 @@ struct StoreProfileTests {
             try session.select(archived)
         }
         #expect(session.selectedStoreID == active.id)
+    }
+
+    @Test func sessaoTrocaSelecaoArquivadaAposImportacaoRemota() throws {
+        let context = try TestDatabase.makeCleanContext()
+        let defaults = makeDefaults()
+        let archived = StoreProfile(name: "Arquivada", isArchived: true)
+        let active = StoreProfile(name: "Ativa")
+        context.insert(archived)
+        context.insert(active)
+        let session = StoreSession(selectedStoreID: archived.id, defaults: defaults)
+
+        try session.reconcileCloudChanges(in: context)
+
+        #expect(session.selectedStoreID == active.id)
+        #expect(defaults.string(forKey: StoreSession.selectedStoreKey) == active.id.uuidString)
     }
 
     private func makeDefaults() -> UserDefaults {

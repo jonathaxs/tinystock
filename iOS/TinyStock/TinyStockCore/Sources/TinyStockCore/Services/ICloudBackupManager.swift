@@ -9,7 +9,7 @@
 import Foundation
 
 public enum ICloudBackupManager {
-    public static let containerIdentifier = "iCloud.com.jonathaxs.TinyStock"
+    public static let containerIdentifier = TinyStockPersistence.cloudContainerIdentifier
     public static let filename = "TinyStock-Backup.json"
 
     // MARK: - Disponibilidade
