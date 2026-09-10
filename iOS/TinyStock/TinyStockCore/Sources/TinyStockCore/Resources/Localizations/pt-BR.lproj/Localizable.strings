@@ -496,3 +496,22 @@
 "settings.privacy.icloud.message" = "Ao usar recursos de backup ou sincronização, os dados podem ser armazenados na sua conta privada do iCloud e tratados conforme os ajustes da sua Conta Apple.";
 "settings.privacy.notifications.title" = "Notificações";
 "settings.privacy.notifications.message" = "Os lembretes de pedidos são agendados localmente pelo iOS. A permissão e a entrega das notificações são controladas nos Ajustes do iOS.";
+
+/* Exportacao para o Calendario */
+"settings.calendar.title" = "Calendário do iPhone";
+"settings.calendar.showExport" = "Mostrar opções de exportação";
+"settings.calendar.showExport.footer" = "Quando ativado, pedidos elegíveis oferecem eventos de produção e despacho para exportação.";
+"settings.calendar.privacy" = "Privacidade";
+"settings.calendar.privacy.message" = "Cada evento é revisado no editor do Calendário da Apple antes de ser salvo. O TinyStock não lê seus calendários.";
+"calendar.export.section" = "Calendário do iPhone";
+"calendar.export.production.action" = "Adicionar produção";
+"calendar.export.shipping.action" = "Adicionar despacho";
+"calendar.export.production.title" = "Produzir: %@";
+"calendar.export.shipping.title" = "Despachar: %@";
+"calendar.export.subject.fallback" = "Pedido";
+"calendar.export.subject.multiple" = "%1$@ + mais %2$d";
+"calendar.export.notes.store" = "Loja: %@";
+"calendar.export.notes.buyer" = "Comprador: %@";
+"calendar.export.notes.reference" = "Referência: %@";
+"calendar.export.notes.channel" = "Canal de venda: %@";
+"calendar.export.open.hint" = "Abre o editor do Calendário.";

@@ -496,3 +496,22 @@
 "settings.privacy.icloud.message" = "When you use backup or synchronization features, data may be stored in your private iCloud account and handled according to your Apple Account settings.";
 "settings.privacy.notifications.title" = "Notifications";
 "settings.privacy.notifications.message" = "Order reminders are scheduled locally by iOS. Notification permission and delivery are controlled in iOS Settings.";
+
+/* Calendar export */
+"settings.calendar.title" = "iPhone Calendar";
+"settings.calendar.showExport" = "Show export options";
+"settings.calendar.showExport.footer" = "When enabled, eligible orders offer production and dispatch events for export.";
+"settings.calendar.privacy" = "Privacy";
+"settings.calendar.privacy.message" = "Each event is reviewed in the Apple Calendar editor before it is saved. TinyStock does not read your calendars.";
+"calendar.export.section" = "iPhone Calendar";
+"calendar.export.production.action" = "Add production";
+"calendar.export.shipping.action" = "Add dispatch";
+"calendar.export.production.title" = "Produce: %@";
+"calendar.export.shipping.title" = "Dispatch: %@";
+"calendar.export.subject.fallback" = "Order";
+"calendar.export.subject.multiple" = "%1$@ + %2$d more";
+"calendar.export.notes.store" = "Store: %@";
+"calendar.export.notes.buyer" = "Buyer: %@";
+"calendar.export.notes.reference" = "Reference: %@";
+"calendar.export.notes.channel" = "Sales channel: %@";
+"calendar.export.open.hint" = "Opens the Calendar editor.";
