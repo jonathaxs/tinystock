@@ -45,5 +45,6 @@ struct StoreSwitcherView: View {
         .accessibilityLabel(
             String(localized: "store.switcher.accessibility", bundle: .tinyStockCore)
         )
+        .accessibilityValue(selectedStore?.name ?? StoreProfileService.localizedDefaultName)
     }
 }

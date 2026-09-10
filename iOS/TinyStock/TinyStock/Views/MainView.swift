@@ -91,7 +91,7 @@ struct MainView: View {
         .alert(String(localized: "notifications.title", bundle: .tinyStockCore), isPresented: Binding(
             get: { reminderError != nil }, set: { if !$0 { reminderError = nil } }
         )) {
-            Button("OK") { reminderError = nil }
+            Button(String(localized: "common.ok", bundle: .tinyStockCore)) { reminderError = nil }
         } message: { Text(reminderError ?? "") }
     }
 }

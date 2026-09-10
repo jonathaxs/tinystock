@@ -88,7 +88,7 @@ struct NewSaleView: View {
                 isPresented: .constant(errorMessage != nil),
                 presenting: errorMessage
             ) { _ in
-                Button(String(localized: "common.cancel", bundle: .tinyStockCore), role: .cancel) {
+                Button(String(localized: "common.ok", bundle: .tinyStockCore), role: .cancel) {
                     errorMessage = nil
                 }
             } message: { message in
@@ -196,7 +196,7 @@ struct NewSaleView: View {
                         TextField("0", text: $shopeeFeePercentageText)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
-                            .frame(width: 72)
+                            .frame(minWidth: 72)
 
                         Text(verbatim: "%")
                             .foregroundStyle(.secondary)

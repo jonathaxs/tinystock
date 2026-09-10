@@ -70,7 +70,7 @@ struct StoresView: View {
                 set: { if !$0 { errorMessage = nil } }
             )
         ) {
-            Button("OK") {
+            Button(String(localized: "common.ok", bundle: .tinyStockCore)) {
                 errorMessage = nil
             }
         } message: {
@@ -89,6 +89,8 @@ struct StoresView: View {
                 )
             }
             .buttonStyle(.plain)
+            .accessibilityHint(String(localized: "stores.select.hint", bundle: .tinyStockCore))
+            .accessibilityAddTraits(store.id == storeSession.selectedStoreID ? [.isSelected] : [])
 
             Menu {
                 Button {

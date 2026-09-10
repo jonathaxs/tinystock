@@ -107,7 +107,7 @@ struct BackupSettingsView: View {
             Alert(
                 title: Text(message.title),
                 message: Text(message.message),
-                dismissButton: .default(Text("OK"))
+                dismissButton: .default(Text(String(localized: "common.ok", bundle: .tinyStockCore)))
             )
         }
     }

@@ -76,7 +76,7 @@ struct StoreFormView: View {
                     set: { if !$0 { errorMessage = nil } }
                 )
             ) {
-                Button("OK") {
+                Button(String(localized: "common.ok", bundle: .tinyStockCore)) {
                     errorMessage = nil
                 }
             } message: {

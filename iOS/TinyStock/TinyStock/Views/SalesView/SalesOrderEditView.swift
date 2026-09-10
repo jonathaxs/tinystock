@@ -74,7 +74,7 @@ struct SalesOrderEditView: View {
             .alert(String(localized: "order.operation.error.title", bundle: .tinyStockCore), isPresented: Binding(
                 get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } }
             )) {
-                Button("OK") { errorMessage = nil }
+                Button(String(localized: "common.ok", bundle: .tinyStockCore)) { errorMessage = nil }
             } message: { Text(errorMessage ?? "") }
         }
         .onChange(of: orderedAt) { _, _ in clampDeadlines() }
@@ -134,7 +134,7 @@ struct SalesOrderEditView: View {
                     TextField("0", text: $channelFeeText)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
-                        .frame(width: 72)
+                        .frame(minWidth: 72)
                     Text(verbatim: "%").foregroundStyle(.secondary)
                 }
             }

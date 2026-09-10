@@ -82,7 +82,7 @@ struct ProductFormView: View {
             .alert(String(localized: "product.form.error.title", bundle: .tinyStockCore), isPresented: Binding(
                 get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } }
             )) {
-                Button("OK") { errorMessage = nil }
+                Button(String(localized: "common.ok", bundle: .tinyStockCore)) { errorMessage = nil }
             } message: {
                 Text(errorMessage ?? "")
             }

@@ -50,7 +50,7 @@ struct ProductsView: View {
             .alert(String(localized: "products.error.title", bundle: .tinyStockCore), isPresented: Binding(
                 get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } }
             )) {
-                Button("OK") { errorMessage = nil }
+                Button(String(localized: "common.ok", bundle: .tinyStockCore)) { errorMessage = nil }
             } message: { Text(errorMessage ?? "") }
         }
         .environment(\.editMode, $editMode)
@@ -128,6 +128,7 @@ struct ProductsView: View {
                 rowLabel(product)
             }
             .buttonStyle(.plain)
+            .accessibilityHint(String(localized: "products.actions.hint", bundle: .tinyStockCore))
         }
     }
 
