@@ -22,29 +22,12 @@ struct TinyStockApp: App {
     private let reminderCoordinator: OrderReminderCoordinator
 
     init() {
-        let schema = Schema([
-            StoreProfile.self,
-            Product.self,
-            ProductVariant.self,
-            StockMovement.self,
-            SalesOrder.self,
-            SalesOrderItem.self,
-            Sale.self,
-            SaleItem.self
-        ])
-        // URL explícita + cloudKitDatabase: .none evita que o iOS ligue o mirror do CloudKit
-        // só por causa de um entitlement de iCloud Documents (usado no futuro pro backup).
-        // O arquivo v2 preserva o banco antigo enquanto o novo domínio é construído.
-        let storeURL = URL.applicationSupportDirectory.appending(path: "TinyStock-v2.store")
-        let config = ModelConfiguration(
-            schema: schema,
-            url: storeURL,
-            cloudKitDatabase: .none
-        )
+        let schema = TinyStockPersistence.schema
+        let config = TinyStockPersistence.cloudConfiguration(schema: schema)
         do {
             let container = try ModelContainer(for: schema, configurations: [config])
             let context = ModelContext(container)
-            let session = try StoreSession.bootstrap(in: context)
+            let session = try StoreSession.bootstrapForCloudSync(in: context)
             try context.save()
 
             sharedModelContainer = container

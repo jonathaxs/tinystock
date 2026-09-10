@@ -32,6 +32,12 @@ struct SettingsView: View {
 
                 Section(String(localized: "settings.section.data", bundle: .tinyStockCore)) {
                     NavigationLink {
+                        CloudSyncSettingsView()
+                    } label: {
+                        Label(String(localized: "settings.sync.title", bundle: .tinyStockCore), systemImage: "icloud")
+                    }
+
+                    NavigationLink {
                         BackupSettingsView(storeID: storeID)
                     } label: {
                         Label(String(localized: "settings.backup.title", bundle: .tinyStockCore), systemImage: "externaldrive")

@@ -33,9 +33,22 @@
 		69730D4B300EEEDE001A58BC /* TinyStockUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TinyStockUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		69C10D0132C8000000C10D01 /* Exceptions for "TinyStock" folder in "TinyStock" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Resources/Info.plist,
+			);
+			target = 69730D31300EEEDD001A58BC /* TinyStock */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		69730D34300EEEDD001A58BC /* TinyStock */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				69C10D0132C8000000C10D01 /* Exceptions for "TinyStock" folder in "TinyStock" target */,
+			);
 			path = TinyStock;
 			sourceTree = "<group>";
 		};
@@ -189,6 +202,17 @@
 				TargetAttributes = {
 					69730D31300EEEDD001A58BC = {
 						CreatedOnToolsVersion = 26.6;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+							com.apple.iCloud = {
+								enabled = 1;
+							};
+							com.apple.Push = {
+								enabled = 1;
+							};
+						};
 					};
 					69730D40300EEEDE001A58BC = {
 						CreatedOnToolsVersion = 26.6;
@@ -423,6 +447,7 @@
 				DEVELOPMENT_TEAM = W8T84CC8DH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TinyStock/Resources/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Take a photo to identify your product.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -463,6 +488,7 @@
 				DEVELOPMENT_TEAM = W8T84CC8DH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TinyStock/Resources/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Take a photo to identify your product.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
