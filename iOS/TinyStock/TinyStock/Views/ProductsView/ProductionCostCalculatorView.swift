@@ -12,6 +12,7 @@ import TinyStockCore
 struct ProductionCostCalculatorView: View {
 
     @Environment(\.dismiss) private var dismiss
+    @FocusState private var focusedField: CalculatorField?
 
     let onApply: (ProductionCostResult) -> Void
 
@@ -73,6 +74,14 @@ struct ProductionCostCalculatorView: View {
                     }
                     .disabled(!canApply)
                 }
+
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+
+                    Button(String(localized: "common.done", bundle: .tinyStockCore)) {
+                        focusedField = nil
+                    }
+                }
             }
         }
     }
@@ -80,18 +89,23 @@ struct ProductionCostCalculatorView: View {
     private var materialsSection: some View {
         Section {
             ForEach($materials) { $material in
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
+                LabeledContent(
+                    String(localized: "costCalculator.material.name", bundle: .tinyStockCore)
+                ) {
+                    HStack(spacing: 8) {
                         TextField(
-                            String(localized: "costCalculator.material.name", bundle: .tinyStockCore),
-                            text: $material.name,
-                            prompt: Text(
-                                String(
-                                    localized: "costCalculator.material.name.placeholder",
-                                    bundle: .tinyStockCore
-                                )
-                            )
+                            String(
+                                localized: "costCalculator.material.name.placeholder",
+                                bundle: .tinyStockCore
+                            ),
+                            text: $material.name
                         )
+                        .multilineTextAlignment(.trailing)
+                        .focused($focusedField, equals: .materialName(material.id))
+                        .submitLabel(.next)
+                        .onSubmit {
+                            focusedField = .materialQuantity(material.id)
+                        }
 
                         if materials.count > 1 {
                             Button(role: .destructive) {
@@ -105,17 +119,23 @@ struct ProductionCostCalculatorView: View {
                             )
                         }
                     }
-
-                    decimalField(
-                        String(localized: "costCalculator.material.quantity", bundle: .tinyStockCore),
-                        text: $material.quantityText,
-                        placeholder: "0"
-                    )
-                    decimalField(
-                        String(localized: "costCalculator.material.unitCost", bundle: .tinyStockCore),
-                        text: $material.unitCostText
-                    )
                 }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    focusedField = .materialName(material.id)
+                }
+
+                decimalField(
+                    String(localized: "costCalculator.material.quantity", bundle: .tinyStockCore),
+                    text: $material.quantityText,
+                    placeholder: "0",
+                    field: .materialQuantity(material.id)
+                )
+                decimalField(
+                    String(localized: "costCalculator.material.unitCost", bundle: .tinyStockCore),
+                    text: $material.unitCostText,
+                    field: .materialUnitCost(material.id)
+                )
             }
 
             Button {
@@ -138,11 +158,13 @@ struct ProductionCostCalculatorView: View {
             decimalField(
                 String(localized: "costCalculator.time.hours", bundle: .tinyStockCore),
                 text: $productionHoursText,
-                placeholder: "0"
+                placeholder: "0",
+                field: .productionHours
             )
             decimalField(
                 String(localized: "costCalculator.time.hourlyCost", bundle: .tinyStockCore),
-                text: $hourlyCostText
+                text: $hourlyCostText,
+                field: .hourlyCost
             )
         }
     }
@@ -151,7 +173,8 @@ struct ProductionCostCalculatorView: View {
         Section {
             decimalField(
                 String(localized: "costCalculator.additional", bundle: .tinyStockCore),
-                text: $additionalCostText
+                text: $additionalCostText,
+                field: .additionalCost
             )
         } header: {
             Text(String(localized: "costCalculator.section.additional", bundle: .tinyStockCore))
@@ -212,15 +235,19 @@ struct ProductionCostCalculatorView: View {
     private func decimalField(
         _ title: String,
         text: Binding<String>,
-        placeholder: String? = nil
+        placeholder: String? = nil,
+        field: CalculatorField
     ) -> some View {
-        // Rótulo e valor ficam em linhas separadas pra textos longos não colidirem.
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-
+        LabeledContent(title) {
             TextField(placeholder ?? currencyPlaceholder, text: text)
                 .keyboardType(.decimalPad)
                 .multilineTextAlignment(.trailing)
+                .frame(minWidth: 88, idealWidth: 112, maxWidth: 132)
+                .focused($focusedField, equals: field)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            focusedField = field
         }
     }
 
@@ -237,6 +264,15 @@ struct ProductionCostCalculatorView: View {
         onApply(result)
         dismiss()
     }
+}
+
+private enum CalculatorField: Hashable {
+    case materialName(UUID)
+    case materialQuantity(UUID)
+    case materialUnitCost(UUID)
+    case productionHours
+    case hourlyCost
+    case additionalCost
 }
 
 private struct MaterialDraft: Identifiable {

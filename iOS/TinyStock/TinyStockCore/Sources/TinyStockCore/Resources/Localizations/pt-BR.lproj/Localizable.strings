@@ -19,6 +19,7 @@
 "common.save" = "Salvar";
 "common.apply" = "Aplicar";
 "common.cancel" = "Cancelar";
+"common.done" = "Concluir";
 "common.edit" = "Editar";
 "common.delete" = "Excluir";
 "common.ok" = "OK";
