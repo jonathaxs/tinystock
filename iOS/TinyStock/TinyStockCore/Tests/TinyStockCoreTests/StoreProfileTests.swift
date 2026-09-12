@@ -222,6 +222,131 @@ struct StoreProfileTests {
         #expect(store.updatedAt == restoredAt)
     }
 
+    @Test func exclusaoPermanenteRemoveEscopoCompletoEPreservaOutraLoja() throws {
+        let context = try TestDatabase.makeCleanContext()
+        let target = try StoreProfileService.create(name: "Loja temporaria", in: context)
+        let remaining = try StoreProfileService.create(name: "Loja mantida", in: context)
+        let keptProduct = Product(storeID: remaining.id, name: "Produto mantido")
+        let product = Product(storeID: target.id, name: "Produto")
+        let variant = ProductVariant(
+            storeID: target.id,
+            productID: product.id,
+            name: "Padrao",
+            quantity: 2
+        )
+        let movement = StockMovement(
+            storeID: target.id,
+            productID: product.id,
+            variantID: variant.id,
+            kind: .initialStock,
+            quantityDelta: 2,
+            balanceAfter: 2
+        )
+        let order = SalesOrder(storeID: target.id)
+        let orderItem = SalesOrderItem(
+            storeID: target.id,
+            productID: product.id,
+            variantID: variant.id,
+            productName: product.name,
+            variantName: variant.name,
+            quantity: 1
+        )
+        let legacySale = Sale(storeID: target.id)
+        let legacyItem = SaleItem(productID: product.id, productName: product.name, quantity: 1)
+
+        context.insert(keptProduct)
+        context.insert(product)
+        context.insert(variant)
+        context.insert(movement)
+        context.insert(order)
+        context.insert(orderItem)
+        context.insert(legacySale)
+        context.insert(legacyItem)
+        orderItem.order = order
+        legacyItem.sale = legacySale
+        try context.save()
+
+        let summary = try StoreProfileService.deletionSummary(for: target, in: context)
+        #expect(summary == StoreDeletionSummary(
+            productCount: 1,
+            variantCount: 1,
+            stockMovementCount: 1,
+            orderCount: 2
+        ))
+
+        let targetID = target.id
+        let replacement = try StoreProfileService.deletePermanently(target, in: context)
+        try context.save()
+
+        #expect(replacement?.id == remaining.id)
+        #expect(try context.fetchCount(FetchDescriptor<StoreProfile>()) == 1)
+        #expect(try context.fetchCount(
+            FetchDescriptor<Product>(predicate: #Predicate { $0.storeID == targetID })
+        ) == 0)
+        #expect(try context.fetchCount(FetchDescriptor<Product>()) == 1)
+        #expect(try context.fetchCount(
+            FetchDescriptor<ProductVariant>(predicate: #Predicate { $0.storeID == targetID })
+        ) == 0)
+        #expect(try context.fetchCount(
+            FetchDescriptor<StockMovement>(predicate: #Predicate { $0.storeID == targetID })
+        ) == 0)
+        #expect(try context.fetchCount(
+            FetchDescriptor<SalesOrder>(predicate: #Predicate { $0.storeID == targetID })
+        ) == 0)
+        #expect(try context.fetchCount(
+            FetchDescriptor<SalesOrderItem>(predicate: #Predicate { $0.storeID == targetID })
+        ) == 0)
+        #expect(try context.fetchCount(
+            FetchDescriptor<Sale>(predicate: #Predicate { $0.storeID == targetID })
+        ) == 0)
+        #expect(try context.fetchCount(FetchDescriptor<SaleItem>()) == 0)
+    }
+
+    @Test func ultimaLojaAtivaNaoPodeSerExcluida() throws {
+        let context = try TestDatabase.makeCleanContext()
+        let store = try StoreProfileService.create(name: "Loja principal", in: context)
+
+        #expect(throws: StoreProfileError.lastActiveStore) {
+            try StoreProfileService.deletionSummary(for: store, in: context)
+        }
+        #expect(throws: StoreProfileError.lastActiveStore) {
+            try StoreProfileService.deletePermanently(store, in: context)
+        }
+        #expect(try context.fetchCount(FetchDescriptor<StoreProfile>()) == 1)
+    }
+
+    @Test func lojaArquivadaPodeSerExcluidaComApenasUmaLojaAtiva() throws {
+        let context = try TestDatabase.makeCleanContext()
+        let active = StoreProfile(name: "Ativa")
+        let archived = StoreProfile(name: "Arquivada", isArchived: true)
+        context.insert(active)
+        context.insert(archived)
+
+        _ = try StoreProfileService.deletePermanently(archived, in: context)
+        try context.save()
+
+        let stores = try context.fetch(FetchDescriptor<StoreProfile>())
+        #expect(stores.map(\.id) == [active.id])
+    }
+
+    @Test func exclusaoDaLojaInicialTransfereIdentidadeParaSubstituta() throws {
+        let context = try TestDatabase.makeCleanContext()
+        let initial = StoreProfile(id: StoreScope.primaryStoreID, name: "Inicial", sortOrder: 0)
+        let replacement = StoreProfile(name: "Substituta", sortOrder: 1)
+        let product = Product(storeID: replacement.id, name: "Produto mantido")
+        context.insert(initial)
+        context.insert(replacement)
+        context.insert(product)
+
+        let selected = try StoreProfileService.deletePermanently(initial, in: context)
+        try context.save()
+
+        #expect(selected?.id == StoreScope.primaryStoreID)
+        #expect(replacement.id == StoreScope.primaryStoreID)
+        #expect(replacement.sortOrder == 0)
+        #expect(product.storeID == StoreScope.primaryStoreID)
+    }
+
     @Test func todoErroTemMensagemLocalizada() {
         let errors: [StoreProfileError] = [
             .emptyName,

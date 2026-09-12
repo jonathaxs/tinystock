@@ -290,7 +290,7 @@ public enum StoreProfileService {
     }
 
     /// Os models usam UUIDs escalares para que a troca de identidade nao dependa de relacoes obrigatorias.
-    private static func remapStoreScope(
+    static func remapStoreScope(
         from previousID: UUID,
         to newID: UUID,
         in context: ModelContext

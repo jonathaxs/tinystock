@@ -273,6 +273,9 @@
 "stores.current" = "Current store";
 "stores.actions.accessibility" = "Actions for %@";
 "stores.select.hint" = "Selects this store.";
+"stores.error.title" = "Unable to complete the store operation";
+"stores.delete.confirm.title" = "Permanently delete store?";
+"stores.delete.confirm.message" = "\"%@\" and all its data will be permanently deleted:\n\nProducts: %@\nVariations: %@\nStock movements: %@\nOrders: %@\n\nEvents already saved in the iPhone Calendar will not be changed. This action cannot be undone.";
 "settings.store.section" = "Store";
 "settings.store.manage" = "Manage stores";
 

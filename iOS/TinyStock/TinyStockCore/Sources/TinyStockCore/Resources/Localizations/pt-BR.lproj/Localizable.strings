@@ -273,6 +273,9 @@
 "stores.current" = "Loja atual";
 "stores.actions.accessibility" = "Ações de %@";
 "stores.select.hint" = "Seleciona esta loja.";
+"stores.error.title" = "Não foi possível concluir a operação da loja";
+"stores.delete.confirm.title" = "Excluir loja permanentemente?";
+"stores.delete.confirm.message" = "\"%@\" e todos os seus dados serão excluídos permanentemente:\n\nProdutos: %@\nVariações: %@\nMovimentações de estoque: %@\nPedidos: %@\n\nEventos já salvos no Calendário do iPhone não serão alterados. Esta ação não pode ser desfeita.";
 "settings.store.section" = "Loja";
 "settings.store.manage" = "Gerenciar lojas";
 
