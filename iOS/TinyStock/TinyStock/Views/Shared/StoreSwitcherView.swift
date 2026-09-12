@@ -13,10 +13,12 @@ import TinyStockCore
 struct StoreSwitcherView: View {
 
     @Environment(StoreSession.self) private var storeSession
-    @Query(
-        filter: #Predicate<StoreProfile> { !$0.isArchived },
-        sort: \StoreProfile.name
-    ) private var stores: [StoreProfile]
+    @Query(filter: #Predicate<StoreProfile> { !$0.isArchived })
+    private var storedStores: [StoreProfile]
+
+    private var stores: [StoreProfile] {
+        StoreProfileService.orderedForDisplay(storedStores)
+    }
 
     private var selectedStore: StoreProfile? {
         stores.first { $0.id == storeSession.selectedStoreID }

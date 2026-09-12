@@ -14,17 +14,17 @@ struct StoresView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Environment(StoreSession.self) private var storeSession
-    @Query(sort: \StoreProfile.createdAt) private var stores: [StoreProfile]
+    @Query private var stores: [StoreProfile]
 
     @State private var formRoute: StoreFormRoute?
     @State private var errorMessage: String?
 
     private var activeStores: [StoreProfile] {
-        stores.filter { !$0.isArchived }
+        StoreProfileService.orderedForDisplay(stores.filter { !$0.isArchived })
     }
 
     private var archivedStores: [StoreProfile] {
-        stores.filter(\.isArchived)
+        StoreProfileService.orderedForDisplay(stores.filter(\.isArchived))
     }
 
     var body: some View {
@@ -33,6 +33,7 @@ struct StoresView: View {
                 ForEach(activeStores) { store in
                     activeRow(store)
                 }
+                .onMove(perform: moveActiveStores)
             } header: {
                 Text(String(localized: "stores.section.active", bundle: .tinyStockCore))
             } footer: {
@@ -49,7 +50,9 @@ struct StoresView: View {
         }
         .navigationTitle(String(localized: "stores.title", bundle: .tinyStockCore))
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
+            ToolbarItemGroup(placement: .primaryAction) {
+                EditButton()
+
                 Button {
                     formRoute = StoreFormRoute(store: nil)
                 } label: {
@@ -196,6 +199,22 @@ struct StoresView: View {
         do {
             StoreProfileService.restore(store)
             try modelContext.save()
+        } catch {
+            modelContext.rollback()
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func moveActiveStores(from source: IndexSet, to destination: Int) {
+        var reorderedStores = activeStores
+        reorderedStores.move(fromOffsets: source, toOffset: destination)
+
+        do {
+            try StoreProfileService.setDisplayOrder(reorderedStores)
+            try modelContext.save()
+        } catch let error as StoreProfileError {
+            modelContext.rollback()
+            errorMessage = error.localizedMessage
         } catch {
             modelContext.rollback()
             errorMessage = error.localizedDescription
