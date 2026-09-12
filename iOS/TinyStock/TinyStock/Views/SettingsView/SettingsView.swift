@@ -34,23 +34,6 @@ struct SettingsView: View {
                         Label(String(localized: "settings.calendar.title", bundle: .tinyStockCore), systemImage: "calendar.badge.plus")
                     }
 
-                }
-
-                Section(String(localized: "settings.section.data", bundle: .tinyStockCore)) {
-                    NavigationLink {
-                        CloudSyncSettingsView()
-                    } label: {
-                        Label(String(localized: "settings.sync.title", bundle: .tinyStockCore), systemImage: "icloud")
-                    }
-
-                    NavigationLink {
-                        BackupSettingsView(storeID: storeID)
-                    } label: {
-                        Label(String(localized: "settings.backup.title", bundle: .tinyStockCore), systemImage: "externaldrive")
-                    }
-                }
-
-                Section {
                     Button {
                         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
                         openURL(url)
@@ -66,10 +49,17 @@ struct SettingsView: View {
                         }
                     }
                     .foregroundStyle(.primary)
-                } header: {
-                    Text(String(localized: "settings.preferences.title", bundle: .tinyStockCore))
-                } footer: {
-                    Text(String(localized: "settings.language.footer", bundle: .tinyStockCore))
+                }
+
+                Section(String(localized: "settings.section.data", bundle: .tinyStockCore)) {
+                    NavigationLink {
+                        DataSettingsView(storeID: storeID)
+                    } label: {
+                        Label(
+                            String(localized: "settings.data.title", bundle: .tinyStockCore),
+                            systemImage: "externaldrive.badge.icloud"
+                        )
+                    }
                 }
 
                 Section(String(localized: "settings.section.about", bundle: .tinyStockCore)) {
@@ -85,7 +75,7 @@ struct SettingsView: View {
     }
 
     private var storeSection: some View {
-        Section(String(localized: "settings.store.section", bundle: .tinyStockCore)) {
+        Section(String(localized: "settings.section.profile", bundle: .tinyStockCore)) {
             NavigationLink {
                 StoresView()
             } label: {

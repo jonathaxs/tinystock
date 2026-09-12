@@ -1,44 +1,41 @@
-// Proposito: Informar a disponibilidade da sincronizacao privada pelo iCloud.
+// Proposito: Exibir o estado da sincronizacao automatica na pagina de dados.
 // Created by Jonathas Motta (@jonathaxs) on 2026-09-09.
 
 import CloudKit
 import SwiftUI
 import TinyStockCore
 
-struct CloudSyncSettingsView: View {
+struct CloudSyncStatusSection: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var accountState: AccountState = .checking
 
     var body: some View {
-        List {
-            Section {
-                LabeledContent {
-                    Label(accountState.localizedName, systemImage: accountState.symbolName)
-                        .foregroundStyle(accountState.tint)
-                } label: {
-                    Text(String(localized: "settings.sync.status", bundle: .tinyStockCore))
-                }
-
-                Button {
-                    Task { await refresh() }
-                } label: {
-                    Label(String(localized: "settings.sync.refresh", bundle: .tinyStockCore), systemImage: "arrow.clockwise")
-                }
-                .disabled(accountState == .checking)
-            } footer: {
-                Text(String(localized: "settings.sync.footer", bundle: .tinyStockCore))
+        Section {
+            LabeledContent {
+                Label(accountState.localizedName, systemImage: accountState.symbolName)
+                    .foregroundStyle(accountState.tint)
+            } label: {
+                Text(String(localized: "settings.sync.status", bundle: .tinyStockCore))
             }
 
-            Section {
+            Button {
+                Task { await refresh() }
+            } label: {
+                Label(
+                    String(localized: "settings.sync.refresh", bundle: .tinyStockCore),
+                    systemImage: "arrow.clockwise"
+                )
+            }
+            .disabled(accountState == .checking)
+        } header: {
+            Text(String(localized: "settings.sync.title", bundle: .tinyStockCore))
+        } footer: {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(String(localized: "settings.sync.footer", bundle: .tinyStockCore))
                 Text(String(localized: "settings.sync.backup.message", bundle: .tinyStockCore))
-                    .foregroundStyle(.secondary)
-            } header: {
-                Text(String(localized: "settings.sync.howItWorks", bundle: .tinyStockCore))
             }
         }
-        .navigationTitle(String(localized: "settings.sync.title", bundle: .tinyStockCore))
         .task { await refresh() }
-        .refreshable { await refresh() }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { Task { await refresh() } }
         }

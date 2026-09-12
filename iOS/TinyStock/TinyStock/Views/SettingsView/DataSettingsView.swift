@@ -1,7 +1,7 @@
 // ⌘
-//  TinyStock/Views/SettingsView/BackupSettingsView.swift
+//  TinyStock/Views/SettingsView/DataSettingsView.swift
 //
-//  Propósito: Reunir os backups locais e do iCloud Drive de todas as lojas.
+//  Propósito: Reunir sincronizacao e backups de todas as lojas.
 //
 //  Created by Jonathas Motta (@jonathaxs) on 2026-08-07.
 // ⌘
@@ -11,7 +11,7 @@ import SwiftData
 import UniformTypeIdentifiers
 import TinyStockCore
 
-struct BackupSettingsView: View {
+struct DataSettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(StoreSession.self) private var storeSession
 
@@ -37,10 +37,11 @@ struct BackupSettingsView: View {
 
     var body: some View {
         List {
+            CloudSyncStatusSection()
             iCloudBackupSection
             localBackupSection
         }
-        .navigationTitle(String(localized: "settings.backup.title", bundle: .tinyStockCore))
+        .navigationTitle(String(localized: "settings.data.title", bundle: .tinyStockCore))
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await refreshICloudStatus()
@@ -363,7 +364,7 @@ private struct PresentedMessage: Identifiable {
 
 #Preview {
     let storeID = UUID()
-    BackupSettingsView(storeID: storeID)
+    DataSettingsView(storeID: storeID)
         .environment(StoreSession(selectedStoreID: storeID))
         .modelContainer(
             for: [
