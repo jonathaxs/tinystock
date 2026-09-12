@@ -149,11 +149,18 @@ struct SalesView: View {
                     }
                 }
             } header: {
-                VStack(alignment: .leading, spacing: 4) {
-                    if displayMode == .day {
-                        Text(selectedDate, format: .dateTime.weekday(.wide).day().month(.wide).year())
+                HStack {
+                    Spacer()
+
+                    VStack(spacing: 4) {
+                        if displayMode == .day {
+                            Text(selectedDate, format: .dateTime.weekday(.wide).day().month(.wide).year())
+                        }
+                        Text(filter.title)
                     }
-                    Text(filter.title)
+                    .multilineTextAlignment(.center)
+
+                    Spacer()
                 }
                 .font(.subheadline)
                 .textCase(nil)

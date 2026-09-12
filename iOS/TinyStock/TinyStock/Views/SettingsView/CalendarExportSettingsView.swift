@@ -18,12 +18,19 @@ struct CalendarExportSettingsView: View {
                 Text(String(localized: "settings.calendar.showExport.footer", bundle: .tinyStockCore))
             }
 
-            Section(String(localized: "settings.calendar.privacy", bundle: .tinyStockCore)) {
-                Label {
+            Section {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(String(localized: "settings.calendar.privacy", bundle: .tinyStockCore))
+                        .font(.subheadline.weight(.medium))
+
                     Text(String(localized: "settings.calendar.privacy.message", bundle: .tinyStockCore))
-                } icon: {
-                    Image(systemName: "hand.raised")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityElement(children: .combine)
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
             }
         }
         .navigationTitle(String(localized: "settings.calendar.title", bundle: .tinyStockCore))
