@@ -1,7 +1,7 @@
 // ⌘
 //  TinyStock/Views/SettingsView/StoresView.swift
 //
-//  Propósito: Gerenciar, selecionar e arquivar as lojas do TinyStock.
+//  Propósito: Gerenciar, selecionar, ordenar e excluir as lojas do TinyStock.
 //
 //  Created by Jonathas Motta (@jonathaxs) on 2026-08-25.
 // ⌘
@@ -17,6 +17,7 @@ struct StoresView: View {
     @Query private var stores: [StoreProfile]
 
     @State private var formRoute: StoreFormRoute?
+    @State private var deletionRequest: StoreDeletionRequest?
     @State private var errorMessage: String?
 
     private var activeStores: [StoreProfile] {
@@ -34,6 +35,7 @@ struct StoresView: View {
                     activeRow(store)
                 }
                 .onMove(perform: moveActiveStores)
+                .onDelete { requestDeletion(from: activeStores, at: $0) }
             } header: {
                 Text(String(localized: "stores.section.active", bundle: .tinyStockCore))
             } footer: {
@@ -45,6 +47,7 @@ struct StoresView: View {
                     ForEach(archivedStores) { store in
                         archivedRow(store)
                     }
+                    .onDelete { requestDeletion(from: archivedStores, at: $0) }
                 }
             }
         }
@@ -67,7 +70,25 @@ struct StoresView: View {
             StoreFormView(store: route.store)
         }
         .alert(
-            String(localized: "store.error.title", bundle: .tinyStockCore),
+            String(localized: "stores.delete.confirm.title", bundle: .tinyStockCore),
+            isPresented: Binding(
+                get: { deletionRequest != nil },
+                set: { if !$0 { deletionRequest = nil } }
+            ),
+            presenting: deletionRequest
+        ) { request in
+            Button(
+                String(localized: "common.delete", bundle: .tinyStockCore),
+                role: .destructive
+            ) {
+                deletePermanently(request.store)
+            }
+            Button(String(localized: "common.cancel", bundle: .tinyStockCore), role: .cancel) {}
+        } message: { request in
+            Text(deletionMessage(for: request))
+        }
+        .alert(
+            String(localized: "stores.error.title", bundle: .tinyStockCore),
             isPresented: Binding(
                 get: { errorMessage != nil },
                 set: { if !$0 { errorMessage = nil } }
@@ -106,11 +127,11 @@ struct StoresView: View {
                 }
 
                 Button(role: .destructive) {
-                    archive(store)
+                    requestDeletion(store)
                 } label: {
                     Label(
-                        String(localized: "stores.archive", bundle: .tinyStockCore),
-                        systemImage: "archivebox"
+                        String(localized: "common.delete", bundle: .tinyStockCore),
+                        systemImage: "trash"
                     )
                 }
                 .disabled(activeStores.count == 1)
@@ -152,6 +173,15 @@ struct StoresView: View {
                         systemImage: "pencil"
                     )
                 }
+
+                Button(role: .destructive) {
+                    requestDeletion(store)
+                } label: {
+                    Label(
+                        String(localized: "common.delete", bundle: .tinyStockCore),
+                        systemImage: "trash"
+                    )
+                }
             } label: {
                 Image(systemName: "ellipsis.circle")
                     .font(.title3)
@@ -177,15 +207,33 @@ struct StoresView: View {
         }
     }
 
-    private func archive(_ store: StoreProfile) {
+    private func requestDeletion(_ store: StoreProfile) {
         do {
-            let replacement = activeStores.first { $0.id != store.id }
-            try StoreProfileService.archive(store, in: modelContext)
+            let summary = try StoreProfileService.deletionSummary(for: store, in: modelContext)
+            deletionRequest = StoreDeletionRequest(store: store, summary: summary)
+        } catch let error as StoreProfileError {
+            errorMessage = error.localizedMessage
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func requestDeletion(from stores: [StoreProfile], at offsets: IndexSet) {
+        guard let index = offsets.first, stores.indices.contains(index) else { return }
+        requestDeletion(stores[index])
+    }
+
+    private func deletePermanently(_ store: StoreProfile) {
+        let isSelected = store.id == storeSession.selectedStoreID
+
+        do {
+            let replacement = try StoreProfileService.deletePermanently(store, in: modelContext)
             try modelContext.save()
 
-            if store.id == storeSession.selectedStoreID, let replacement {
+            if isSelected, let replacement {
                 try storeSession.select(replacement)
             }
+            deletionRequest = nil
         } catch let error as StoreProfileError {
             modelContext.rollback()
             errorMessage = error.localizedMessage
@@ -193,6 +241,22 @@ struct StoresView: View {
             modelContext.rollback()
             errorMessage = error.localizedDescription
         }
+    }
+
+    private func deletionMessage(for request: StoreDeletionRequest) -> String {
+        let format = String(
+            localized: "stores.delete.confirm.message",
+            bundle: .tinyStockCore
+        )
+        return String(
+            format: format,
+            locale: .autoupdatingCurrent,
+            request.storeName,
+            request.summary.productCount.formatted(),
+            request.summary.variantCount.formatted(),
+            request.summary.stockMovementCount.formatted(),
+            request.summary.orderCount.formatted()
+        )
     }
 
     private func restore(_ store: StoreProfile) {
@@ -253,4 +317,18 @@ private struct StoreManagementRow: View {
 private struct StoreFormRoute: Identifiable {
     let id = UUID()
     let store: StoreProfile?
+}
+
+private struct StoreDeletionRequest: Identifiable {
+    let id: UUID
+    let store: StoreProfile
+    let storeName: String
+    let summary: StoreDeletionSummary
+
+    init(store: StoreProfile, summary: StoreDeletionSummary) {
+        id = store.id
+        self.store = store
+        storeName = store.name
+        self.summary = summary
+    }
 }
