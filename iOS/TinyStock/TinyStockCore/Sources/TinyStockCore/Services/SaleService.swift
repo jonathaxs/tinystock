@@ -20,7 +20,7 @@ public enum SaleError: Error, Equatable, Sendable {
     /// Quantidade zero ou negativa em algum item.
     case invalidQuantity(productName: String)
 
-    /// Não há estoque suficiente. Carrega os números pra tela poder explicar direito.
+    /// Estoque insuficiente com os valores necessários para explicar o bloqueio na interface.
     case insufficientStock(productName: String, available: Int, requested: Int)
 
     /// Percentual da taxa precisa ficar entre zero e cem.
@@ -32,8 +32,7 @@ public enum SaleError: Error, Equatable, Sendable {
 
 public extension SaleError {
 
-    /// Explicação pronta pra mostrar num alerta, já traduzida.
-    /// Fica no Core pra tela não precisar montar texto nem conhecer os casos do erro.
+    /// Mensagem localizada para apresentação direta em alertas.
     var localizedMessage: String {
         switch self {
         case .emptySale:
@@ -62,7 +61,7 @@ public extension SaleError {
 
 /// O que a tela monta antes de fechar a venda: um produto e quantas unidades.
 ///
-/// Não é Sendable de propósito: carrega um `@Model`, que vive preso ao contexto
+/// Não é `Sendable` porque carrega um `@Model` vinculado ao contexto
 /// do SwiftData e não pode atravessar threads.
 public struct SaleLine {
 
@@ -78,7 +77,7 @@ public struct SaleLine {
 // MARK: - Registro da venda
 
 /// Concentra a regra mais importante do app: vender dá baixa no estoque,
-/// e só dá pra vender o que existe.
+/// e limita a venda ao estoque disponível.
 public enum SaleService {
 
     /// Valida as linhas, cria a venda e desconta o estoque dos produtos.
@@ -99,7 +98,7 @@ public enum SaleService {
 
         guard !lines.isEmpty else { throw SaleError.emptySale }
 
-        // Quantidade tem que fazer sentido antes de qualquer conta.
+        // Valida as quantidades antes de calcular e alterar o estoque.
         for line in lines where line.quantity <= 0 {
             throw SaleError.invalidQuantity(productName: line.product.name)
         }
@@ -138,7 +137,7 @@ public enum SaleService {
             throw SaleError.invalidChannelFeePercentage
         }
 
-        // Daqui pra baixo nada mais pode falhar, então já pode escrever.
+        // As validações anteriores garantem que as alterações podem ser aplicadas juntas.
         let sale = Sale(
             storeID: storeID,
             date: date,
@@ -165,7 +164,7 @@ public enum SaleService {
     }
 
     /// Junta linhas repetidas do mesmo produto numa só, somando as quantidades.
-    /// Mantém a ordem em que os produtos apareceram, pra venda ficar igual ao que a pessoa montou.
+    /// Mantém a ordem em que os produtos foram adicionados à venda.
     private static func merge(_ lines: [SaleLine]) -> [SaleLine] {
         var totals: [UUID: Int] = [:]
         var order: [UUID] = []

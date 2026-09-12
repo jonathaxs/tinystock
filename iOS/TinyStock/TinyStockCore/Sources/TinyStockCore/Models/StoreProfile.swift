@@ -25,7 +25,7 @@ public enum StoreScope {
 
 /// Uma loja independente dentro do TinyStock.
 ///
-/// Produtos, pedidos e relatórios serão associados a este identificador nas próximas etapas.
+/// Produtos, pedidos e relatórios usam este identificador para manter o isolamento da loja.
 /// Todas as propriedades possuem valor padrão para manter a compatibilidade com CloudKit.
 @Model
 public final class StoreProfile {
@@ -33,7 +33,7 @@ public final class StoreProfile {
     /// Identificador estável usado nas relações, no backup e na seleção da loja atual.
     public var id: UUID = UUID()
 
-    /// Nome escolhido pelo comerciante, como VHS Plus ou Minha loja.
+    /// Nome escolhido pelo comerciante para identificar a loja.
     public var name: String = ""
 
     /// Logo ou foto opcional. O arquivo fica fora do banco principal.

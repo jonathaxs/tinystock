@@ -24,7 +24,7 @@ struct BackupManagerTests {
     @Test func exportacaoV2PreservaDominioCompletoEIgnoraRascunho() throws {
         let context = try makeContext()
         let activeStore = StoreProfile(
-            name: "VHS Plus", imageData: Data([0x01, 0x02]),
+            name: "Loja Principal", imageData: Data([0x01, 0x02]),
             sortOrder: 4,
             createdAt: reference, updatedAt: reference.addingTimeInterval(1)
         )
@@ -34,7 +34,7 @@ struct BackupManagerTests {
             createdAt: reference.addingTimeInterval(2), updatedAt: reference.addingTimeInterval(3)
         )
         let product = Product(
-            storeID: activeStore.id, name: "Maquina Beast", category: "Legado",
+            storeID: activeStore.id, name: "Produto Premium", category: "Legado",
             quantity: 4, minimumStock: 1, costPrice: Decimal(string: "80.25")!,
             salePrice: Decimal(string: "179.90")!, imageData: Data([0x04, 0x05]),
             createdAt: reference.addingTimeInterval(4), updatedAt: reference.addingTimeInterval(5)
@@ -70,7 +70,7 @@ struct BackupManagerTests {
         order.cancelledAt = reference.addingTimeInterval(18)
         let item = SalesOrderItem(
             storeID: activeStore.id, productID: product.id, variantID: variant.id,
-            productName: "Maquina Beast", variantName: "Preta",
+            productName: "Produto Premium", variantName: "Preta",
             unitPrice: Decimal(string: "179.90")!, unitCost: Decimal(string: "80.25")!,
             quantity: 2, position: 3
         )
@@ -101,7 +101,7 @@ struct BackupManagerTests {
         #expect(payload.stores.first(where: { $0.id == activeStore.id })?.imageData == Data([0x01, 0x02]))
         #expect(payload.stores.first(where: { $0.id == activeStore.id })?.sortOrder == 4)
         #expect(payload.stores.first(where: { $0.id == archivedStore.id })?.isArchived == true)
-        #expect(payload.products.map(\.name) == ["Maquina Beast"])
+        #expect(payload.products.map(\.name) == ["Produto Premium"])
         #expect(payload.products.first?.imageData == Data([0x04, 0x05]))
         #expect(payload.products.first?.costPrice == Decimal(string: "80.25"))
         #expect(payload.variants.first?.quantity == 3)

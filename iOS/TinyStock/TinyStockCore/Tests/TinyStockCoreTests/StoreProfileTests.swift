@@ -19,9 +19,9 @@ struct StoreProfileTests {
     @Test func criacaoRemoveEspacosDoNome() throws {
         let context = try TestDatabase.makeCleanContext()
 
-        let store = try StoreProfileService.create(name: "  VHS Plus  ", in: context)
+        let store = try StoreProfileService.create(name: "  Loja Principal  ", in: context)
 
-        #expect(store.name == "VHS Plus")
+        #expect(store.name == "Loja Principal")
         #expect(store.isArchived == false)
     }
 
@@ -67,10 +67,10 @@ struct StoreProfileTests {
 
     @Test func nomeDuplicadoIgnoraMaiusculasEAcentos() throws {
         let context = try TestDatabase.makeCleanContext()
-        try StoreProfileService.create(name: "Impressões 3D", in: context)
+        try StoreProfileService.create(name: "Loja Secundária", in: context)
 
         #expect(throws: StoreProfileError.duplicateName) {
-            try StoreProfileService.create(name: "IMPRESSOES 3D", in: context)
+            try StoreProfileService.create(name: "LOJA SECUNDARIA", in: context)
         }
     }
 
@@ -140,7 +140,7 @@ struct StoreProfileTests {
         )
         let newer = StoreProfile(
             id: StoreScope.primaryStoreID,
-            name: "VHS Plus",
+            name: "Loja Principal",
             createdAt: Date(timeIntervalSince1970: 200),
             updatedAt: Date(timeIntervalSince1970: 300)
         )
@@ -153,7 +153,7 @@ struct StoreProfileTests {
         let stores = try context.fetch(FetchDescriptor<StoreProfile>())
         #expect(stores.count == 1)
         #expect(selected.id == StoreScope.primaryStoreID)
-        #expect(selected.name == "VHS Plus")
+        #expect(selected.name == "Loja Principal")
         #expect(selected.createdAt == Date(timeIntervalSince1970: 100))
     }
 
@@ -179,7 +179,7 @@ struct StoreProfileTests {
 
     @Test func lojaPadraoReativaLojaArquivadaEmBancoInconsistente() throws {
         let context = try TestDatabase.makeCleanContext()
-        let archived = StoreProfile(name: "VHS Plus", isArchived: true)
+        let archived = StoreProfile(name: "Loja Principal", isArchived: true)
         context.insert(archived)
 
         let recovered = try StoreProfileService.ensureDefaultStore(in: context)
@@ -202,8 +202,8 @@ struct StoreProfileTests {
 
     @Test func lojaPodeSerArquivadaQuandoExisteOutraAtiva() throws {
         let context = try TestDatabase.makeCleanContext()
-        let first = try StoreProfileService.create(name: "VHS Plus", in: context)
-        try StoreProfileService.create(name: "Impressões 3D", in: context)
+        let first = try StoreProfileService.create(name: "Loja Principal", in: context)
+        try StoreProfileService.create(name: "Loja Secundária", in: context)
         let archivedAt = Date(timeIntervalSince1970: 1_800_000_000)
 
         try StoreProfileService.archive(first, date: archivedAt, in: context)
@@ -214,7 +214,7 @@ struct StoreProfileTests {
 
     @Test func lojaArquivadaPodeSerRestaurada() throws {
         let restoredAt = Date(timeIntervalSince1970: 1_800_000_000)
-        let store = StoreProfile(name: "VHS Plus", isArchived: true)
+        let store = StoreProfile(name: "Loja Principal", isArchived: true)
 
         StoreProfileService.restore(store, date: restoredAt)
 
@@ -376,7 +376,7 @@ struct StoreProfileTests {
         let context = try TestDatabase.makeCleanContext()
         let defaults = makeDefaults()
         defaults.set(UUID().uuidString, forKey: StoreSession.selectedStoreKey)
-        let store = try StoreProfileService.create(name: "VHS Plus", in: context)
+        let store = try StoreProfileService.create(name: "Loja Principal", in: context)
 
         let session = try StoreSession.bootstrap(in: context, defaults: defaults)
 
@@ -386,7 +386,7 @@ struct StoreProfileTests {
     @Test func sessaoRecusaSelecionarLojaArquivada() throws {
         let context = try TestDatabase.makeCleanContext()
         let defaults = makeDefaults()
-        let active = try StoreProfileService.create(name: "VHS Plus", in: context)
+        let active = try StoreProfileService.create(name: "Loja Principal", in: context)
         let archived = StoreProfile(name: "Loja antiga", isArchived: true)
         context.insert(archived)
         let session = StoreSession(selectedStoreID: active.id, defaults: defaults)

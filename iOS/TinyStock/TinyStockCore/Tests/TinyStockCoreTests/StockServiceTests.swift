@@ -19,7 +19,7 @@ struct StockServiceTests {
         initialQuantity: Int = 0,
         in context: ModelContext
     ) throws -> (Product, ProductVariant) {
-        let product = Product(storeID: UUID(), name: "Máquina Beast")
+        let product = Product(storeID: UUID(), name: "Produto principal")
         context.insert(product)
         let variant = try ProductVariantService.create(
             for: product,
@@ -66,7 +66,7 @@ struct StockServiceTests {
             quantity: 4,
             to: variant,
             product: product,
-            note: "  Nova impressão  ",
+            note: "  Nova entrada  ",
             referenceID: referenceID,
             date: date,
             in: context
@@ -77,7 +77,7 @@ struct StockServiceTests {
         #expect(movement.kind == .entry)
         #expect(movement.quantityDelta == 4)
         #expect(movement.balanceAfter == 6)
-        #expect(movement.note == "Nova impressão")
+        #expect(movement.note == "Nova entrada")
         #expect(movement.referenceID == referenceID)
     }
 

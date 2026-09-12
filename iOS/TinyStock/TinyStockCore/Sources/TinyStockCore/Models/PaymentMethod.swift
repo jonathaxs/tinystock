@@ -10,15 +10,14 @@ import Foundation
 
 // MARK: - Forma de pagamento
 
-/// Como o cliente pagou. Shopee entra aqui porque a taxa do canal muda o lucro
-/// líquido, e isso vai ser calculado à parte mais pra frente.
+/// Forma de pagamento preservada para compatibilidade com vendas do schema anterior.
 public enum PaymentMethod: String, CaseIterable, Codable, Sendable {
     case pix
     case cash
     case card
     case shopee
 
-    /// Nome pronto pra tela, traduzido pelo bundle do Core.
+    /// Nome localizado para apresentação na interface.
     public var localizedName: String {
         switch self {
         case .pix:

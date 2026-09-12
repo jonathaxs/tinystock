@@ -76,7 +76,7 @@ struct SalesReportTests {
 
     @Test func resumoSomaApenasAsVendasDoPeriodo() throws {
         let context = try makeContext()
-        let product = Product(name: "Amigurumi Gato", quantity: 30, costPrice: 20, salePrice: 45)
+        let product = Product(name: "Produto A", quantity: 30, costPrice: 20, salePrice: 45)
         context.insert(product)
 
         try sell(product, quantity: 2, daysFromReference: 0, in: context)
@@ -110,7 +110,7 @@ struct SalesReportTests {
 
     @Test func resumoFinanceiroDescontaTaxasDoLucro() throws {
         let context = try makeContext()
-        let product = Product(name: "Peça 3D", quantity: 5, costPrice: 40, salePrice: 100)
+        let product = Product(name: "Produto E", quantity: 5, costPrice: 40, salePrice: 100)
         context.insert(product)
 
         try SaleService.register(
@@ -136,7 +136,7 @@ struct SalesReportTests {
 
     @Test func rankingSomaOMesmoProdutoEmVendasDiferentes() throws {
         let context = try makeContext()
-        let product = Product(name: "Amigurumi Gato", quantity: 20, costPrice: 20, salePrice: 45)
+        let product = Product(name: "Produto A", quantity: 20, costPrice: 20, salePrice: 45)
         context.insert(product)
 
         try sell(product, quantity: 2, daysFromReference: 0, in: context)
@@ -151,15 +151,15 @@ struct SalesReportTests {
         let ranking = try #require(summary.bestSellingProducts().first)
 
         #expect(ranking.productID == product.id)
-        #expect(ranking.productName == "Amigurumi Gato")
+        #expect(ranking.productName == "Produto A")
         #expect(ranking.quantity == 5)
         #expect(ranking.revenue == 225)
     }
 
     @Test func rankingUsaApenasAsVendasDoPeriodo() throws {
         let context = try makeContext()
-        let recent = Product(name: "Suporte de Fone", quantity: 10, salePrice: 25)
-        let old = Product(name: "Tapete Redondo", quantity: 20, salePrice: 90)
+        let recent = Product(name: "Produto recente", quantity: 10, salePrice: 25)
+        let old = Product(name: "Produto antigo", quantity: 20, salePrice: 90)
         context.insert(recent)
         context.insert(old)
 
@@ -173,12 +173,12 @@ struct SalesReportTests {
             calendar: calendar
         )
 
-        #expect(summary.bestSellingProducts().map(\.productName) == ["Suporte de Fone"])
+        #expect(summary.bestSellingProducts().map(\.productName) == ["Produto recente"])
     }
 
     @Test func rankingPrefereQuantidadeEDesempataPorReceita() throws {
         let context = try makeContext()
-        let first = Product(name: "Vaso 3D", quantity: 20, salePrice: 20)
+        let first = Product(name: "Produto C", quantity: 20, salePrice: 20)
         let second = Product(name: "Chaveiro", quantity: 20, salePrice: 10)
         let third = Product(name: "Porta Copo", quantity: 20, salePrice: 50)
         context.insert(first)
@@ -196,7 +196,7 @@ struct SalesReportTests {
             calendar: calendar
         )
 
-        #expect(summary.bestSellingProducts().map(\.productName) == ["Chaveiro", "Porta Copo", "Vaso 3D"])
+        #expect(summary.bestSellingProducts().map(\.productName) == ["Chaveiro", "Porta Copo", "Produto C"])
     }
 
     @Test func rankingRespeitaOLimiteSolicitado() throws {

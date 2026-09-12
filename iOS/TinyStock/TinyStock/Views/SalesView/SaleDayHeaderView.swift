@@ -42,7 +42,7 @@ struct SaleDayHeaderView: View {
 #Preview {
     List {
         Section {
-            Text(verbatim: "Amigurumi Gato")
+            Text(verbatim: "Produto de exemplo")
         } header: {
             SaleDayHeaderView(group: SaleDayGroup(day: Date(), sales: []))
         }

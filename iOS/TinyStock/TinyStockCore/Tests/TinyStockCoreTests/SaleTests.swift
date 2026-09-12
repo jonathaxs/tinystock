@@ -31,7 +31,7 @@ struct SaleTests {
 
     @Test func vendaDaBaixaNoEstoque() throws {
         let context = try makeContext()
-        let produto = Product(name: "Amigurumi Gato", quantity: 12, costPrice: 20, salePrice: 45)
+        let produto = Product(name: "Produto A", quantity: 12, costPrice: 20, salePrice: 45)
         context.insert(produto)
 
         try SaleService.register(
@@ -60,7 +60,7 @@ struct SaleTests {
     @Test func vendaAtualizaADataDeEdicaoDoProduto() throws {
         let context = try makeContext()
         let antes = Date(timeIntervalSince1970: 1_700_000_000)
-        let produto = Product(name: "Vaso 3D", quantity: 5, salePrice: 30, updatedAt: antes)
+        let produto = Product(name: "Produto B", quantity: 5, salePrice: 30, updatedAt: antes)
         context.insert(produto)
 
         try SaleService.register(
@@ -117,10 +117,10 @@ struct SaleTests {
 
     @Test func quantidadeZeradaEhBloqueada() throws {
         let context = try makeContext()
-        let produto = Product(name: "Amigurumi Gato", quantity: 10, salePrice: 45)
+        let produto = Product(name: "Produto A", quantity: 10, salePrice: 45)
         context.insert(produto)
 
-        #expect(throws: SaleError.invalidQuantity(productName: "Amigurumi Gato")) {
+        #expect(throws: SaleError.invalidQuantity(productName: "Produto A")) {
             try SaleService.register(
                 lines: [SaleLine(product: produto, quantity: 0)],
                 paymentMethod: .pix,
@@ -131,12 +131,12 @@ struct SaleTests {
 
     @Test func mesmoProdutoRepetidoSomaAntesDeValidarOEstoque() throws {
         let context = try makeContext()
-        let produto = Product(name: "Amigurumi Gato", quantity: 5, salePrice: 45)
+        let produto = Product(name: "Produto A", quantity: 5, salePrice: 45)
         context.insert(produto)
 
         // Três mais três dá seis, e só existem cinco. Tem que barrar mesmo cada linha
         // isolada cabendo no estoque.
-        #expect(throws: SaleError.insufficientStock(productName: "Amigurumi Gato", available: 5, requested: 6)) {
+        #expect(throws: SaleError.insufficientStock(productName: "Produto A", available: 5, requested: 6)) {
             try SaleService.register(
                 lines: [
                     SaleLine(product: produto, quantity: 3),
@@ -152,7 +152,7 @@ struct SaleTests {
 
     @Test func mesmoProdutoRepetidoViraUmItemSo() throws {
         let context = try makeContext()
-        let produto = Product(name: "Amigurumi Gato", quantity: 10, costPrice: 20, salePrice: 45)
+        let produto = Product(name: "Produto A", quantity: 10, costPrice: 20, salePrice: 45)
         context.insert(produto)
 
         let venda = try SaleService.register(
@@ -172,7 +172,7 @@ struct SaleTests {
     @Test func vendaHerdaALojaDoProduto() throws {
         let context = try makeContext()
         let storeID = UUID()
-        let produto = Product(storeID: storeID, name: "Máquina Beast", quantity: 2, salePrice: 100)
+        let produto = Product(storeID: storeID, name: "Produto Premium", quantity: 2, salePrice: 100)
         context.insert(produto)
 
         let venda = try SaleService.register(
@@ -186,22 +186,22 @@ struct SaleTests {
 
     @Test func vendaNaoMisturaProdutosDeLojasDiferentes() throws {
         let context = try makeContext()
-        let beast = Product(storeID: UUID(), name: "Máquina Beast", quantity: 2, salePrice: 100)
+        let outroProduto = Product(storeID: UUID(), name: "Produto Premium", quantity: 2, salePrice: 100)
         let caneca = Product(storeID: UUID(), name: "Caneca", quantity: 2, salePrice: 30)
-        context.insert(beast)
+        context.insert(outroProduto)
         context.insert(caneca)
 
         #expect(throws: SaleError.mixedStores) {
             try SaleService.register(
                 lines: [
-                    SaleLine(product: beast, quantity: 1),
+                    SaleLine(product: outroProduto, quantity: 1),
                     SaleLine(product: caneca, quantity: 1)
                 ],
                 paymentMethod: .shopee,
                 in: context
             )
         }
-        #expect(beast.quantity == 2)
+        #expect(outroProduto.quantity == 2)
         #expect(caneca.quantity == 2)
     }
 
@@ -209,7 +209,7 @@ struct SaleTests {
 
     @Test func itemGuardaRetratoDoProdutoNaDataDaVenda() throws {
         let context = try makeContext()
-        let produto = Product(name: "Amigurumi Gato", quantity: 10, costPrice: 20, salePrice: 45)
+        let produto = Product(name: "Produto A", quantity: 10, costPrice: 20, salePrice: 45)
         context.insert(produto)
 
         let venda = try SaleService.register(
@@ -219,12 +219,12 @@ struct SaleTests {
         )
 
         // Reajuste depois da venda não pode reescrever o passado.
-        produto.name = "Amigurumi Gato Grande"
+        produto.name = "Produto A Atualizado"
         produto.salePrice = 60
         produto.costPrice = 25
 
         let item = try #require(venda.itemList.first)
-        #expect(item.productName == "Amigurumi Gato")
+        #expect(item.productName == "Produto A")
         #expect(item.unitPrice == 45)
         #expect(item.unitCost == 20)
         #expect(venda.total == 90)
@@ -254,15 +254,15 @@ struct SaleTests {
 
     @Test func totaisSomamTodosOsItens() throws {
         let context = try makeContext()
-        let amigurumi = Product(name: "Amigurumi Gato", quantity: 10, costPrice: 20, salePrice: 45)
-        let tapete = Product(name: "Tapete Redondo", quantity: 10, costPrice: 30, salePrice: 90)
-        context.insert(amigurumi)
-        context.insert(tapete)
+        let produtoA = Product(name: "Produto A", quantity: 10, costPrice: 20, salePrice: 45)
+        let produtoB = Product(name: "Produto B", quantity: 10, costPrice: 30, salePrice: 90)
+        context.insert(produtoA)
+        context.insert(produtoB)
 
         let venda = try SaleService.register(
             lines: [
-                SaleLine(product: amigurumi, quantity: 2),
-                SaleLine(product: tapete, quantity: 1)
+                SaleLine(product: produtoA, quantity: 2),
+                SaleLine(product: produtoB, quantity: 1)
             ],
             paymentMethod: .shopee,
             in: context
@@ -297,7 +297,7 @@ struct SaleTests {
 
     @Test func taxaDoCanalFicaNoRetratoEDescontaDoLucroLiquido() throws {
         let context = try makeContext()
-        let produto = Product(name: "Peça 3D", quantity: 5, costPrice: 40, salePrice: 100)
+        let produto = Product(name: "Produto Premium", quantity: 5, costPrice: 40, salePrice: 100)
         context.insert(produto)
 
         let venda = try SaleService.register(
@@ -316,7 +316,7 @@ struct SaleTests {
 
     @Test func taxaInvalidaNaoRegistraVendaNemBaixaEstoque() throws {
         let context = try makeContext()
-        let produto = Product(name: "Peça 3D", quantity: 5, salePrice: 100)
+        let produto = Product(name: "Produto Premium", quantity: 5, salePrice: 100)
         context.insert(produto)
 
         #expect(throws: SaleError.invalidChannelFeePercentage) {
@@ -336,7 +336,7 @@ struct SaleTests {
 
     @Test func formaDePagamentoVaiEVoltaComoEnum() throws {
         let context = try makeContext()
-        let produto = Product(name: "Amigurumi Gato", quantity: 10, salePrice: 45)
+        let produto = Product(name: "Produto A", quantity: 10, salePrice: 45)
         context.insert(produto)
 
         let venda = try SaleService.register(
@@ -361,8 +361,8 @@ struct SaleTests {
     @Test func todoErroDeVendaTemMensagem() {
         let erros: [SaleError] = [
             .emptySale,
-            .invalidQuantity(productName: "Amigurumi Gato"),
-            .insufficientStock(productName: "Amigurumi Gato", available: 2, requested: 5),
+            .invalidQuantity(productName: "Produto A"),
+            .insufficientStock(productName: "Produto A", available: 2, requested: 5),
             .invalidChannelFeePercentage,
             .mixedStores
         ]
@@ -392,7 +392,7 @@ struct SaleTests {
 
     @Test func apagarAVendaApagaOsItens() throws {
         let context = try makeContext()
-        let produto = Product(name: "Amigurumi Gato", quantity: 10, salePrice: 45)
+        let produto = Product(name: "Produto A", quantity: 10, salePrice: 45)
         context.insert(produto)
 
         let venda = try SaleService.register(

@@ -12,29 +12,27 @@ import SwiftData
 // MARK: - Modelo SwiftData
 
 /// Product representa um item do catálogo de uma loja.
-/// Cada propriedade tem valor padrão, o que mantém o model compatível com uma
-/// futura sincronização via CloudKit (que exige defaults ou opcionais).
+/// Cada propriedade tem valor padrão para manter o model compatível com o CloudKit.
 @Model
 public final class Product {
 
     /// Identificador estável usado no backup JSON e no snapshot da venda.
-    /// Sem `.unique` de propósito, pra não quebrar o mirror do CloudKit no futuro.
+    /// Não usa `.unique`, pois essa restrição é incompatível com o CloudKit.
     public var id: UUID = UUID()
 
-    /// Loja dona do produto. UUID simples evita apagar o produto ao arquivar uma loja.
+    /// Loja dona do produto. O UUID simples permite consultas e exclusões por escopo.
     public var storeID: UUID = StoreScope.unassignedStoreID
 
     /// Nome do produto exibido nas listas.
     public var name: String = ""
 
-    /// Campo legado mantido enquanto as telas antigas ainda estão ativas.
-    /// Novos cadastros usam variações livres em vez de categoria.
+    /// Campo legado preservado para restaurar backups do schema anterior.
     public var category: String = ""
 
-    /// Estoque legado mantido até variações e movimentações substituírem o fluxo antigo.
+    /// Estoque legado preservado para restaurar backups do schema anterior.
     public var quantity: Int = 0
 
-    /// Alerta legado mantido até a nova regra de estoque estar funcional.
+    /// Alerta legado preservado para restaurar backups do schema anterior.
     public var minimumStock: Int = 0
 
     /// Custo unitário de produção ou compra. Decimal evita erro de ponto flutuante com dinheiro.
@@ -43,7 +41,7 @@ public final class Product {
     /// Preço de venda unitário.
     public var salePrice: Decimal = 0
 
-    /// Foto opcional do produto. Externa ao banco principal pra não pesar as consultas.
+    /// Foto opcional armazenada fora do banco principal para reduzir o custo das consultas.
     @Attribute(.externalStorage) public var imageData: Data?
 
     /// Data de cadastro.
@@ -99,11 +97,10 @@ public final class Product {
 
     // MARK: - Busca
 
-    /// Diz se o produto casa com o texto digitado na busca, olhando nome e categoria.
+    /// Verifica o texto digitado no nome e na categoria legada.
     ///
-    /// Usa `localizedStandardContains`, que é a comparação que o próprio iOS faz nas buscas
-    /// do sistema: ignora maiúscula e acento, então "croche" encontra "Crochê".
-    /// Texto vazio devolve true, ou seja, sem busca a lista aparece inteira.
+    /// `localizedStandardContains` ignora diferenças de maiúsculas e acentos.
+    /// Texto vazio mantém todos os produtos no resultado.
     public func matches(searchText: String) -> Bool {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return true }
@@ -112,7 +109,7 @@ public final class Product {
             || category.localizedStandardContains(query)
     }
 
-    /// A nova lista busca pelo catalogo atual, sem considerar a categoria legada.
+    /// Busca no catálogo atual usando o nome do produto e suas variações.
     public func matches(searchText: String, variants: [ProductVariant]) -> Bool {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         return query.isEmpty || name.localizedStandardContains(query) || variants.contains {

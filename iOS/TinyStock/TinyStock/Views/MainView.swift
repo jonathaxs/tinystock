@@ -11,7 +11,7 @@ import SwiftData
 import TinyStockCore
 
 // MARK: - Índices das abas
-// Constantes centralizadas pra outras telas navegarem sem números mágicos.
+// Constantes centralizadas para evitar números mágicos na navegação entre abas.
 extension MainView {
     enum Tab {
         static let products = 0
@@ -28,7 +28,7 @@ struct MainView: View {
     @Environment(OrderReminderRouter.self) private var reminderRouter
     @Environment(\.modelContext) private var modelContext
 
-    // Aba selecionada, persistida pra permitir navegação entre abas no futuro.
+    // A seleção persistida permite preservar a aba ao reabrir o aplicativo.
     @AppStorage("app.selectedTab") private var selectedTab: Int = 0
     @State private var calendarFilterRequest: CalendarOrderFilter?
     @State private var reminderRoute: OrderReminderRoute?

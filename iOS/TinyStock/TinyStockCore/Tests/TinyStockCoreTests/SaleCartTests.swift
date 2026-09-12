@@ -36,7 +36,7 @@ struct SaleCartTests {
     // MARK: - Adicionar
 
     @Test func adicionarProdutoCriaUmaLinhaComUmaUnidade() {
-        let produto = Product(name: "Amigurumi Gato", quantity: 10, costPrice: 20, salePrice: 45)
+        let produto = Product(name: "Produto A", quantity: 10, costPrice: 20, salePrice: 45)
         var carrinho = SaleCart()
 
         carrinho.add(produto)
@@ -47,7 +47,7 @@ struct SaleCartTests {
     }
 
     @Test func mesmoProdutoDuasVezesViraUmaLinhaSo() {
-        let produto = Product(name: "Amigurumi Gato", quantity: 10, salePrice: 45)
+        let produto = Product(name: "Produto A", quantity: 10, salePrice: 45)
         var carrinho = SaleCart()
 
         carrinho.add(produto)
@@ -58,20 +58,20 @@ struct SaleCartTests {
     }
 
     @Test func produtosDiferentesViramLinhasDiferentesNaOrdemEscolhida() {
-        let amigurumi = Product(name: "Amigurumi Gato", quantity: 10, salePrice: 45)
-        let tapete = Product(name: "Tapete Redondo", quantity: 10, salePrice: 90)
+        let produtoA = Product(name: "Produto A", quantity: 10, salePrice: 45)
+        let produtoB = Product(name: "Produto B", quantity: 10, salePrice: 90)
         var carrinho = SaleCart()
 
-        carrinho.add(tapete)
-        carrinho.add(amigurumi)
+        carrinho.add(produtoB)
+        carrinho.add(produtoA)
 
-        #expect(carrinho.lines.map(\.product.name) == ["Tapete Redondo", "Amigurumi Gato"])
+        #expect(carrinho.lines.map(\.product.name) == ["Produto B", "Produto A"])
     }
 
     // MARK: - Limite do estoque
 
     @Test func carrinhoNaoPassaDoEstoque() {
-        let produto = Product(name: "Suporte de Fone", quantity: 2, salePrice: 25)
+        let produto = Product(name: "Produto D", quantity: 2, salePrice: 25)
         var carrinho = SaleCart()
 
         carrinho.add(produto, quantity: 7)
@@ -80,18 +80,18 @@ struct SaleCartTests {
     }
 
     @Test func adicionarComOEstoqueJaTodoNoCarrinhoNaoFazNada() {
-        let produto = Product(name: "Suporte de Fone", quantity: 2, salePrice: 25)
+        let produto = Product(name: "Produto D", quantity: 2, salePrice: 25)
         var carrinho = SaleCart()
 
         carrinho.add(produto, quantity: 2)
         let coube = carrinho.add(produto)
 
-        #expect(coube == false, "a tela precisa saber que não deu")
+        #expect(coube == false, "a interface precisa receber o resultado da tentativa")
         #expect(carrinho.quantity(of: produto) == 2)
     }
 
     @Test func oQueSobraDoEstoqueDescontaOCarrinho() {
-        let produto = Product(name: "Tapete Redondo", quantity: 5, salePrice: 90)
+        let produto = Product(name: "Produto B", quantity: 5, salePrice: 90)
         var carrinho = SaleCart()
 
         #expect(carrinho.remainingStock(of: produto) == 5)
@@ -102,7 +102,7 @@ struct SaleCartTests {
     }
 
     @Test func quantidadeAcimaDoEstoqueParaNoEstoque() {
-        let produto = Product(name: "Vaso 3D", quantity: 4, salePrice: 30)
+        let produto = Product(name: "Produto C", quantity: 4, salePrice: 30)
         var carrinho = SaleCart()
 
         carrinho.add(produto)
@@ -114,7 +114,7 @@ struct SaleCartTests {
     // MARK: - Remover
 
     @Test func quantidadeZeradaTiraOProdutoDoCarrinho() {
-        let produto = Product(name: "Amigurumi Gato", quantity: 10, salePrice: 45)
+        let produto = Product(name: "Produto A", quantity: 10, salePrice: 45)
         var carrinho = SaleCart()
 
         carrinho.add(produto, quantity: 3)
@@ -124,28 +124,28 @@ struct SaleCartTests {
     }
 
     @Test func removerPeloIndiceTiraALinhaCerta() {
-        let amigurumi = Product(name: "Amigurumi Gato", quantity: 10, salePrice: 45)
-        let tapete = Product(name: "Tapete Redondo", quantity: 10, salePrice: 90)
-        let vaso = Product(name: "Vaso 3D", quantity: 10, salePrice: 30)
+        let produtoA = Product(name: "Produto A", quantity: 10, salePrice: 45)
+        let produtoB = Product(name: "Produto B", quantity: 10, salePrice: 90)
+        let produtoC = Product(name: "Produto C", quantity: 10, salePrice: 30)
         var carrinho = SaleCart()
 
-        carrinho.add(amigurumi)
-        carrinho.add(tapete)
-        carrinho.add(vaso)
+        carrinho.add(produtoA)
+        carrinho.add(produtoB)
+        carrinho.add(produtoC)
         carrinho.remove(atOffsets: IndexSet(integer: 1))
 
-        #expect(carrinho.lines.map(\.product.name) == ["Amigurumi Gato", "Vaso 3D"])
+        #expect(carrinho.lines.map(\.product.name) == ["Produto A", "Produto C"])
     }
 
     // MARK: - Totais
 
     @Test func totalELucroSomamTodasAsLinhas() {
-        let amigurumi = Product(name: "Amigurumi Gato", quantity: 10, costPrice: 20, salePrice: 45)
-        let tapete = Product(name: "Tapete Redondo", quantity: 10, costPrice: 30, salePrice: 90)
+        let produtoA = Product(name: "Produto A", quantity: 10, costPrice: 20, salePrice: 45)
+        let produtoB = Product(name: "Produto B", quantity: 10, costPrice: 30, salePrice: 90)
         var carrinho = SaleCart()
 
-        carrinho.add(amigurumi, quantity: 2)
-        carrinho.add(tapete)
+        carrinho.add(produtoA, quantity: 2)
+        carrinho.add(produtoB)
 
         #expect(carrinho.total == 180)     // 45 x 2 mais 90
         #expect(carrinho.profit == 110)    // 25 x 2 mais 60
@@ -153,7 +153,7 @@ struct SaleCartTests {
     }
 
     @Test func taxaDoCanalMostraOLucroLiquidoAntesDeFechar() {
-        let produto = Product(name: "Peça 3D", quantity: 5, costPrice: 40, salePrice: 100)
+        let produto = Product(name: "Produto E", quantity: 5, costPrice: 40, salePrice: 100)
         var carrinho = SaleCart()
         carrinho.add(produto)
 
@@ -165,14 +165,14 @@ struct SaleCartTests {
 
     @Test func carrinhoFechaVendaComVariosProdutos() throws {
         let context = try makeContext()
-        let amigurumi = Product(name: "Amigurumi Gato", quantity: 10, costPrice: 20, salePrice: 45)
-        let tapete = Product(name: "Tapete Redondo", quantity: 4, costPrice: 30, salePrice: 90)
-        context.insert(amigurumi)
-        context.insert(tapete)
+        let produtoA = Product(name: "Produto A", quantity: 10, costPrice: 20, salePrice: 45)
+        let produtoB = Product(name: "Produto B", quantity: 4, costPrice: 30, salePrice: 90)
+        context.insert(produtoA)
+        context.insert(produtoB)
 
         var carrinho = SaleCart()
-        carrinho.add(amigurumi, quantity: 2)
-        carrinho.add(tapete, quantity: 1)
+        carrinho.add(produtoA, quantity: 2)
+        carrinho.add(produtoB, quantity: 1)
 
         let venda = try SaleService.register(
             lines: carrinho.lines,
@@ -183,20 +183,20 @@ struct SaleCartTests {
         #expect(venda.itemList.count == 2)
         #expect(venda.total == 180)
         #expect(venda.totalQuantity == 3)
-        #expect(amigurumi.quantity == 8, "cada produto dá baixa do que foi vendido")
-        #expect(tapete.quantity == 3)
+        #expect(produtoA.quantity == 8, "cada produto dá baixa do que foi vendido")
+        #expect(produtoB.quantity == 3)
     }
 
     @Test func itensDaVendaSaemSempreNaMesmaOrdem() throws {
         let context = try makeContext()
-        let tapete = Product(name: "Tapete Redondo", quantity: 10, salePrice: 90)
-        let amigurumi = Product(name: "Amigurumi Gato", quantity: 10, salePrice: 45)
-        context.insert(tapete)
-        context.insert(amigurumi)
+        let produtoB = Product(name: "Produto B", quantity: 10, salePrice: 90)
+        let produtoA = Product(name: "Produto A", quantity: 10, salePrice: 45)
+        context.insert(produtoB)
+        context.insert(produtoA)
 
         var carrinho = SaleCart()
-        carrinho.add(tapete)
-        carrinho.add(amigurumi)
+        carrinho.add(produtoB)
+        carrinho.add(produtoA)
 
         let venda = try SaleService.register(
             lines: carrinho.lines,
@@ -204,13 +204,13 @@ struct SaleCartTests {
             in: context
         )
 
-        // A relação do SwiftData não guarda ordem, então a lista tem que ordenar sozinha.
-        #expect(venda.itemList.map(\.productName) == ["Amigurumi Gato", "Tapete Redondo"])
+        // A relação do SwiftData não preserva ordem, então a lista aplica ordenação estável.
+        #expect(venda.itemList.map(\.productName) == ["Produto A", "Produto B"])
     }
 
     @Test func carrinhoMontadoNoLimiteFechaAVenda() throws {
         let context = try makeContext()
-        let produto = Product(name: "Suporte de Fone", quantity: 3, salePrice: 25)
+        let produto = Product(name: "Produto D", quantity: 3, salePrice: 25)
         context.insert(produto)
 
         var carrinho = SaleCart()

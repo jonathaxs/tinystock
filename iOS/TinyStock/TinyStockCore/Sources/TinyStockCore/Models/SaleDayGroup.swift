@@ -10,15 +10,15 @@ import Foundation
 
 // MARK: - Um dia do histórico
 
-/// As vendas de um mesmo dia, já somadas e prontas pra virar uma seção da lista.
+/// Vendas de um mesmo dia com os totais usados pela seção da lista.
 ///
-/// Não é Sendable de propósito: carrega `Sale`, que é `@Model` e vive preso ao contexto.
+/// Não é `Sendable` porque carrega models vinculados ao contexto do SwiftData.
 public struct SaleDayGroup: Identifiable {
 
     /// Meia-noite do dia, no calendário de quem está usando o app.
     public let day: Date
 
-    /// Vendas do dia, da mais recente pra mais antiga.
+    /// Vendas do dia, da mais recente para a mais antiga.
     public let sales: [Sale]
 
     public var id: Date { day }
@@ -80,7 +80,7 @@ public struct SaleDayGroup: Identifiable {
 
 public extension SaleDayGroup {
 
-    /// Quebra uma lista de vendas em dias, do mais recente pro mais antigo.
+    /// Agrupa as vendas por dia, do mais recente para o mais antigo.
     ///
     /// Uma lista linear serve enquanto há três vendas. Com dezenas, é o corte por dia
     /// que responde a pergunta que a pessoa realmente faz: quanto eu vendi hoje.

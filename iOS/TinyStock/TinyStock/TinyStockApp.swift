@@ -34,7 +34,7 @@ struct TinyStockApp: App {
             storeSession = session
             containerInitFailed = false
         } catch {
-            // Cai pra um container em memória pra o app conseguir mostrar a tela de erro.
+            // Usa um container em memória para permitir a apresentação da tela de erro.
             // Nesse estado os dados não são salvos, mas o app não trava.
             let container = try! ModelContainer(
                 for: schema,

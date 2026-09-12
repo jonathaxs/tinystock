@@ -24,13 +24,13 @@ struct SaleDayGroupTests {
         try TestDatabase.makeCleanContext()
     }
 
-    /// Um instante do dia de hoje deslocado por dias e horas, pra montar histórico de mentira.
+    /// Cria um instante relativo ao dia atual para montar o histórico do teste.
     func date(daysAgo: Int, hour: Int = 12) -> Date {
         let day = calendar.date(byAdding: .day, value: -daysAgo, to: Date()) ?? Date()
         return calendar.date(bySettingHour: hour, minute: 0, second: 0, of: day) ?? day
     }
 
-    /// Registra uma venda de verdade, passando pelo serviço, pra o teste enxergar o que o app enxerga.
+    /// Registra a venda pelo mesmo serviço usado pelo aplicativo.
     @discardableResult
     func sell(
         _ product: Product,
@@ -55,7 +55,7 @@ struct SaleDayGroupTests {
 
     @Test func vendasDoMesmoDiaCaemNoMesmoGrupo() throws {
         let context = try makeContext()
-        let produto = Product(name: "Amigurumi Gato", quantity: 20, costPrice: 20, salePrice: 45)
+        let produto = Product(name: "Produto A", quantity: 20, costPrice: 20, salePrice: 45)
         context.insert(produto)
 
         try sell(produto, quantity: 1, on: date(daysAgo: 0, hour: 9), in: context)
@@ -69,7 +69,7 @@ struct SaleDayGroupTests {
 
     @Test func diasDiferentesViramGruposDiferentes() throws {
         let context = try makeContext()
-        let produto = Product(name: "Tapete Redondo", quantity: 20, costPrice: 30, salePrice: 90)
+        let produto = Product(name: "Produto B", quantity: 20, costPrice: 30, salePrice: 90)
         context.insert(produto)
 
         try sell(produto, quantity: 1, on: date(daysAgo: 0), in: context)
@@ -83,10 +83,10 @@ struct SaleDayGroupTests {
 
     @Test func meiaNoiteEUmMinutoAindaEhOMesmoDia() throws {
         let context = try makeContext()
-        let produto = Product(name: "Vaso 3D", quantity: 20, salePrice: 30)
+        let produto = Product(name: "Produto C", quantity: 20, salePrice: 30)
         context.insert(produto)
 
-        // Venda na virada e venda antes de dormir contam pro mesmo dia do calendário.
+        // Os horários extremos continuam pertencendo ao mesmo dia do calendário.
         try sell(produto, quantity: 1, on: date(daysAgo: 0, hour: 0), in: context)
         try sell(produto, quantity: 1, on: date(daysAgo: 0, hour: 23), in: context)
 
@@ -99,7 +99,7 @@ struct SaleDayGroupTests {
 
     @Test func grupoMaisRecenteVemPrimeiro() throws {
         let context = try makeContext()
-        let produto = Product(name: "Amigurumi Gato", quantity: 20, salePrice: 45)
+        let produto = Product(name: "Produto A", quantity: 20, salePrice: 45)
         context.insert(produto)
 
         try sell(produto, quantity: 1, on: date(daysAgo: 3), in: context)
@@ -135,7 +135,7 @@ struct SaleDayGroupTests {
 
     @Test func totalDoDiaSomaAsVendasDaqueleDia() throws {
         let context = try makeContext()
-        let produto = Product(name: "Amigurumi Gato", quantity: 20, costPrice: 20, salePrice: 45)
+        let produto = Product(name: "Produto A", quantity: 20, costPrice: 20, salePrice: 45)
         context.insert(produto)
 
         try sell(produto, quantity: 2, on: date(daysAgo: 0, hour: 9), in: context)   // 90

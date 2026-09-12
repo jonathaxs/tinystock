@@ -15,70 +15,70 @@ import SwiftData
 
 @Test func lowStockLigaQuandoQuantidadeAtingeMinimo() {
     // Estoque igual ou abaixo do mínimo deve acender o alerta.
-    let produto = Product(name: "Amigurumi", quantity: 3, minimumStock: 5)
+    let produto = Product(name: "Produto A", quantity: 3, minimumStock: 5)
     #expect(produto.isLowStock == true)
 }
 
 @Test func lowStockDesligaQuandoMinimoZero() {
     // Mínimo zero significa "sem alerta", mesmo com estoque zerado.
-    let produto = Product(name: "Chaveiro 3D", quantity: 0, minimumStock: 0)
+    let produto = Product(name: "Produto B", quantity: 0, minimumStock: 0)
     #expect(produto.isLowStock == false)
 }
 
 @Test func lucroUnitarioEhPrecoMenosCusto() {
-    let produto = Product(name: "Vaso 3D", costPrice: 8, salePrice: 25)
+    let produto = Product(name: "Produto C", costPrice: 8, salePrice: 25)
     #expect(produto.unitProfit == 17)
 }
 
 @Test func lowStockDesligaQuandoEstoqueEstaAcimaDoMinimo() {
-    let produto = Product(name: "Tapete Redondo", quantity: 10, minimumStock: 3)
+    let produto = Product(name: "Produto D", quantity: 10, minimumStock: 3)
     #expect(produto.isLowStock == false)
 }
 
 @Test func lowStockLigaComEstoqueZeradoEMinimoDefinido() {
     // Estoque acabou de vez, que é justamente quando o alerta mais importa.
-    let produto = Product(name: "Vaso 3D", quantity: 0, minimumStock: 2)
+    let produto = Product(name: "Produto C", quantity: 0, minimumStock: 2)
     #expect(produto.isLowStock == true)
 }
 
 // MARK: - Busca
 
 @Test func buscaVaziaDevolveTodosOsProdutos() {
-    let produto = Product(name: "Amigurumi Gato", category: "Crochê")
+    let produto = Product(name: "Luminária Clássica", category: "Decoração")
     #expect(produto.matches(searchText: "") == true)
     #expect(produto.matches(searchText: "   ") == true)
 }
 
 @Test func buscaEncontraPorPedacoDoNome() {
-    let produto = Product(name: "Amigurumi Gato", category: "Crochê")
-    #expect(produto.matches(searchText: "gato") == true)
+    let produto = Product(name: "Luminária Clássica", category: "Decoração")
+    #expect(produto.matches(searchText: "classica") == true)
 }
 
 @Test func buscaIgnoraAcentoEMaiuscula() {
-    // O comerciante digita rápido e sem acento, e a busca tem que achar do mesmo jeito.
-    let produto = Product(name: "Amigurumi Gato", category: "Crochê")
-    #expect(produto.matches(searchText: "CROCHE") == true)
+    // A busca deve aceitar o texto sem acentos e com outra capitalização.
+    let produto = Product(name: "Luminária Clássica", category: "Decoração")
+    #expect(produto.matches(searchText: "DECORACAO") == true)
 }
 
 @Test func buscaEncontraPelaCategoria() {
-    let produto = Product(name: "Suporte de Fone", category: "Impressão 3D")
-    #expect(produto.matches(searchText: "impressao") == true)
+    let produto = Product(name: "Caderno", category: "Acessórios")
+    #expect(produto.matches(searchText: "acessorios") == true)
 }
 
 @Test func buscaNaoEncontraOQueNaoExiste() {
-    let produto = Product(name: "Amigurumi Gato", category: "Crochê")
+    let produto = Product(name: "Luminária Clássica", category: "Decoração")
     #expect(produto.matches(searchText: "caneca") == false)
 }
 
 // MARK: - Lucro
 
 @Test func lucroPotencialMultiplicaOLucroPelaQuantidade() {
-    let produto = Product(name: "Suporte de Fone", quantity: 4, costPrice: 10, salePrice: 25)
+    let produto = Product(name: "Produto A", quantity: 4, costPrice: 10, salePrice: 25)
     #expect(produto.potentialProfit == 60)
 }
 
 @Test func lucroPotencialEhZeroComEstoqueVazio() {
-    let produto = Product(name: "Tapete Redondo", quantity: 0, costPrice: 30, salePrice: 90)
+    let produto = Product(name: "Produto B", quantity: 0, costPrice: 30, salePrice: 90)
     #expect(produto.potentialProfit == 0)
 }
 
@@ -95,14 +95,14 @@ struct ProductPersistenceTests {
         let context = try TestDatabase.makeCleanContext()
 
         context.insert(
-            Product(name: "Amigurumi Gato", category: "Crochê", quantity: 12, costPrice: 20, salePrice: 45)
+            Product(name: "Luminária Clássica", category: "Decoração", quantity: 12, costPrice: 20, salePrice: 45)
         )
 
         let salvos = try context.fetch(FetchDescriptor<Product>())
 
         #expect(salvos.count == 1)
-        #expect(salvos.first?.name == "Amigurumi Gato")
-        #expect(salvos.first?.category == "Crochê")
+        #expect(salvos.first?.name == "Luminária Clássica")
+        #expect(salvos.first?.category == "Decoração")
         #expect(salvos.first?.quantity == 12)
         #expect(salvos.first?.unitProfit == 25)
     }
@@ -111,11 +111,11 @@ struct ProductPersistenceTests {
         let context = try TestDatabase.makeCleanContext()
 
         let criadoEm = Date(timeIntervalSince1970: 1_700_000_000)
-        let produto = Product(name: "Suporte de Fone", quantity: 2, salePrice: 25, createdAt: criadoEm, updatedAt: criadoEm)
+        let produto = Product(name: "Organizador", quantity: 2, salePrice: 25, createdAt: criadoEm, updatedAt: criadoEm)
         context.insert(produto)
 
         // Mesma operação que o formulário faz ao salvar uma edição.
-        produto.name = "Suporte de Fone V2"
+        produto.name = "Organizador V2"
         produto.quantity = 10
         produto.salePrice = 30
         produto.updatedAt = Date()
@@ -123,25 +123,25 @@ struct ProductPersistenceTests {
         let salvos = try context.fetch(FetchDescriptor<Product>())
 
         #expect(salvos.count == 1, "editar não pode criar um segundo registro")
-        #expect(salvos.first?.name == "Suporte de Fone V2")
+        #expect(salvos.first?.name == "Organizador V2")
         #expect(salvos.first?.quantity == 10)
-        #expect(salvos.first?.createdAt == criadoEm, "a data de cadastro original tem que sobreviver")
+        #expect(salvos.first?.createdAt == criadoEm, "a data original deve ser preservada")
         #expect(salvos.first?.updatedAt != criadoEm)
     }
 
     @Test func exclusaoTiraOProdutoDoEstoque() throws {
         let context = try TestDatabase.makeCleanContext()
 
-        let amigurumi = Product(name: "Amigurumi Gato", quantity: 12)
-        let tapete = Product(name: "Tapete Redondo", quantity: 8)
-        context.insert(amigurumi)
-        context.insert(tapete)
+        let removedProduct = Product(name: "Produto removido", quantity: 12)
+        let remainingProduct = Product(name: "Produto mantido", quantity: 8)
+        context.insert(removedProduct)
+        context.insert(remainingProduct)
 
-        context.delete(amigurumi)
+        context.delete(removedProduct)
 
         let restantes = try context.fetch(FetchDescriptor<Product>())
 
         #expect(restantes.count == 1)
-        #expect(restantes.first?.name == "Tapete Redondo")
+        #expect(restantes.first?.name == "Produto mantido")
     }
 }

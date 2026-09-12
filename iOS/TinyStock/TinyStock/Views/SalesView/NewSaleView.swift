@@ -24,7 +24,7 @@ struct NewSaleView: View {
 
     @State private var paymentMethod: PaymentMethod = .pix
 
-    /// Guarda a última taxa informada pra próxima venda feita pela Shopee.
+    /// Preserva a última taxa informada para preencher o próximo registro no mesmo canal.
     @AppStorage("sale.shopeeFeePercentage") private var shopeeFeePercentageText = ""
 
     /// Mensagem do erro devolvido pelo Core. Não nil significa alerta na tela.
@@ -158,7 +158,7 @@ struct NewSaleView: View {
 
                 Spacer()
 
-                // Trava no estoque do produto, então não dá pra montar
+                // Limita a quantidade ao saldo do produto para impedir
                 // um carrinho que a confirmação vai recusar.
                 Stepper(
                     String(localized: "sale.new.section.quantity", bundle: .tinyStockCore),

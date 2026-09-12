@@ -9,9 +9,9 @@
 import Foundation
 import SwiftData
 
-/// Variação livre, como Preta, Vermelha, Indiana Jones ou Tamanho M.
-/// Os identificadores explícitos mantêm produto e loja isolados sem depender
-/// de uma relação obrigatória, o que facilita a sincronização futura via CloudKit.
+/// Variação livre, como Azul, Tamanho M ou Edição especial.
+/// Os identificadores explícitos mantêm produto e loja isolados sem relações obrigatórias,
+/// preservando a compatibilidade com o CloudKit.
 @Model
 public final class ProductVariant {
 
@@ -26,7 +26,7 @@ public final class ProductVariant {
     /// Nome livre escolhido pelo comerciante.
     public var name: String = ""
 
-    /// Saldo atual. A R7 centralizará toda alteração neste valor por movimentações.
+    /// Saldo atual, alterado exclusivamente pelos serviços de estoque e pedidos.
     public var quantity: Int = 0
 
     public var createdAt: Date = Date()

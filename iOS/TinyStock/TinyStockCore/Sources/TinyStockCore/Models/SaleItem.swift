@@ -13,15 +13,14 @@ import SwiftData
 
 /// Uma linha da venda: qual produto, quantos e por quanto.
 ///
-/// De propósito NÃO tem relação com `Product`. O item guarda uma cópia do nome, do preço
-/// e do custo do dia da venda. Assim, se o preço do amigurumi subir mês que vem ou o
-/// produto for excluído, o histórico e o lucro já registrados continuam contando a verdade.
+/// Não possui relação com `Product`. O item guarda uma cópia do nome, preço e custo
+/// para preservar o histórico quando o catálogo for alterado ou excluído.
 @Model
 public final class SaleItem {
 
     public var id: UUID = UUID()
 
-    /// Só o identificador do produto, usado pra somar "mais vendidos" nos relatórios.
+    /// Identificador do produto usado para agregar os rankings dos relatórios.
     /// Não é uma relação, então excluir o produto não apaga a venda.
     public var productID: UUID = UUID()
 
@@ -31,7 +30,7 @@ public final class SaleItem {
     /// Preço unitário cobrado nessa venda.
     public var unitPrice: Decimal = 0
 
-    /// Custo unitário na data da venda, usado pra calcular o lucro real do período.
+    /// Custo unitário na data da venda, usado para calcular o lucro do período.
     public var unitCost: Decimal = 0
 
     public var quantity: Int = 0
@@ -61,9 +60,7 @@ public final class SaleItem {
 
     /// Cria o item já copiando os dados atuais do produto.
     ///
-    /// É função estática, e não `convenience init`, de propósito: dentro de uma classe
-    /// `@Model` o `self.init(...)` acaba resolvendo pro `init(backingData:)` que o macro
-    /// gera, e o app quebra ao abrir o banco.
+    /// Uma função estática evita conflito com o `init(backingData:)` gerado por `@Model`.
     public static func from(product: Product, quantity: Int) -> SaleItem {
         SaleItem(
             productID: product.id,
@@ -81,7 +78,7 @@ public final class SaleItem {
         unitPrice * Decimal(quantity)
     }
 
-    /// Quanto essa linha custou pra produzir ou comprar.
+    /// Custo total dos itens desta linha.
     public var subtotalCost: Decimal {
         unitCost * Decimal(quantity)
     }

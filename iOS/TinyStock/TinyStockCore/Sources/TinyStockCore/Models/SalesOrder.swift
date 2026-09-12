@@ -103,7 +103,7 @@ public final class SalesOrder {
     public var grossProfit: Decimal { total - totalCost }
     public var netProfit: Decimal { grossProfit - channelFeeAmount }
 
-    /// Consulta pura. O servico aplicara estado, datas e estoque juntos na R11/R13.
+    /// Consulta pura. As alterações de estado, datas e estoque pertencem ao serviço de gerenciamento.
     public func canTransition(to next: SalesOrderStatus) -> Bool {
         guard let status, let fulfillment else { return false }
         return status.canTransition(to: next, fulfillment: fulfillment)

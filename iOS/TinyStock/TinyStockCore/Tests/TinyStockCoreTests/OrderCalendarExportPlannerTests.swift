@@ -67,12 +67,12 @@ struct OrderCalendarExportPlannerTests {
     @Test func conteudoIdentificaPedidoELoja() throws {
         let order = makeOrder(status: .awaitingProduction)
         let draft = try #require(OrderCalendarExportPlanner.drafts(
-            for: order, storeName: "VHS Plus", calendar: calendar
+            for: order, storeName: "Loja Principal", calendar: calendar
         ).first)
 
         #expect(draft.id == "\(order.id.uuidString).production")
-        #expect(draft.title.contains("Máquina Beast"))
-        #expect(draft.notes.contains("VHS Plus"))
+        #expect(draft.title.contains("Produto Premium"))
+        #expect(draft.notes.contains("Loja Principal"))
         #expect(draft.notes.contains("Ana"))
         #expect(draft.notes.contains("PED-42"))
         #expect(draft.notes.contains(order.channelDisplayName))
@@ -89,8 +89,8 @@ struct OrderCalendarExportPlannerTests {
             shippingDueAt: date(3, 10)
         )
         order.items = [
-            SalesOrderItem(productName: "Máquina Beast", variantName: "Preta", quantity: 1),
-            SalesOrderItem(productName: "Fita VHS", variantName: "Indiana Jones", quantity: 1, position: 1)
+            SalesOrderItem(productName: "Produto Premium", variantName: "Preta", quantity: 1),
+            SalesOrderItem(productName: "Produto Secundário", variantName: "Edição especial", quantity: 1, position: 1)
         ]
         return order
     }

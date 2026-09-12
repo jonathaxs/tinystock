@@ -23,7 +23,7 @@ struct ProductServiceTests {
 
         let product = try ProductService.create(
             storeID: storeID,
-            name: "  Máquina Beast  ",
+            name: "  Café Especial  ",
             costPrice: 40,
             salePrice: 100,
             imageData: imageData,
@@ -32,7 +32,7 @@ struct ProductServiceTests {
         )
 
         #expect(product.storeID == storeID)
-        #expect(product.name == "Máquina Beast")
+        #expect(product.name == "Café Especial")
         #expect(product.costPrice == 40)
         #expect(product.salePrice == 100)
         #expect(product.imageData == imageData)
@@ -55,11 +55,11 @@ struct ProductServiceTests {
         let context = try TestDatabase.makeCleanContext()
         let storeID = UUID()
 
-        try ProductService.create(storeID: storeID, name: "Máquina Beast", in: context)
+        try ProductService.create(storeID: storeID, name: "Café Especial", in: context)
         try context.save()
 
         #expect(throws: ProductError.duplicateName) {
-            try ProductService.create(storeID: storeID, name: "maquina beast", in: context)
+            try ProductService.create(storeID: storeID, name: "cafe especial", in: context)
         }
     }
 

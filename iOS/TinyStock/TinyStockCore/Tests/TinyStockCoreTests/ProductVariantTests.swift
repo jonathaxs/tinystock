@@ -17,7 +17,7 @@ struct ProductVariantTests {
 
     @Test func criacaoHerdaProdutoELoja() throws {
         let context = try TestDatabase.makeCleanContext()
-        let product = Product(storeID: UUID(), name: "Máquina Beast")
+        let product = Product(storeID: UUID(), name: "Produto principal")
         context.insert(product)
         let date = Date(timeIntervalSince1970: 1_800_000_000)
 
@@ -58,7 +58,7 @@ struct ProductVariantTests {
 
     @Test func nomeDuplicadoNoMesmoProdutoEhRecusado() throws {
         let context = try TestDatabase.makeCleanContext()
-        let product = Product(storeID: UUID(), name: "Máquina Beast")
+        let product = Product(storeID: UUID(), name: "Produto principal")
         context.insert(product)
 
         try ProductVariantService.create(for: product, name: "Vermelha", in: context)
@@ -84,7 +84,7 @@ struct ProductVariantTests {
 
     @Test func nomeVazioEQuantidadeNegativaSaoRecusados() throws {
         let context = try TestDatabase.makeCleanContext()
-        let product = Product(storeID: UUID(), name: "Fita VHS")
+        let product = Product(storeID: UUID(), name: "Produto principal")
         context.insert(product)
 
         #expect(throws: ProductVariantError.emptyName) {
@@ -94,7 +94,7 @@ struct ProductVariantTests {
         #expect(throws: ProductVariantError.negativeQuantity) {
             try ProductVariantService.create(
                 for: product,
-                name: "Indiana Jones",
+                name: "Edição limitada",
                 initialQuantity: -1,
                 in: context
             )
@@ -149,7 +149,7 @@ struct ProductVariantTests {
 
     @Test func totalSomaSomenteAsVariacoesDoProduto() throws {
         let context = try TestDatabase.makeCleanContext()
-        let product = Product(storeID: UUID(), name: "Máquina Beast")
+        let product = Product(storeID: UUID(), name: "Produto principal")
         let other = Product(storeID: UUID(), name: "Caneca")
         context.insert(product)
         context.insert(other)

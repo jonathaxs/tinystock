@@ -31,7 +31,7 @@ enum TestDatabase {
         }
     }()
 
-    /// Contexto zerado pra um teste começar do nada.
+    /// Limpa o contexto compartilhado antes de cada teste.
     /// Só funciona com as suítes marcadas `.serialized`, senão um teste limpa o do outro.
     static func makeCleanContext() throws -> ModelContext {
         let context = ModelContext(container)

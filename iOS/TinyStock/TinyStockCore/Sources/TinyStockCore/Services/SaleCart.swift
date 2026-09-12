@@ -12,11 +12,11 @@ import Foundation
 
 /// O que a tela vai juntando antes de fechar a venda.
 ///
-/// Existe pra tirar da view a única parte da venda com várias linhas que tem regra:
+/// Centraliza as regras do carrinho para manter a view restrita à apresentação:
 /// somar o mesmo produto em vez de repetir, e nunca deixar passar do estoque.
 /// O `SaleService` continua validando na hora de gravar, mas aqui a pessoa nem chega a errar.
 ///
-/// Não é Sendable de propósito: carrega `Product`, que é `@Model` e vive preso ao contexto.
+/// Não é `Sendable` porque carrega models vinculados ao contexto do SwiftData.
 public struct SaleCart {
 
     /// Linhas na ordem em que os produtos foram escolhidos, uma por produto.
@@ -59,10 +59,10 @@ public struct SaleCart {
         lines.first { $0.product.id == product.id }?.quantity ?? 0
     }
 
-    /// Quanto ainda dá pra tirar desse produto sem estourar o estoque.
+    /// Quantidade que ainda pode ser adicionada sem ultrapassar o estoque.
     ///
     /// É o número que a tela mostra na hora de escolher: com 5 em estoque e 3 no carrinho,
-    /// o que sobra pra escolher é 2.
+    /// restam 2 unidades disponíveis.
     public func remainingStock(of product: Product) -> Int {
         max(0, product.quantity - quantity(of: product))
     }
@@ -72,7 +72,7 @@ public struct SaleCart {
     /// Coloca unidades no carrinho, somando na linha do produto se ela já existir.
     ///
     /// Nunca passa do estoque: pedir mais do que existe entra até o limite.
-    /// Devolve `false` quando não coube nada, pra tela poder avisar.
+    /// Devolve `false` quando nenhuma unidade pôde ser adicionada.
     @discardableResult
     public mutating func add(_ product: Product, quantity: Int = 1) -> Bool {
         guard quantity > 0, remainingStock(of: product) > 0 else { return false }
@@ -104,9 +104,9 @@ public struct SaleCart {
         lines.removeAll { $0.product.id == product.id }
     }
 
-    /// Remove pelos índices que o `ForEach` da lista entrega no deslizar pro lado.
+    /// Remove pelos índices fornecidos pelo `ForEach` da lista.
     ///
-    /// De trás pra frente, senão a primeira remoção desloca as outras.
+    /// A ordem inversa evita que uma remoção desloque os índices seguintes.
     /// Escrito na mão porque o `remove(atOffsets:)` pronto vem do SwiftUI, e o Core não importa UI.
     public mutating func remove(atOffsets offsets: IndexSet) {
         for index in offsets.sorted(by: >) where lines.indices.contains(index) {

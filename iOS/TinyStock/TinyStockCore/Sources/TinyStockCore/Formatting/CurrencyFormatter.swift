@@ -11,7 +11,7 @@ import Foundation
 // MARK: - Formatador de moeda
 
 /// Centraliza tudo que envolve dinheiro no TinyStock: transformar um `Decimal` em
-/// texto pronto pra tela e ler de volta o que o usuário digitou.
+/// texto para apresentação e leitura do valor digitado pelo usuário.
 ///
 /// Mora no Core porque a mesma regra serve o app, os testes e o futuro alvo watchOS.
 public enum CurrencyFormatter {
@@ -21,7 +21,7 @@ public enum CurrencyFormatter {
 
     // MARK: - Exibição
 
-    /// Devolve o valor formatado pra tela, por exemplo "R$ 45,00".
+    /// Devolve o valor formatado para apresentação, por exemplo "R$ 45,00".
     ///
     /// A locale entra como parâmetro (e não fixa) por dois motivos: respeitar o
     /// idioma do aparelho na separação de milhar e permitir teste determinístico.
@@ -29,7 +29,7 @@ public enum CurrencyFormatter {
         value.formatted(.currency(code: currencyCode).locale(locale))
     }
 
-    /// Devolve o valor pronto pra preencher um campo de formulário, por exemplo "45,90".
+    /// Devolve o valor para preencher um campo de formulário, por exemplo "45,90".
     ///
     /// Diferente do `string(from:)`, aqui não entra símbolo de moeda nem separador de
     /// milhar, porque o campo precisa continuar legível e fácil de corrigir no teclado.
@@ -50,7 +50,7 @@ public enum CurrencyFormatter {
     /// Converte o texto digitado em `Decimal`, aceitando vírgula ou ponto como separador decimal.
     /// Devolve nil quando não sobra nenhum dígito, ou seja, campo vazio ou só símbolo.
     ///
-    /// A regra de propósito não depende da locale do aparelho, porque o teclado numérico
+    /// A regra não depende do locale do aparelho, porque o teclado numérico
     /// do iPhone às vezes oferece ponto mesmo com o sistema em português. O critério é a
     /// quantidade de dígitos depois do último separador:
     ///
@@ -79,7 +79,7 @@ public enum CurrencyFormatter {
         // 3. O separador que sobrou na parte inteira é milhar e pode sumir.
         integerPart = integerPart.filter(\.isNumber)
 
-        // 4. Monta no formato neutro (ponto como decimal) pra leitura não depender de locale.
+        // 4. Monta o formato neutro para a leitura não depender do locale.
         let sign = isNegative ? "-" : ""
         let normalized = "\(sign)\(integerPart.isEmpty ? "0" : integerPart).\(decimalPart.isEmpty ? "0" : decimalPart)"
 
@@ -91,7 +91,7 @@ public enum CurrencyFormatter {
 
 public extension Decimal {
 
-    /// Texto do valor no formato de moeda do app, pronto pra jogar num `Text`.
+    /// Texto do valor no formato de moeda usado pelo aplicativo.
     var currencyText: String {
         CurrencyFormatter.string(from: self)
     }

@@ -59,7 +59,7 @@ struct ICloudBackupManagerTests {
         #expect(ICloudBackupManager.containerIdentifier == "iCloud.com.jonathaxs.TinyStock")
         #expect(ICloudBackupManager.filename == "TinyStock-Backup.json")
 
-        let url = URL(fileURLWithPath: "/tmp/TinyStock-R22.store")
+        let url = URL(fileURLWithPath: "/tmp/TinyStock-Test.store")
         let configuration = TinyStockPersistence.cloudConfiguration(
             schema: TinyStockPersistence.schema,
             url: url

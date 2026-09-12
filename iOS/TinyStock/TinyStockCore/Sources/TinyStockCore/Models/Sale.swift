@@ -12,7 +12,7 @@ import SwiftData
 // MARK: - Venda
 
 /// Uma venda fechada, com um ou mais itens.
-/// Como o `Product`, nasce com valor padrão em tudo pra continuar compatível com CloudKit.
+/// Todas as propriedades possuem valor padrão para manter a compatibilidade com o CloudKit.
 @Model
 public final class Sale {
 
@@ -26,9 +26,8 @@ public final class Sale {
 
     /// Forma de pagamento guardada como texto.
     ///
-    /// Guardar o texto cru em vez do enum é feio, mas é o que deixa os filtros dos relatórios
-    /// funcionarem sem dor: `#Predicate` do SwiftData não lida bem com enum. Quem usa o model
-    /// mexe sempre em `paymentMethod` logo abaixo, então a feiura fica escondida aqui.
+    /// O texto persistido permite filtrar com `#Predicate`, que não oferece suporte confiável
+    /// a enums. O acesso tipado permanece disponível em `paymentMethod`.
     public var paymentMethodRawValue: String = PaymentMethod.pix.rawValue
 
     /// Anotação livre, por exemplo o nome do cliente.
@@ -41,7 +40,7 @@ public final class Sale {
     public var channelFeeAmount: Decimal = 0
 
     /// Itens da venda. Apagar a venda apaga os itens junto.
-    /// Opcional porque relação to-many precisa ser opcional pro CloudKit.
+    /// Opcional porque relações para muitos precisam ser opcionais no CloudKit.
     @Relationship(deleteRule: .cascade, inverse: \SaleItem.sale)
     public var items: [SaleItem]?
 
@@ -71,7 +70,7 @@ public final class Sale {
     /// que é o padrão, em vez de quebrar a tela.
     ///
     /// Precisa de `@Transient`: por ter `set`, o SwiftData tentaria persistir essa
-    /// propriedade como se fosse uma coluna, e o app quebra ao inserir a venda.
+    /// propriedade como uma coluna adicional e impediria a inserção da venda.
     @Transient
     public var paymentMethod: PaymentMethod {
         get { PaymentMethod(rawValue: paymentMethodRawValue) ?? .pix }
@@ -82,9 +81,9 @@ public final class Sale {
 
     /// Itens numa lista comum, já que a propriedade persistida é opcional.
     ///
-    /// Ordenado por nome de propósito: relação to-many do SwiftData não guarda ordem,
+    /// Ordenado por nome porque relações para muitos do SwiftData não preservam ordem,
     /// então sem isso a mesma venda apareceria com os itens embaralhados a cada abertura.
-    /// Ordenar aqui custa pouco, porque venda de artesanato tem poucos itens.
+    /// O custo da ordenação é reduzido porque cada venda possui poucos itens.
     public var itemList: [SaleItem] {
         (items ?? []).sorted {
             $0.productName.localizedStandardCompare($1.productName) == .orderedAscending

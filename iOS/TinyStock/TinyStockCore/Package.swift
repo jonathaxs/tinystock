@@ -7,7 +7,7 @@ let package = Package(
     platforms: [
         .iOS(.v26),
         .watchOS(.v26),
-        // macOS existe só pra rodar os testes com "swift test" pela linha de comando.
+        // O suporte a macOS permite executar os testes do Core pela linha de comando.
         .macOS(.v15)
     ],
     products: [

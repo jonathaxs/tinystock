@@ -13,22 +13,22 @@ import UniformTypeIdentifiers
 
 // MARK: - Processamento da foto do produto
 
-/// Prepara a foto do produto pra ser guardada.
+/// Prepara a foto do produto para armazenamento.
 ///
 /// Uma foto direto da câmera do iPhone passa de 4 MB. Guardar isso sem tratar deixaria
 /// o banco enorme e a lista lenta, então aqui a imagem é reduzida e recomprimida em JPEG.
 ///
-/// Usa ImageIO em vez de UIKit de propósito: assim o mesmo código roda no app, nos testes
+/// Usa ImageIO em vez de UIKit para compartilhar o mesmo código entre app e testes
 /// pela linha de comando e num futuro alvo watchOS.
 public enum ProductImageProcessor {
 
-    /// Maior lado da imagem guardada, em pixels. O suficiente pra tela cheia de um iPhone.
+    /// Limite do maior lado da imagem armazenada, em pixels.
     public static let maxDimension = 1024
 
     /// Qualidade do JPEG. 0,8 é o ponto onde o olho não vê perda mas o arquivo cai bastante.
     public static let compressionQuality = 0.8
 
-    /// Reduz a imagem pro lado máximo pedido e devolve os bytes em JPEG.
+    /// Reduz a imagem ao limite informado e devolve os bytes em JPEG.
     /// Devolve nil quando os dados não são uma imagem que o sistema saiba ler.
     public static func prepared(from data: Data, maxDimension: Int = maxDimension) -> Data? {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil) else { return nil }
@@ -69,7 +69,7 @@ public enum ProductImageProcessor {
     }
 
     /// Largura e altura em pixels de uma imagem, sem precisar carregar ela inteira na memória.
-    /// Serve pros testes e pra qualquer checagem futura de tamanho.
+    /// Lê as dimensões sem decodificar a imagem completa.
     public static func pixelSize(of data: Data) -> (width: Int, height: Int)? {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil),
               let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],

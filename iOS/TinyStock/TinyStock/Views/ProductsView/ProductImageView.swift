@@ -17,7 +17,7 @@ struct ProductImageView: View {
     var side: CGFloat = 52
 
     private var cornerRadius: CGFloat {
-        // Proporcional ao tamanho pra miniatura e foto grande terem o mesmo desenho.
+        // Mantém miniaturas e imagens maiores com a mesma proporção.
         side / 4.5
     }
 
@@ -33,7 +33,7 @@ struct ProductImageView: View {
         }
         .frame(width: side, height: side)
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-        // Decorativa: o nome do produto aparece do lado e já diz tudo pro VoiceOver.
+        // O nome adjacente já identifica o produto para o VoiceOver.
         .accessibilityHidden(true)
     }
 

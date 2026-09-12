@@ -107,7 +107,7 @@ public enum ProductionCostCalculator {
         )
     }
 
-    /// Custos usam arredondamento comercial; o preço sobe o centavo pra não perder a margem.
+    /// Custos usam arredondamento comercial; o preço é arredondado para cima para preservar a margem.
     private static func rounded(_ value: Decimal) -> Decimal {
         var value = value
         var result = Decimal.zero

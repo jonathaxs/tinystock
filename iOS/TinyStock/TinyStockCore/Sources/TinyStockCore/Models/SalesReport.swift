@@ -19,7 +19,7 @@ public enum SalesReportPeriod: String, CaseIterable, Identifiable, Sendable {
 
     public var id: String { rawValue }
 
-    /// Nome curto de propósito, para caber no controle segmentado em qualquer iPhone.
+    /// Nome curto para permanecer legível no controle segmentado.
     public var localizedName: String {
         switch self {
         case .today:
@@ -78,7 +78,7 @@ public enum SalesReportPeriod: String, CaseIterable, Identifiable, Sendable {
 
 /// Vendas filtradas e somadas para a tela de relatórios.
 ///
-/// Não é Sendable de propósito: carrega models `Sale` presos ao contexto do SwiftData.
+/// Não é `Sendable` porque carrega models vinculados ao contexto do SwiftData.
 public struct SalesReportSummary {
     public let period: SalesReportPeriod
     public let sales: [Sale]

@@ -12,7 +12,7 @@ import Foundation
 
 // MARK: - Apoio
 
-/// Locale fixa pros testes não mudarem de resultado conforme o aparelho.
+/// Locale fixa para manter os resultados independentes da configuração do aparelho.
 private let localeBR = Locale(identifier: "pt_BR")
 
 /// O formatador do sistema separa símbolo e número com espaço não quebrável.
@@ -64,7 +64,7 @@ private func money(cents: Int) -> Decimal {
 }
 
 @Test func textoDeEdicaoVoltaNoParser() {
-    // Abrir o produto pra editar e salvar sem mexer não pode alterar o valor.
+    // Abrir e salvar um produto sem editar não pode alterar o valor.
     let original = money(cents: 4590)
     let texto = CurrencyFormatter.editableText(from: original, locale: localeBR)
     #expect(CurrencyFormatter.decimal(from: texto) == original)
@@ -104,7 +104,7 @@ private func money(cents: Int) -> Decimal {
 }
 
 @Test func idaEVoltaPreservaOValor() {
-    // Formatar e ler de volta tem que devolver exatamente o mesmo Decimal.
+    // Formatar e ler novamente deve preservar exatamente o mesmo Decimal.
     let original = money(cents: 8990)
     let texto = CurrencyFormatter.string(from: original, locale: localeBR)
     #expect(CurrencyFormatter.decimal(from: texto) == original)

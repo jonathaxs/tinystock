@@ -37,7 +37,7 @@ public final class StockMovement {
 
     public var note: String = ""
 
-    /// Identificador de pedido ou outra origem, quando houver integração futura.
+    /// Identificador do pedido ou de outra operação que originou a movimentação.
     public var referenceID: UUID?
 
     /// Preenchido somente na movimentação que desfaz outra.

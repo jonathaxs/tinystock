@@ -59,7 +59,7 @@ public final class SalesOrderItem {
     }
 
     /// Nao ha relacao com o catalogo: renomear ou excluir um produto nao muda o pedido.
-    /// Criar o retrato nao reserva nem baixa estoque; isso pertence ao servico da R11.
+    /// Criar o retrato nao reserva nem baixa estoque; essa operacao pertence ao servico de pedidos.
     public static func snapshot(
         product: Product,
         variant: ProductVariant,

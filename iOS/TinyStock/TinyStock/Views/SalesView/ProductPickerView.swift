@@ -15,7 +15,7 @@ struct ProductPickerView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
-    /// Quanto ainda dá pra vender de cada produto, já descontando o carrinho.
+    /// Saldo disponível depois de descontar as quantidades que já estão no carrinho.
     /// Quem chama sabe o que já foi escolhido, esta tela não precisa saber.
     let remainingStock: (Product) -> Int
 
@@ -43,7 +43,7 @@ struct ProductPickerView: View {
         )
     }
 
-    /// Some da lista quem já foi todo pro carrinho: não dá pra escolher o que não sobrou.
+    /// Remove da lista os produtos cujo saldo já foi totalmente incluído no carrinho.
     private var sellableProducts: [Product] {
         availableProducts.filter { remainingStock($0) > 0 }
     }
@@ -109,7 +109,7 @@ struct ProductPickerView: View {
             Text(product.name)
                 .font(.headline)
 
-            // O número que importa aqui é o que ainda dá pra escolher,
+            // Exibe somente o saldo que ainda pode ser escolhido,
             // não o estoque cheio: parte dele já pode estar no carrinho.
             Text(
                 String(

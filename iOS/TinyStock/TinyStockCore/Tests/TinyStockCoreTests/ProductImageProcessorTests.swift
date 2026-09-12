@@ -63,7 +63,7 @@ private func makeImageData(width: Int, height: Int) throws -> Data {
 }
 
 @Test func fotoPequenaNaoEhEsticada() throws {
-    // Imagem menor que o limite tem que continuar do tamanho que era.
+    // Imagens menores que o limite preservam suas dimensões.
     let original = try makeImageData(width: 300, height: 200)
     let preparada = try #require(ProductImageProcessor.prepared(from: original))
     let tamanho = try #require(ProductImageProcessor.pixelSize(of: preparada))

@@ -77,7 +77,7 @@ struct BestSellingRowView: View {
         position: 1,
         ranking: SalesOrderProductRanking(
             productID: UUID(),
-            productName: "Amigurumi Gato",
+            productName: "Produto popular",
             quantity: 12,
             revenue: 540,
             cost: 240
