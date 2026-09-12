@@ -56,7 +56,12 @@ public enum StoreProfileService {
             throw StoreProfileError.duplicateName
         }
 
-        let store = StoreProfile(name: cleanName, imageData: imageData)
+        let existingStores = try context.fetch(FetchDescriptor<StoreProfile>())
+        let store = StoreProfile(
+            name: cleanName,
+            imageData: imageData,
+            sortOrder: nextSortOrder(after: existingStores)
+        )
         context.insert(store)
         return store
     }
@@ -69,7 +74,10 @@ public enum StoreProfileService {
     ) throws -> StoreProfile {
         let descriptor = FetchDescriptor<StoreProfile>(
             predicate: #Predicate { !$0.isArchived },
-            sortBy: [SortDescriptor(\StoreProfile.createdAt)]
+            sortBy: [
+                SortDescriptor(\StoreProfile.sortOrder),
+                SortDescriptor(\StoreProfile.createdAt)
+            ]
         )
 
         if let existing = try context.fetch(descriptor).first {
@@ -139,6 +147,7 @@ public enum StoreProfileService {
             canonical.name = newest.name
             canonical.imageData = newest.imageData
             canonical.isArchived = newest.isArchived
+            canonical.sortOrder = newest.sortOrder
             canonical.updatedAt = newest.updatedAt
 
             for duplicate in primaryCopies.dropFirst() {
@@ -149,6 +158,7 @@ public enum StoreProfileService {
         stores = try context.fetch(
             FetchDescriptor<StoreProfile>(sortBy: [SortDescriptor(\StoreProfile.createdAt)])
         )
+        stores = orderedForDisplay(stores)
         if stores.isEmpty {
             let created = try ensureDefaultStore(in: context)
             return created
@@ -216,10 +226,45 @@ public enum StoreProfileService {
         store.updatedAt = date
     }
 
+    /// Ordena com desempate deterministico para bancos anteriores ao campo de posicao.
+    public static func orderedForDisplay(_ stores: [StoreProfile]) -> [StoreProfile] {
+        stores.sorted { left, right in
+            if left.sortOrder != right.sortOrder {
+                return left.sortOrder < right.sortOrder
+            }
+            if left.createdAt != right.createdAt {
+                return left.createdAt < right.createdAt
+            }
+            return left.id.uuidString < right.id.uuidString
+        }
+    }
+
+    /// Persiste a ordem completa recebida da interface sem alterar outros dados da loja.
+    public static func setDisplayOrder(
+        _ stores: [StoreProfile],
+        date: Date = Date()
+    ) throws {
+        guard stores.allSatisfy({ !$0.isArchived }) else {
+            throw StoreProfileError.archivedStore
+        }
+
+        for (position, store) in stores.enumerated() where store.sortOrder != position {
+            store.sortOrder = position
+            store.updatedAt = date
+        }
+    }
+
     // MARK: - Apoio
 
     private static func sanitized(_ name: String) -> String {
         name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private static func nextSortOrder(after stores: [StoreProfile]) -> Int {
+        guard let last = stores.map(\.sortOrder).max(), last < Int.max else {
+            return stores.count
+        }
+        return last + 1
     }
 
     private static func contains(

@@ -72,17 +72,35 @@ public struct BackupPayload: Codable, Equatable, Sendable {
         public let name: String
         public let imageData: Data?
         public let isArchived: Bool
+        public let sortOrder: Int
         public let createdAt: Date
         public let updatedAt: Date
 
         public init(id: UUID, name: String, imageData: Data?, isArchived: Bool,
-                    createdAt: Date, updatedAt: Date) {
+                    sortOrder: Int = 0, createdAt: Date, updatedAt: Date) {
             self.id = id
             self.name = name
             self.imageData = imageData
             self.isArchived = isArchived
+            self.sortOrder = sortOrder
             self.createdAt = createdAt
             self.updatedAt = updatedAt
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case id, name, imageData, isArchived, sortOrder, createdAt, updatedAt
+        }
+
+        /// Backups v2 anteriores a ordenacao continuam validos com a ordem inicial.
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            id = try container.decode(UUID.self, forKey: .id)
+            name = try container.decode(String.self, forKey: .name)
+            imageData = try container.decodeIfPresent(Data.self, forKey: .imageData)
+            isArchived = try container.decode(Bool.self, forKey: .isArchived)
+            sortOrder = try container.decodeIfPresent(Int.self, forKey: .sortOrder) ?? 0
+            createdAt = try container.decode(Date.self, forKey: .createdAt)
+            updatedAt = try container.decode(Date.self, forKey: .updatedAt)
         }
     }
 

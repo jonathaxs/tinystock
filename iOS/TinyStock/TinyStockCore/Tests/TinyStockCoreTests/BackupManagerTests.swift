@@ -25,10 +25,12 @@ struct BackupManagerTests {
         let context = try makeContext()
         let activeStore = StoreProfile(
             name: "VHS Plus", imageData: Data([0x01, 0x02]),
+            sortOrder: 4,
             createdAt: reference, updatedAt: reference.addingTimeInterval(1)
         )
         let archivedStore = StoreProfile(
             name: "Loja arquivada", imageData: Data([0x03]), isArchived: true,
+            sortOrder: 9,
             createdAt: reference.addingTimeInterval(2), updatedAt: reference.addingTimeInterval(3)
         )
         let product = Product(
@@ -97,6 +99,7 @@ struct BackupManagerTests {
         #expect(payload.selectedStoreID == activeStore.id)
         #expect(payload.summary == BackupSummary(storeCount: 2, productCount: 1, variantCount: 1, orderCount: 1))
         #expect(payload.stores.first(where: { $0.id == activeStore.id })?.imageData == Data([0x01, 0x02]))
+        #expect(payload.stores.first(where: { $0.id == activeStore.id })?.sortOrder == 4)
         #expect(payload.stores.first(where: { $0.id == archivedStore.id })?.isArchived == true)
         #expect(payload.products.map(\.name) == ["Maquina Beast"])
         #expect(payload.products.first?.imageData == Data([0x04, 0x05]))
@@ -150,6 +153,9 @@ struct BackupManagerTests {
         #expect(restoredItem.order?.id == restoredOrder.id)
         #expect(restoredItem.productName == "Caneca")
         #expect(restoredOrder.total == Decimal(string: "79.80"))
+        #expect(try context.fetch(FetchDescriptor<StoreProfile>()).first {
+            $0.id == payload.selectedStoreID
+        }?.sortOrder == 2)
     }
 
     @Test func restauracaoV2PreservaIdentidadeDeRegistrosExistentes() throws {
@@ -307,6 +313,21 @@ struct BackupManagerTests {
         #expect(payload.summary == BackupSummary(storeCount: 1, productCount: 1, variantCount: 1, orderCount: 1))
     }
 
+    @Test func arquivoV2SemOrdemDeLojaContinuaCompativel() throws {
+        let data = try encodeForTest(makeV2Payload())
+        var object = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        var stores = try #require(object["stores"] as? [[String: Any]])
+        for index in stores.indices {
+            stores[index].removeValue(forKey: "sortOrder")
+        }
+        object["stores"] = stores
+
+        let oldData = try JSONSerialization.data(withJSONObject: object)
+        let decoded = try BackupManager.decode(oldData)
+
+        #expect(decoded.stores.allSatisfy { $0.sortOrder == 0 })
+    }
+
     @Test func migracaoV1RecusaLojaAusenteOuArquivadaSemApagarDados() throws {
         let context = try makeContext()
         let archivedStore = StoreProfile(name: "Arquivada", isArchived: true)
@@ -379,11 +400,13 @@ struct BackupManagerTests {
             stores: [
                 .init(
                     id: activeStoreID, name: "Loja ativa", imageData: Data([0x02]),
-                    isArchived: false, createdAt: reference, updatedAt: reference
+                    isArchived: false, sortOrder: 2,
+                    createdAt: reference, updatedAt: reference
                 ),
                 .init(
                     id: archivedStoreID, name: "Loja arquivada", imageData: nil,
-                    isArchived: true, createdAt: reference, updatedAt: reference
+                    isArchived: true, sortOrder: 7,
+                    createdAt: reference, updatedAt: reference
                 )
             ],
             variants: [

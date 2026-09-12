@@ -25,6 +25,38 @@ struct StoreProfileTests {
         #expect(store.isArchived == false)
     }
 
+    @Test func criacaoAtribuiOrdemSequencial() throws {
+        let context = try TestDatabase.makeCleanContext()
+
+        let first = try StoreProfileService.create(name: "Primeira", in: context)
+        let second = try StoreProfileService.create(name: "Segunda", in: context)
+        let third = try StoreProfileService.create(name: "Terceira", in: context)
+        let positions: [Int] = [first.sortOrder, second.sortOrder, third.sortOrder]
+
+        #expect(positions == [0, 1, 2])
+    }
+
+    @Test func reordenacaoPersistePosicoesConsecutivas() throws {
+        let context = try TestDatabase.makeCleanContext()
+        let first = try StoreProfileService.create(name: "Primeira", in: context)
+        let second = try StoreProfileService.create(name: "Segunda", in: context)
+        let third = try StoreProfileService.create(name: "Terceira", in: context)
+        let reorderedAt = Date(timeIntervalSince1970: 1_800_000_000)
+
+        try StoreProfileService.setDisplayOrder(
+            [third, first, second],
+            date: reorderedAt
+        )
+
+        #expect(third.sortOrder == 0)
+        #expect(first.sortOrder == 1)
+        #expect(second.sortOrder == 2)
+        #expect(StoreProfileService.orderedForDisplay([first, second, third]).map(\.id) == [
+            third.id, first.id, second.id
+        ])
+        #expect([first, second, third].allSatisfy { $0.updatedAt == reorderedAt })
+    }
+
     @Test func nomeVazioEhRecusado() throws {
         let context = try TestDatabase.makeCleanContext()
 

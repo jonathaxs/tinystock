@@ -230,6 +230,7 @@ public enum BackupManager {
         value.name = snapshot.name
         value.imageData = snapshot.imageData
         value.isArchived = snapshot.isArchived
+        value.sortOrder = snapshot.sortOrder
         value.createdAt = snapshot.createdAt
         value.updatedAt = snapshot.updatedAt
     }
@@ -414,7 +415,8 @@ public enum BackupManager {
 
     private static func storeSnapshot(_ value: StoreProfile) -> BackupPayload.StoreSnapshot {
         .init(id: value.id, name: value.name, imageData: value.imageData,
-              isArchived: value.isArchived, createdAt: value.createdAt, updatedAt: value.updatedAt)
+              isArchived: value.isArchived, sortOrder: value.sortOrder,
+              createdAt: value.createdAt, updatedAt: value.updatedAt)
     }
 
     private static func productSnapshot(_ value: Product) -> BackupPayload.ProductSnapshot {
@@ -491,7 +493,9 @@ public enum BackupManager {
               let selectedStoreID = payload.selectedStoreID,
               activeIDs.contains(selectedStoreID),
               !storeIDs.contains(StoreScope.unassignedStoreID),
-              payload.stores.allSatisfy({ valid($0.createdAt, $0.updatedAt) }) else { return false }
+              payload.stores.allSatisfy({
+                  $0.sortOrder >= 0 && valid($0.createdAt, $0.updatedAt)
+              }) else { return false }
 
         guard hasUniqueIDs(payload.products.map(\.id)) else { return false }
         let productsByID = Dictionary(uniqueKeysWithValues: payload.products.map { ($0.id, $0) })

@@ -42,6 +42,9 @@ public final class StoreProfile {
     /// Lojas arquivadas preservam o histórico, mas não aparecem no uso cotidiano.
     public var isArchived: Bool = false
 
+    /// Posicao escolhida pelo usuario nas listas e no seletor rapido.
+    public var sortOrder: Int = 0
+
     public var createdAt: Date = Date()
     public var updatedAt: Date = Date()
 
@@ -50,6 +53,7 @@ public final class StoreProfile {
         name: String = "",
         imageData: Data? = nil,
         isArchived: Bool = false,
+        sortOrder: Int = 0,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
@@ -57,6 +61,7 @@ public final class StoreProfile {
         self.name = name
         self.imageData = imageData
         self.isArchived = isArchived
+        self.sortOrder = sortOrder
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
