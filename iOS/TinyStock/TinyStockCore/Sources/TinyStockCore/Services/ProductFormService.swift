@@ -7,6 +7,19 @@
 import Foundation
 import SwiftData
 
+public enum ProductFormError: Error, Equatable, Sendable {
+    case missingVariation
+}
+
+public extension ProductFormError {
+    var localizedMessage: String {
+        switch self {
+        case .missingVariation:
+            String(localized: "product.form.error.missingVariation", bundle: .tinyStockCore)
+        }
+    }
+}
+
 /// Valores de uma variacao no formulario, sem modificar o banco durante a edicao.
 public struct ProductVariantInput: Identifiable, Sendable {
     public let id: UUID
@@ -37,6 +50,9 @@ public enum ProductFormService {
     ) throws -> Product {
         if let product, product.storeID != storeID {
             throw ProductVariantError.productMismatch
+        }
+        guard product != nil || !variants.isEmpty else {
+            throw ProductFormError.missingVariation
         }
 
         // Valida toda a lista antes de alterar produto, nomes ou saldos.

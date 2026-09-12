@@ -36,11 +36,13 @@ struct ProductFormServiceTests {
         #expect(try reader.fetchCount(FetchDescriptor<ProductVariant>()) == 2)
     }
 
-    @Test func produtoPodeSerCadastradoSemEstoqueOuVariacoes() throws {
+    @Test func cadastroExigePeloMenosUmaVariacao() throws {
         let context = try TestDatabase.makeCleanContext()
-        _ = try ProductFormService.apply(storeID: UUID(), name: "Produto", costPrice: 0,
+        #expect(throws: ProductFormError.missingVariation) {
+            try ProductFormService.apply(storeID: UUID(), name: "Produto", costPrice: 0,
                                          salePrice: 0, imageData: nil, variants: [], in: context)
-        #expect(try context.fetchCount(FetchDescriptor<Product>()) == 1)
+        }
+        #expect(try context.fetchCount(FetchDescriptor<Product>()) == 0)
         #expect(try context.fetchCount(FetchDescriptor<ProductVariant>()) == 0)
         #expect(try context.fetchCount(FetchDescriptor<StockMovement>()) == 0)
     }
