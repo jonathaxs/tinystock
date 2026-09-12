@@ -22,6 +22,8 @@ struct ProductFormView: View {
     @State private var costPriceText: String
     @State private var salePriceText: String
     @State private var imageData: Data?
+    @State private var initialVariationName = ""
+    @State private var initialQuantityText = "0"
     @State private var variants: [ProductVariantInput] = []
     @State private var editingVariant: ProductVariantInput?
     @State private var didLoadVariants = false
@@ -45,10 +47,24 @@ struct ProductFormView: View {
         text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0 : CurrencyFormatter.decimal(from: text)
     }
 
+    private var initialQuantity: Int? {
+        Int(initialQuantityText.trimmingCharacters(in: .whitespacesAndNewlines))
+    }
+
+    private var formVariants: [ProductVariantInput] {
+        guard editingProduct == nil else { return variants }
+        guard let initialQuantity else { return [] }
+        return [ProductVariantInput(name: initialVariationName, initialQuantity: initialQuantity)]
+    }
+
     private var canSave: Bool {
         guard let cost = price(from: costPriceText), let sale = price(from: salePriceText) else { return false }
+        let hasValidInitialVariation = editingProduct != nil || (
+            !initialVariationName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                && (initialQuantity ?? -1) >= 0
+        )
         return !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && cost >= 0 && sale >= 0 && didLoadVariants && !isLoadingPhoto
+            && cost >= 0 && sale >= 0 && hasValidInitialVariation && didLoadVariants && !isLoadingPhoto
     }
 
     private var title: String {
@@ -66,7 +82,11 @@ struct ProductFormView: View {
                         .textInputAutocapitalization(.words)
                 }
                 pricesSection
-                variantsSection
+                if editingProduct == nil {
+                    initialVariationSection
+                } else {
+                    variantsSection
+                }
             }
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
@@ -205,20 +225,20 @@ struct ProductFormView: View {
                     }
                     .foregroundStyle(.primary)
                 }
-                // Uma variacao persistida pode ter historico. Somente rascunhos sao removidos aqui.
-                .deleteDisabled(input.existingID != nil)
             }
-            .onDelete { offsets in
-                variants = variants.enumerated().filter {
-                    !offsets.contains($0.offset) || $0.element.existingID != nil
-                }.map(\.element)
+        }
+    }
+
+    private var initialVariationSection: some View {
+        Section(String(localized: "product.form.variant.title", bundle: .tinyStockCore)) {
+            TextField(String(localized: "product.form.variant.name", bundle: .tinyStockCore), text: $initialVariationName)
+                .textInputAutocapitalization(.words)
+            LabeledContent(String(localized: "product.form.variant.initialStock", bundle: .tinyStockCore)) {
+                TextField("0", text: $initialQuantityText)
+                    .keyboardType(.numberPad)
+                    .multilineTextAlignment(.trailing)
+                    .accessibilityLabel(String(localized: "product.form.variant.initialStock", bundle: .tinyStockCore))
             }
-            Button {
-                editingVariant = ProductVariantInput()
-            } label: {
-                Label(String(localized: "product.form.variant.add", bundle: .tinyStockCore), systemImage: "plus")
-            }
-            .disabled(!didLoadVariants)
         }
     }
 
@@ -267,12 +287,14 @@ struct ProductFormView: View {
         do {
             try ProductFormService.apply(to: editingProduct, storeID: storeID, name: name,
                                          costPrice: cost, salePrice: sale, imageData: imageData,
-                                         variants: variants, in: modelContext)
+                                         variants: formVariants, in: modelContext)
             try modelContext.save()
             dismiss()
         } catch {
             modelContext.rollback()
             if let error = error as? ProductError {
+                errorMessage = error.localizedMessage
+            } else if let error = error as? ProductFormError {
                 errorMessage = error.localizedMessage
             } else if let error = error as? ProductVariantError {
                 errorMessage = error.localizedMessage
