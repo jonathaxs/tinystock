@@ -12,6 +12,7 @@ import TinyStockCore
 struct ProductionCostCalculatorView: View {
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @FocusState private var focusedField: CalculatorField?
 
     let onApply: (ProductionCostResult) -> Void
@@ -89,34 +90,17 @@ struct ProductionCostCalculatorView: View {
     private var materialsSection: some View {
         Section {
             ForEach($materials) { $material in
-                LabeledContent(
-                    String(localized: "costCalculator.material.name", bundle: .tinyStockCore)
-                ) {
-                    HStack(spacing: 8) {
-                        TextField(
-                            String(
-                                localized: "costCalculator.material.name.placeholder",
-                                bundle: .tinyStockCore
-                            ),
-                            text: $material.name
-                        )
-                        .multilineTextAlignment(.trailing)
-                        .focused($focusedField, equals: .materialName(material.id))
-                        .submitLabel(.next)
-                        .onSubmit {
-                            focusedField = .materialQuantity(material.id)
+                Group {
+                    if dynamicTypeSize.isAccessibilitySize {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(String(localized: "costCalculator.material.name", bundle: .tinyStockCore))
+                            materialNameInput(material: $material)
                         }
-
-                        if materials.count > 1 {
-                            Button(role: .destructive) {
-                                removeMaterial(id: material.id)
-                            } label: {
-                                Image(systemName: "trash")
-                            }
-                            .buttonStyle(.borderless)
-                            .accessibilityLabel(
-                                String(localized: "costCalculator.material.remove", bundle: .tinyStockCore)
-                            )
+                    } else {
+                        LabeledContent(
+                            String(localized: "costCalculator.material.name", bundle: .tinyStockCore)
+                        ) {
+                            materialNameInput(material: $material)
                         }
                     }
                 }
@@ -150,6 +134,37 @@ struct ProductionCostCalculatorView: View {
             Text(String(localized: "costCalculator.section.materials", bundle: .tinyStockCore))
         } footer: {
             Text(String(localized: "costCalculator.materials.footer", bundle: .tinyStockCore))
+        }
+    }
+
+    private func materialNameInput(material: Binding<MaterialDraft>) -> some View {
+        HStack(spacing: 8) {
+            TextField(
+                String(
+                    localized: "costCalculator.material.name.placeholder",
+                    bundle: .tinyStockCore
+                ),
+                text: material.name
+            )
+            .multilineTextAlignment(dynamicTypeSize.isAccessibilitySize ? .leading : .trailing)
+            .focused($focusedField, equals: .materialName(material.wrappedValue.id))
+            .accessibilityLabel(String(localized: "costCalculator.material.name", bundle: .tinyStockCore))
+            .submitLabel(.next)
+            .onSubmit {
+                focusedField = .materialQuantity(material.wrappedValue.id)
+            }
+
+            if materials.count > 1 {
+                Button(role: .destructive) {
+                    removeMaterial(id: material.wrappedValue.id)
+                } label: {
+                    Image(systemName: "trash")
+                }
+                .buttonStyle(.borderless)
+                .accessibilityLabel(
+                    String(localized: "costCalculator.material.remove", bundle: .tinyStockCore)
+                )
+            }
         }
     }
 
@@ -238,17 +253,33 @@ struct ProductionCostCalculatorView: View {
         placeholder: String? = nil,
         field: CalculatorField
     ) -> some View {
-        LabeledContent(title) {
-            TextField(placeholder ?? currencyPlaceholder, text: text)
-                .keyboardType(.decimalPad)
-                .multilineTextAlignment(.trailing)
-                .frame(minWidth: 88, idealWidth: 112, maxWidth: 132)
-                .focused($focusedField, equals: field)
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(title)
+                    decimalInput(title: title, text: text, placeholder: placeholder, field: field)
+                }
+            } else {
+                LabeledContent(title) {
+                    decimalInput(title: title, text: text, placeholder: placeholder, field: field)
+                        .frame(minWidth: 88, idealWidth: 112, maxWidth: 132)
+                }
+            }
         }
         .contentShape(Rectangle())
         .onTapGesture {
             focusedField = field
         }
+    }
+
+    private func decimalInput(
+        title: String, text: Binding<String>, placeholder: String?, field: CalculatorField
+    ) -> some View {
+        TextField(placeholder ?? currencyPlaceholder, text: text)
+            .keyboardType(.decimalPad)
+            .multilineTextAlignment(dynamicTypeSize.isAccessibilitySize ? .leading : .trailing)
+            .focused($focusedField, equals: field)
+            .accessibilityLabel(title)
     }
 
     private func decimal(from text: String) -> Decimal {

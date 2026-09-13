@@ -49,6 +49,7 @@ struct SettingsView: View {
                         }
                     }
                     .foregroundStyle(.primary)
+                    .accessibilityHint(String(localized: "settings.language.hint", bundle: .tinyStockCore))
                 }
 
                 Section(String(localized: "settings.section.data", bundle: .tinyStockCore)) {

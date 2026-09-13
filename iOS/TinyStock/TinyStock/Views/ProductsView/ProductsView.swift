@@ -116,6 +116,7 @@ struct ProductsView: View {
                 rowLabel(product)
             }
             .buttonStyle(.plain)
+            .accessibilityHint(String(localized: "products.edit.hint", bundle: .tinyStockCore))
         } else {
             Menu {
                 Button { salesProduct = product } label: {

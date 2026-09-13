@@ -237,6 +237,8 @@
 "products.catalog.search" = "Search by product or variation";
 "products.catalog.quantity" = "%@ in stock";
 "products.actions.hint" = "Opens product actions.";
+"products.edit.hint" = "Opens the product editor.";
+"product.form.variant.edit.hint" = "Opens the variation editor.";
 "products.delete.stock.message" = "The product, its variations and stock movements will be deleted. Recorded sales will be kept. This cannot be undone.";
 "products.error.title" = "Unable to delete product";
 "stock.entry.title" = "Stock entry";
@@ -335,6 +337,7 @@
 "order.cancel.reason" = "Reason (optional)";
 "order.operation.error.title" = "Unable to update order";
 "order.detail.title" = "Order";
+"order.detail.open.hint" = "Opens order details.";
 "order.detail.status" = "Status";
 "order.detail.items" = "Items";
 "order.detail.buyer" = "Buyer";
@@ -415,6 +418,7 @@
 "settings.section.about" = "About";
 "settings.section.profile" = "Profile";
 "settings.language" = "Language";
+"settings.language.hint" = "Opens the app settings on this device.";
 "settings.data.title" = "Data and Backup";
 "settings.sync.title" = "iCloud Sync";
 "settings.sync.status" = "Apple Account";

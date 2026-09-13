@@ -178,6 +178,7 @@ struct SalesView: View {
                                 now: now
                             )
                         }
+                        .accessibilityHint(String(localized: "order.detail.open.hint", bundle: .tinyStockCore))
                         .swipeActions(edge: .leading, allowsFullSwipe: false) {
                             if let action = SalesOrderPresentation.quickAction(for: order) {
                                 Button { transition(order, to: action.status) } label: {

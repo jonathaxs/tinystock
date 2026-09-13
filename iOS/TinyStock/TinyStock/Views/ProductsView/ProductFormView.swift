@@ -225,6 +225,7 @@ struct ProductFormView: View {
                     }
                     .foregroundStyle(.primary)
                 }
+                .accessibilityHint(String(localized: "product.form.variant.edit.hint", bundle: .tinyStockCore))
             }
         }
     }

@@ -39,8 +39,7 @@ struct ReportMetricView: View {
             Text(value)
                 .font(.title2.bold())
                 .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(16)
         .frame(maxWidth: .infinity, minHeight: 104, alignment: .leading)

@@ -61,14 +61,14 @@ struct AboutView: View {
                 .interpolation(.high)
                 .frame(width: size, height: size)
                 .clipShape(RoundedRectangle(cornerRadius: size * 0.22, style: .continuous))
-                .accessibilityLabel(String(localized: "settings.about.icon", bundle: .tinyStockCore))
+                .accessibilityHidden(true)
         } else {
             Image(systemName: "shippingbox.fill")
                 .font(.system(size: 42))
                 .frame(width: size, height: size)
                 .background(.tint, in: RoundedRectangle(cornerRadius: size * 0.22, style: .continuous))
                 .foregroundStyle(.white)
-                .accessibilityLabel(String(localized: "settings.about.icon", bundle: .tinyStockCore))
+                .accessibilityHidden(true)
         }
     }
 

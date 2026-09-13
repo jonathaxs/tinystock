@@ -8,6 +8,7 @@ import TinyStockCore
 struct SalesOrderDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.calendar) private var calendar
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Query private var stores: [StoreProfile]
     @Bindable var order: SalesOrder
     @AppStorage(OrderCalendarExportSettings.isEnabledKey) private var isCalendarExportEnabled = true
@@ -77,18 +78,36 @@ struct SalesOrderDetailView: View {
     private var itemsSection: some View {
         Section(String(localized: "order.detail.items", bundle: .tinyStockCore)) {
             ForEach(order.itemList) { item in
-                HStack(alignment: .firstTextBaseline) {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(item.productName).fontWeight(.medium)
-                        Text(item.variantName).font(.subheadline).foregroundStyle(.secondary)
-                    }
-                    Spacer(minLength: 12)
-                    VStack(alignment: .trailing, spacing: 3) {
-                        Text(item.subtotal.currencyText)
-                        Text(item.quantity, format: .number).font(.caption).foregroundStyle(.secondary)
+                Group {
+                    if dynamicTypeSize.isAccessibilitySize {
+                        VStack(alignment: .leading, spacing: 8) {
+                            itemIdentification(item)
+                            itemValues(item, alignment: .leading)
+                        }
+                    } else {
+                        HStack(alignment: .firstTextBaseline) {
+                            itemIdentification(item)
+                            Spacer(minLength: 12)
+                            itemValues(item, alignment: .trailing)
+                        }
                     }
                 }
+                .accessibilityElement(children: .combine)
             }
+        }
+    }
+
+    private func itemIdentification(_ item: SalesOrderItem) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(item.productName).fontWeight(.medium)
+            Text(item.variantName).font(.subheadline).foregroundStyle(.secondary)
+        }
+    }
+
+    private func itemValues(_ item: SalesOrderItem, alignment: HorizontalAlignment) -> some View {
+        VStack(alignment: alignment, spacing: 3) {
+            Text(item.subtotal.currencyText)
+            Text(item.quantity, format: .number).font(.caption).foregroundStyle(.secondary)
         }
     }
 
@@ -149,11 +168,21 @@ struct SalesOrderDetailView: View {
                     Button {
                         selectedCalendarDraft = draft
                     } label: {
-                        HStack {
-                            Label(draft.kind.localizedActionTitle, systemImage: draft.kind.symbolName)
-                            Spacer()
-                            Text(draft.startDate, format: .dateTime.day().month(.abbreviated))
-                                .foregroundStyle(.secondary)
+                        Group {
+                            if dynamicTypeSize.isAccessibilitySize {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Label(draft.kind.localizedActionTitle, systemImage: draft.kind.symbolName)
+                                    Text(draft.startDate, format: .dateTime.day().month(.abbreviated))
+                                        .foregroundStyle(.secondary)
+                                }
+                            } else {
+                                HStack {
+                                    Label(draft.kind.localizedActionTitle, systemImage: draft.kind.symbolName)
+                                    Spacer()
+                                    Text(draft.startDate, format: .dateTime.day().month(.abbreviated))
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
                         }
                     }
                     .accessibilityHint(String(localized: "calendar.export.open.hint", bundle: .tinyStockCore))

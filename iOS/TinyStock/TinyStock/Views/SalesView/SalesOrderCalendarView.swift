@@ -6,6 +6,7 @@ import TinyStockCore
 
 struct SalesOrderCalendarView: View {
     @Environment(\.calendar) private var calendar
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.locale) private var locale
     @Binding var selectedDate: Date
     let countsByDay: [Date: Int]
@@ -82,16 +83,14 @@ struct SalesOrderCalendarView: View {
                 Text(calendar.component(.day, from: day), format: .number)
                     .font(.callout.weight(today ? .bold : .regular))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.7)
                 Text(count == 0 ? " " : (count > 99 ? "99+" : count.formatted()))
                     .font(.caption2.weight(.semibold))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.7)
             }
-            // A grade preserva suas dimensoes mesmo com contagens e Dynamic Type maiores.
+            // Limita apenas o texto da grade para preservar sete colunas legiveis.
             .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
             .frame(maxWidth: .infinity)
-            .frame(height: 52)
+            .frame(height: dynamicTypeSize.isAccessibilitySize ? 68 : 52)
             .foregroundStyle(selected ? Color.white : (inMonth ? Color.primary : Color.secondary))
             .background(selected ? Color.accentColor : .clear, in: RoundedRectangle(cornerRadius: 8))
             .overlay {

@@ -237,6 +237,8 @@
 "products.catalog.search" = "Buscar produto ou variação";
 "products.catalog.quantity" = "%@ em estoque";
 "products.actions.hint" = "Abre as ações do produto.";
+"products.edit.hint" = "Abre o editor do produto.";
+"product.form.variant.edit.hint" = "Abre o editor da variação.";
 "products.delete.stock.message" = "O produto, suas variações e movimentações de estoque serão excluídos. As vendas registradas serão mantidas. Esta ação não pode ser desfeita.";
 "products.error.title" = "Não foi possível excluir o produto";
 "stock.entry.title" = "Entrada de estoque";
@@ -335,6 +337,7 @@
 "order.cancel.reason" = "Motivo (opcional)";
 "order.operation.error.title" = "Não foi possível atualizar o pedido";
 "order.detail.title" = "Pedido";
+"order.detail.open.hint" = "Abre os detalhes do pedido.";
 "order.detail.status" = "Estado";
 "order.detail.items" = "Itens";
 "order.detail.buyer" = "Comprador";
@@ -415,6 +418,7 @@
 "settings.section.about" = "Sobre";
 "settings.section.profile" = "Perfil";
 "settings.language" = "Idioma";
+"settings.language.hint" = "Abre os ajustes do aplicativo neste dispositivo.";
 "settings.data.title" = "Dados e backup";
 "settings.sync.title" = "Sincronização do iCloud";
 "settings.sync.status" = "Conta Apple";

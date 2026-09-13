@@ -111,15 +111,28 @@ struct ReportsView: View {
                 }
             }
         } label: {
-            HStack(spacing: 10) {
-                Image(systemName: "calendar")
-                Text(String(localized: "reports.period.label", bundle: .tinyStockCore))
-                    .foregroundStyle(.secondary)
-                Spacer(minLength: 12)
-                Text(periodTitle).lineLimit(1)
-                Image(systemName: "chevron.up.chevron.down")
-                    .font(.caption.bold())
-                    .foregroundStyle(.secondary)
+            Group {
+                if dynamicTypeSize.isAccessibilitySize {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(String(localized: "reports.period.label", bundle: .tinyStockCore))
+                            .foregroundStyle(.secondary)
+                        Text(periodTitle)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    HStack(spacing: 10) {
+                        Image(systemName: "calendar")
+                            .accessibilityHidden(true)
+                        Text(String(localized: "reports.period.label", bundle: .tinyStockCore))
+                            .foregroundStyle(.secondary)
+                        Spacer(minLength: 12)
+                        Text(periodTitle)
+                        Image(systemName: "chevron.up.chevron.down")
+                            .font(.caption.bold())
+                            .foregroundStyle(.secondary)
+                            .accessibilityHidden(true)
+                    }
+                }
             }
             .padding(.horizontal, 16)
             .frame(minHeight: 48)
