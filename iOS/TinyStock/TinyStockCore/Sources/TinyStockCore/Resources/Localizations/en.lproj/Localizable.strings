@@ -29,41 +29,23 @@
 "products.empty.title" = "No products yet";
 "products.empty.message" = "Add your first product to start tracking your stock.";
 "products.add" = "Add product";
-"products.row.quantity" = "%d in stock";
-"products.lowStock" = "Low stock";
-"products.search.prompt" = "Search by name or category";
 
 
 /* MARK: - Product form */
 "product.form.title.new" = "New Product";
-"product.form.section.identification" = "Identification";
-"product.form.section.stock" = "Stock";
 "product.form.section.prices" = "Prices";
 "product.form.name" = "Name";
-"product.form.name.placeholder" = "E.g. Custom mug";
-"product.form.category" = "Category";
-"product.form.category.placeholder" = "E.g. Handmade";
-"product.form.quantity" = "Quantity";
-"product.form.minimumStock" = "Minimum stock";
-"product.form.stock.footer" = "A minimum stock of zero turns the restock alert off.";
 "product.form.costPrice" = "Cost";
 "product.form.salePrice" = "Sale price";
 "product.form.unitProfit" = "Profit per unit";
-"product.form.prices.footer" = "Cost is what you actually spent to make or buy one unit.";
 "product.form.title.edit" = "Edit Product";
-"product.form.section.photo" = "Photo";
 "product.form.photo.choose" = "Choose photo";
 "product.form.photo.change" = "Change photo";
 "product.form.photo.remove" = "Remove photo";
-"product.form.photo.footer" = "A photo helps you spot the product quickly when making a sale.";
 
 
 /* MARK: - Product detail */
-"product.detail.noCategory" = "No category";
-"product.detail.potentialProfit" = "Profit sitting in stock";
-"product.detail.potentialProfit.footer" = "What this product can still earn if the whole current stock is sold.";
 "product.delete.confirm.title" = "Delete this product?";
-"product.delete.confirm.message" = "The product leaves your stock and this cannot be undone.";
 "product.error.emptyName" = "Enter a name for the product.";
 "product.error.duplicateName" = "A product with this name already exists in this store.";
 "product.error.negativeCostPrice" = "The production cost cannot be negative.";
@@ -83,43 +65,15 @@
 
 
 /* MARK: - Sales */
-"sales.placeholder.title" = "No sales yet";
-"sales.placeholder.message" = "Register your first sale to keep track of what is going out.";
-"sales.add" = "New sale";
-"sales.row.quantity" = "%d units";
-"sales.row.moreItems" = "%1$@ and %2$d more";
-"sales.row.netProfit" = "Net %@";
 "sales.day.today" = "Today";
 "sales.day.yesterday" = "Yesterday";
 
 
 /* MARK: - New sale */
 "sale.new.title" = "New Sale";
-"sale.new.section.items" = "Items";
-"sale.new.addProduct" = "Add product";
-"sale.new.line.unit" = "%1$d × %2$@";
-"sale.new.section.quantity" = "Quantity";
-"sale.new.quantity.accessibility" = "Quantity of %@";
-"sale.new.available" = "%d in stock";
-"sale.new.quantity.footer" = "You can sell several products in the same sale. The quantity stops at what you have in stock today.";
-"sale.new.section.payment" = "Payment";
-"sale.new.section.summary" = "Summary";
-"sale.new.total" = "Total";
-"sale.new.grossProfit" = "Gross profit";
-"sale.new.channelFeePercentage" = "Shopee fee";
-"sale.new.channelFee" = "Channel fee";
-"sale.new.netProfit" = "Net profit";
-"sale.new.confirm" = "Confirm sale";
-
-
-/* MARK: - Product picker */
-"sale.picker.title" = "Choose Product";
-"sale.picker.empty.title" = "Nothing available to sell";
-"sale.picker.empty.message" = "Add a product or restock to register a sale.";
 
 
 /* MARK: - Sale errors */
-"sale.error.title" = "Could not register the sale";
 "sale.error.emptySale" = "Choose a product before confirming.";
 "sale.error.invalidQuantity" = "The quantity must be at least one unit.";
 "sale.error.insufficientStock" = "Only %1$d units of %2$@ left in stock.";
@@ -149,10 +103,8 @@
 "reports.custom.invalid" = "The end date cannot be before the start date.";
 "reports.received.title" = "Orders received in the period";
 "reports.metric.revenue" = "Order value";
-"reports.metric.profit" = "Net profit";
 "reports.metric.netProfit" = "Estimated net profit";
 "reports.metric.orders" = "Orders received";
-"reports.metric.sales" = "Sales";
 "reports.metric.units" = "Units";
 "reports.metric.cost" = "Production cost";
 "reports.metric.fees" = "Channel fees";
@@ -170,8 +122,6 @@
 "reports.count.orders.other" = "%d orders";
 "reports.count.units" = "%@ units";
 "reports.daily.title" = "By day";
-"reports.daily.sales.one" = "%d sale";
-"reports.daily.sales.other" = "%d sales";
 "reports.daily.profit" = "Net profit: %@";
 "reports.empty.period.title" = "No sales in this period";
 "reports.empty.period.message" = "Choose another period or register a new sale.";
@@ -179,13 +129,6 @@
 "reports.bestSellers.units.one" = "%@ unit sold";
 "reports.bestSellers.units.other" = "%@ units sold";
 "reports.channels.title" = "By sales channel";
-"reports.restock.title" = "Needs restocking";
-"reports.restock.stock" = "%1$d in stock · minimum %2$d";
-
-
-/* MARK: - Settings */
-"settings.placeholder.title" = "Settings";
-"settings.placeholder.message" = "Backup and preferences are coming soon.";
 
 
 /* MARK: - Backup */
@@ -268,7 +211,6 @@
 "stores.section.active" = "Active";
 "stores.section.archived" = "Archived";
 "stores.section.footer" = "Each store keeps its products, orders and reports separate.";
-"stores.archive" = "Archive";
 "stores.restore" = "Restore";
 "stores.current" = "Current store";
 "stores.actions.accessibility" = "Actions for %@";
@@ -276,7 +218,6 @@
 "stores.error.title" = "Unable to complete the store operation";
 "stores.delete.confirm.title" = "Permanently delete store?";
 "stores.delete.confirm.message" = "\"%@\" and all its data will be permanently deleted:\n\nProducts: %@\nVariations: %@\nStock movements: %@\nOrders: %@\n\nEvents already saved in the iPhone Calendar will not be changed. This action cannot be undone.";
-"settings.store.section" = "Store";
 "settings.store.manage" = "Manage stores";
 
 
@@ -473,16 +414,12 @@
 "settings.section.data" = "Data";
 "settings.section.about" = "About";
 "settings.section.profile" = "Profile";
-"settings.preferences.title" = "Preferences";
 "settings.language" = "Language";
-"settings.language.footer" = "TinyStock follows the language selected for the app in iOS Settings. Available languages are English and Brazilian Portuguese.";
-"settings.backup.title" = "Backup";
 "settings.data.title" = "Data and Backup";
 "settings.sync.title" = "iCloud Sync";
 "settings.sync.status" = "Apple Account";
 "settings.sync.refresh" = "Check again";
 "settings.sync.footer" = "TinyStock syncs automatically through your private iCloud database. Updates may take a few moments to appear on another device.";
-"settings.sync.howItWorks" = "How it works";
 "settings.sync.backup.message" = "iCloud Drive and JSON backups are separate recovery copies that you control manually.";
 "settings.sync.status.checking" = "Checking";
 "settings.sync.status.available" = "Available";

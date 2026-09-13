@@ -32,7 +32,15 @@ struct StoresView: View {
         List {
             Section {
                 ForEach(activeStores) { store in
-                    activeRow(store)
+                    StoreManagementRow(
+                        store: store,
+                        isSelected: store.id == storeSession.selectedStoreID,
+                        canDelete: activeStores.count > 1,
+                        onSelect: { select(store) },
+                        onEdit: { formRoute = StoreFormRoute(store: store) },
+                        onRestore: nil,
+                        onDelete: { requestDeletion(store) }
+                    )
                 }
                 .onMove(perform: moveActiveStores)
                 .onDelete { requestDeletion(from: activeStores, at: $0) }
@@ -45,7 +53,15 @@ struct StoresView: View {
             if !archivedStores.isEmpty {
                 Section(String(localized: "stores.section.archived", bundle: .tinyStockCore)) {
                     ForEach(archivedStores) { store in
-                        archivedRow(store)
+                        StoreManagementRow(
+                            store: store,
+                            isSelected: false,
+                            canDelete: true,
+                            onSelect: nil,
+                            onEdit: { formRoute = StoreFormRoute(store: store) },
+                            onRestore: { restore(store) },
+                            onDelete: { requestDeletion(store) }
+                        )
                     }
                     .onDelete { requestDeletion(from: archivedStores, at: $0) }
                 }
@@ -99,101 +115,6 @@ struct StoresView: View {
             }
         } message: {
             Text(errorMessage ?? "")
-        }
-    }
-
-    private func activeRow(_ store: StoreProfile) -> some View {
-        HStack(spacing: 12) {
-            Button {
-                select(store)
-            } label: {
-                StoreManagementRow(
-                    store: store,
-                    isSelected: store.id == storeSession.selectedStoreID
-                )
-            }
-            .buttonStyle(.plain)
-            .accessibilityHint(String(localized: "stores.select.hint", bundle: .tinyStockCore))
-            .accessibilityAddTraits(store.id == storeSession.selectedStoreID ? [.isSelected] : [])
-
-            Menu {
-                Button {
-                    formRoute = StoreFormRoute(store: store)
-                } label: {
-                    Label(
-                        String(localized: "common.edit", bundle: .tinyStockCore),
-                        systemImage: "pencil"
-                    )
-                }
-
-                Button(role: .destructive) {
-                    requestDeletion(store)
-                } label: {
-                    Label(
-                        String(localized: "common.delete", bundle: .tinyStockCore),
-                        systemImage: "trash"
-                    )
-                }
-                .disabled(activeStores.count == 1)
-            } label: {
-                Image(systemName: "ellipsis.circle")
-                    .font(.title3)
-                    .frame(width: 44, height: 44)
-                    .contentShape(.rect)
-            }
-            .accessibilityLabel(
-                String(
-                    format: String(localized: "stores.actions.accessibility", bundle: .tinyStockCore),
-                    store.name
-                )
-            )
-        }
-    }
-
-    private func archivedRow(_ store: StoreProfile) -> some View {
-        HStack(spacing: 12) {
-            StoreManagementRow(store: store, isSelected: false)
-                .opacity(0.65)
-
-            Menu {
-                Button {
-                    restore(store)
-                } label: {
-                    Label(
-                        String(localized: "stores.restore", bundle: .tinyStockCore),
-                        systemImage: "arrow.uturn.backward"
-                    )
-                }
-
-                Button {
-                    formRoute = StoreFormRoute(store: store)
-                } label: {
-                    Label(
-                        String(localized: "common.edit", bundle: .tinyStockCore),
-                        systemImage: "pencil"
-                    )
-                }
-
-                Button(role: .destructive) {
-                    requestDeletion(store)
-                } label: {
-                    Label(
-                        String(localized: "common.delete", bundle: .tinyStockCore),
-                        systemImage: "trash"
-                    )
-                }
-            } label: {
-                Image(systemName: "ellipsis.circle")
-                    .font(.title3)
-                    .frame(width: 44, height: 44)
-                    .contentShape(.rect)
-            }
-            .accessibilityLabel(
-                String(
-                    format: String(localized: "stores.actions.accessibility", bundle: .tinyStockCore),
-                    store.name
-                )
-            )
         }
     }
 
@@ -283,52 +204,5 @@ struct StoresView: View {
             modelContext.rollback()
             errorMessage = error.localizedDescription
         }
-    }
-}
-
-private struct StoreManagementRow: View {
-    let store: StoreProfile
-    let isSelected: Bool
-
-    var body: some View {
-        HStack(spacing: 12) {
-            StoreImageView(imageData: store.imageData)
-
-            Text(store.name)
-                .foregroundStyle(.primary)
-                .lineLimit(2)
-
-            Spacer(minLength: 8)
-
-            if isSelected {
-                Image(systemName: "checkmark")
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(Color.accentColor)
-                    .accessibilityLabel(
-                        String(localized: "stores.current", bundle: .tinyStockCore)
-                    )
-            }
-        }
-        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-        .contentShape(.rect)
-    }
-}
-
-private struct StoreFormRoute: Identifiable {
-    let id = UUID()
-    let store: StoreProfile?
-}
-
-private struct StoreDeletionRequest: Identifiable {
-    let id: UUID
-    let store: StoreProfile
-    let storeName: String
-    let summary: StoreDeletionSummary
-
-    init(store: StoreProfile, summary: StoreDeletionSummary) {
-        id = store.id
-        self.store = store
-        storeName = store.name
-        self.summary = summary
     }
 }

@@ -29,41 +29,23 @@
 "products.empty.title" = "Nenhum produto ainda";
 "products.empty.message" = "Cadastre seu primeiro produto pra começar a controlar o estoque.";
 "products.add" = "Cadastrar produto";
-"products.row.quantity" = "%d un";
-"products.lowStock" = "Estoque baixo";
-"products.search.prompt" = "Buscar por nome ou categoria";
 
 
 /* MARK: - Formulário do produto */
 "product.form.title.new" = "Novo produto";
-"product.form.section.identification" = "Identificação";
-"product.form.section.stock" = "Estoque";
 "product.form.section.prices" = "Preços";
 "product.form.name" = "Nome";
-"product.form.name.placeholder" = "Ex.: Caneca personalizada";
-"product.form.category" = "Categoria";
-"product.form.category.placeholder" = "Ex.: Artesanato";
-"product.form.quantity" = "Quantidade";
-"product.form.minimumStock" = "Estoque mínimo";
-"product.form.stock.footer" = "Estoque mínimo zero desliga o alerta de reposição.";
 "product.form.costPrice" = "Custo";
 "product.form.salePrice" = "Preço de venda";
 "product.form.unitProfit" = "Lucro por unidade";
-"product.form.prices.footer" = "O custo é quanto saiu do seu bolso pra produzir ou comprar uma unidade.";
 "product.form.title.edit" = "Editar produto";
-"product.form.section.photo" = "Foto";
 "product.form.photo.choose" = "Escolher foto";
 "product.form.photo.change" = "Trocar foto";
 "product.form.photo.remove" = "Remover foto";
-"product.form.photo.footer" = "A foto ajuda a achar o produto rápido na hora da venda.";
 
 
 /* MARK: - Detalhe do produto */
-"product.detail.noCategory" = "Sem categoria";
-"product.detail.potentialProfit" = "Lucro do estoque parado";
-"product.detail.potentialProfit.footer" = "Quanto esse produto ainda pode render se todo o estoque atual for vendido.";
 "product.delete.confirm.title" = "Excluir este produto?";
-"product.delete.confirm.message" = "O produto sai do estoque e essa ação não pode ser desfeita.";
 "product.error.emptyName" = "Informe um nome para o produto.";
 "product.error.duplicateName" = "Já existe um produto com esse nome nesta loja.";
 "product.error.negativeCostPrice" = "O custo de produção não pode ser negativo.";
@@ -83,43 +65,15 @@
 
 
 /* MARK: - Vendas */
-"sales.placeholder.title" = "Nenhuma venda ainda";
-"sales.placeholder.message" = "Registre sua primeira venda pra acompanhar o que está saindo.";
-"sales.add" = "Registrar venda";
-"sales.row.quantity" = "%d un";
-"sales.row.moreItems" = "%1$@ e mais %2$d";
-"sales.row.netProfit" = "Líq. %@";
 "sales.day.today" = "Hoje";
 "sales.day.yesterday" = "Ontem";
 
 
 /* MARK: - Nova venda */
 "sale.new.title" = "Nova venda";
-"sale.new.section.items" = "Itens";
-"sale.new.addProduct" = "Adicionar produto";
-"sale.new.line.unit" = "%1$d × %2$@";
-"sale.new.section.quantity" = "Quantidade";
-"sale.new.quantity.accessibility" = "Quantidade de %@";
-"sale.new.available" = "%d em estoque";
-"sale.new.quantity.footer" = "Dá pra vender vários produtos na mesma venda. A quantidade para no que existe em estoque hoje.";
-"sale.new.section.payment" = "Pagamento";
-"sale.new.section.summary" = "Resumo";
-"sale.new.total" = "Total";
-"sale.new.grossProfit" = "Lucro bruto";
-"sale.new.channelFeePercentage" = "Taxa da Shopee";
-"sale.new.channelFee" = "Taxa do canal";
-"sale.new.netProfit" = "Lucro líquido";
-"sale.new.confirm" = "Confirmar venda";
-
-
-/* MARK: - Escolha do produto */
-"sale.picker.title" = "Escolher produto";
-"sale.picker.empty.title" = "Nada disponível pra vender";
-"sale.picker.empty.message" = "Cadastre um produto ou reponha o estoque pra registrar uma venda.";
 
 
 /* MARK: - Erros da venda */
-"sale.error.title" = "Não foi possível registrar";
 "sale.error.emptySale" = "Escolha um produto antes de confirmar.";
 "sale.error.invalidQuantity" = "A quantidade precisa ser de pelo menos uma unidade.";
 "sale.error.insufficientStock" = "Restam só %1$d unidades de %2$@ em estoque.";
@@ -149,10 +103,8 @@
 "reports.custom.invalid" = "A data final não pode ser anterior à data inicial.";
 "reports.received.title" = "Pedidos recebidos no período";
 "reports.metric.revenue" = "Valor dos pedidos";
-"reports.metric.profit" = "Lucro líquido";
 "reports.metric.netProfit" = "Lucro líquido estimado";
 "reports.metric.orders" = "Pedidos recebidos";
-"reports.metric.sales" = "Vendas";
 "reports.metric.units" = "Unidades";
 "reports.metric.cost" = "Custo de produção";
 "reports.metric.fees" = "Taxas dos canais";
@@ -170,8 +122,6 @@
 "reports.count.orders.other" = "%d pedidos";
 "reports.count.units" = "%@ unidades";
 "reports.daily.title" = "Por dia";
-"reports.daily.sales.one" = "%d venda";
-"reports.daily.sales.other" = "%d vendas";
 "reports.daily.profit" = "Lucro líquido: %@";
 "reports.empty.period.title" = "Nenhuma venda no período";
 "reports.empty.period.message" = "Escolha outro período ou registre uma nova venda.";
@@ -179,13 +129,6 @@
 "reports.bestSellers.units.one" = "%@ unidade vendida";
 "reports.bestSellers.units.other" = "%@ unidades vendidas";
 "reports.channels.title" = "Por canal de venda";
-"reports.restock.title" = "Precisa repor";
-"reports.restock.stock" = "%1$d un · mínimo %2$d";
-
-
-/* MARK: - Ajustes */
-"settings.placeholder.title" = "Ajustes";
-"settings.placeholder.message" = "Backup e preferências chegam em breve.";
 
 
 /* MARK: - Backup */
@@ -268,7 +211,6 @@
 "stores.section.active" = "Ativas";
 "stores.section.archived" = "Arquivadas";
 "stores.section.footer" = "Cada loja mantém seus produtos, pedidos e relatórios separados.";
-"stores.archive" = "Arquivar";
 "stores.restore" = "Restaurar";
 "stores.current" = "Loja atual";
 "stores.actions.accessibility" = "Ações de %@";
@@ -276,7 +218,6 @@
 "stores.error.title" = "Não foi possível concluir a operação da loja";
 "stores.delete.confirm.title" = "Excluir loja permanentemente?";
 "stores.delete.confirm.message" = "\"%@\" e todos os seus dados serão excluídos permanentemente:\n\nProdutos: %@\nVariações: %@\nMovimentações de estoque: %@\nPedidos: %@\n\nEventos já salvos no Calendário do iPhone não serão alterados. Esta ação não pode ser desfeita.";
-"settings.store.section" = "Loja";
 "settings.store.manage" = "Gerenciar lojas";
 
 
@@ -473,16 +414,12 @@
 "settings.section.data" = "Dados";
 "settings.section.about" = "Sobre";
 "settings.section.profile" = "Perfil";
-"settings.preferences.title" = "Preferências";
 "settings.language" = "Idioma";
-"settings.language.footer" = "O TinyStock usa o idioma selecionado para o app nos Ajustes do iOS. Os idiomas disponíveis são English e Português do Brasil.";
-"settings.backup.title" = "Backup";
 "settings.data.title" = "Dados e backup";
 "settings.sync.title" = "Sincronização do iCloud";
 "settings.sync.status" = "Conta Apple";
 "settings.sync.refresh" = "Verificar novamente";
 "settings.sync.footer" = "O TinyStock sincroniza automaticamente pelo seu banco privado do iCloud. As atualizações podem levar alguns instantes para aparecer em outro dispositivo.";
-"settings.sync.howItWorks" = "Como funciona";
 "settings.sync.backup.message" = "Os backups no iCloud Drive e em JSON são cópias separadas de recuperação controladas manualmente por você.";
 "settings.sync.status.checking" = "Verificando";
 "settings.sync.status.available" = "Disponível";
